@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Example</title>
+</head>
+<body>
+<h1>WebSocket Example</h1>
+<button id="sendMessage">Send Message</button>
+<button id="sendAPIrequest">Send API Request</button>
+<p id="output"></p>
+
+<script>
+    // Connect to the WebSocket server
+    const ws = new WebSocket(`ws://${window.location.host}/ws`);
+
+    ws.onopen = () => {
+        console.log('Connected to WebSocket server');
+    };
+
+    ws.onmessage = (event) => {
+        // Display received messages
+        document.getElementById('output').innerText += `\n${event.data}`;
+    };
+
+    ws.onclose = () => {
+        console.log('WebSocket connection closed');
+    };
+
+    // Send a message to the server
+    document.getElementById('sendMessage').onclick = () => {
+        ws.send('Hello from the client!');
+    };
+    
+    // Send an API request to the server
+    document.getElementById('sendAPIrequest').onclick = () => {
+        fetch('/api/data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: 'Hello from the client!' }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('output').innerText += `\nAPI response: ${JSON.stringify(data)}`;
+            });
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Room Class create() should throw an error if hostId is missing 1`] = `"Host id is required"`;
+
+exports[`Room Class create() should throw an error if name is missing 1`] = `"Room name is required"`;
+
+exports[`Room Class create() should throw an error if name to long 1`] = `"Room name must be at most 50 characters long"`;
+
+exports[`Room Class create() should throw an error if there are more than 2 users 1`] = `"Room can have at most 2 users"`;
+
+exports[`Room Class create() should throw an error if usersIds is empty 1`] = `"Room must have at least 1 user"`;
+
+exports[`Room Class hostDeletesRoom() should throw an error if a non-host tries to delete the room 1`] = `"Only the host can delete the room"`;
+
+exports[`Room Class hostRemovesPlayerFromRoom() should throw an error if a non-host tries to remove a player 1`] = `"Only the host can remove a player from the room"`;
+
+exports[`Room Class hostRenamesRoom() should throw an error if a non-host tries to rename the room 1`] = `"Only the host can rename the room"`;
+
+exports[`Room Class userJoinsRoom() should throw an error if user does not exist 1`] = `"User does not exist"`;
+
+exports[`Room Class userJoinsRoom() should throw an error if user is already in room 1`] = `"User is already in the room"`;
