@@ -1,0 +1,110 @@
+openapi: "3.0.0"
+info:
+  title: "User API"
+  description: "API for managing users"
+  version: "1.0.0"
+servers:
+  - url: "http://localhost:3000"
+    description: "Local server"
+
+paths:
+  /users:
+    get:
+      operationId: "listUsers"
+      description: "List users"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersDTO'
+
+    post:
+      operationId: "createUser"
+      description: "Create user"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequestBody'
+
+      responses:
+        '200':
+          description: OK
+  
+  
+  /users/{id}:
+    parameters:
+      - $ref: '#/components/parameters/userId'
+    get:
+      operationId: "getUserById"
+      description: "Get user by id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDTO'
+    
+    
+    put:
+      operationId: "updateUser"
+      description: "Update user"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEditRequestBody'
+      
+      responses:
+        '200':
+          description: OK
+
+
+components:
+  parameters:
+    userId:
+      name: "userId"
+      in: "path"
+      schema:
+        type: "string"
+      required: true
+  
+  schemas:
+    UserDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    UsersDTO:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponse'
+        - properties:
+            results:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserDTO'
+    
+    UserEditRequestBody:
+      type: object
+      properties:
+        name:
+          type: string
+    
+    UserCreateRequestBody:
+      type: object
+      properties:
+        name:
+          type: string
+    
+    PaginatedResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object

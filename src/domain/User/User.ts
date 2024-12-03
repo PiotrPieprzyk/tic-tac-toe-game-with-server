@@ -20,7 +20,7 @@ export class User {
     public static create(props: {
         id?: string,
         name: string,
-        lastActiveDate: number
+        lastActiveDate?: number
     }): User {
         return new User({
             id: UserId.create(props.id),

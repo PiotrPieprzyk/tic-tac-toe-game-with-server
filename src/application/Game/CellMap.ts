@@ -1,4 +1,4 @@
-import {Cell} from "./Cell";
+import {Cell} from "../../domain/Game/Cell/Cell";
 
 export type CellPersistence = {
     id?: string,

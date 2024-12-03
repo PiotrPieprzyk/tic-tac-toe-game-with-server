@@ -1,14 +1,16 @@
-import express from 'express';
+import express, {NextFunction, Request, Response} from 'express';
 import path from 'path';
 import os from 'os';
 import {WebsocketServer} from "./websocket";
-import {Router} from "./Router";
+import {Router} from "./application/Router";
+import {HTTPError} from "./shared/HTTPError";
 
 const app = express();
 const port = 3000;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, './public')));
@@ -30,6 +32,28 @@ function getLocalIPAddress() {
 }
 
 Router.setup(app);
+
+// HTTP error handling
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    if (err instanceof HTTPError) {
+        res.status(err.status).json({
+            error: {
+                message: err.message,
+                status: err.status
+            }
+        });
+    } else {
+        console.log('OPS')
+        console.log(err);
+        res.status(500).json({
+            error: {
+                message: 'Internal Server Error',
+                status: 500
+            }
+        });
+    }
+});
+
 
 // Start the server
 const server = app.listen(port, () => {

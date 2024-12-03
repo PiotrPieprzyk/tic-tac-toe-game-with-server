@@ -11,6 +11,10 @@
 <button id="sendAPIrequest">Send API Request</button>
 <p id="output"></p>
 
+<label for="userName"> <input id="userName" type="text"></label>
+<button id="sendUserName">Send User Name</button>
+<button id="editUserName">Edit User Name</button>
+
 <script>
     // Connect to the WebSocket server
     const ws = new WebSocket(`ws://${window.location.host}/ws`);
@@ -45,6 +49,48 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById('output').innerText += `\nAPI response: ${JSON.stringify(data)}`;
+            });
+    };
+    
+    
+    
+    
+    // Send a user name to the server
+    document.getElementById('sendUserName').onclick = () => {
+        const userName = document.getElementById('userName').value;
+        
+        fetch('/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userName }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('output').innerText += `\nUser name response: ${JSON.stringify(data)}`;
+            });
+    };
+    
+    
+    // Edit a user name on the server
+    document.getElementById('editUserName').onclick = () => {
+        const userName = document.getElementById('userName').value;
+        
+        // get cookie "UserId"
+        const userId = document.cookie.split('; ').find(row => row.startsWith('UserId')).split('=')[1];
+        
+        
+        fetch(`/users/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userName }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('output').innerText += `\nUser name response: ${JSON.stringify(data)}`;
             });
     };
 </script>

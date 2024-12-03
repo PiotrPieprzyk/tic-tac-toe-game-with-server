@@ -1,10 +1,10 @@
 import {describe, expect, it, beforeEach, jest} from '@jest/globals';
-import {RoomRepositoryI} from "../../../src/domain/Room/RoomRepository";
-import {UserRepositoryI} from "../../../src/domain/User/UserRepository";
+import {RoomRepositoryI} from "../../../src/infrastructure/repositories/interfaces/RoomRepository";
+import {UserRepositoryI} from "../../../src/infrastructure/repositories/interfaces/UserRepository";
 import {UserId} from "../../../src/domain/User/UserId";
 import {Room} from "../../../src/domain/Room/Room";
 import {RoomId} from "../../../src/domain/Room/RoomId";
-import {RoomPersistence} from "../../../src/domain/Room/RoomMap";
+import {RoomPersistence} from "../../../src/application/Room/RoomMap";
 
 const exampleHostIdValue = '1afd6658-89af-4bbb-9149-721ae0e23982'
 const exampleUserIdValue1 = '2afd6658-89af-4bbb-9149-721ae0e23982'

@@ -2,7 +2,7 @@ import {GameId} from "../valueObject/GameId";
 import {CellId} from "./valueObject/CellId";
 import {Mark} from "./valueObject/Mark";
 import {Position} from "./valueObject/Position";
-import {CellRepositoryI} from "./CellRepository";
+import {CellRepositoryI} from "../../../infrastructure/repositories/interfaces/CellRepositoryI";
 
 type CellProps = {
     id: CellId;

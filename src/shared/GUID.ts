@@ -19,3 +19,5 @@ export class Guid {
         return value;
     }
 }
+
+console.log(Guid.createNewGuid())

@@ -2,10 +2,10 @@ import {RoomId} from "./RoomId";
 import {RoomName} from "./RoomName";
 import {UserId} from "../User/UserId";
 import {GameId} from "../Game/valueObject/GameId";
-import {RoomRepositoryI} from "./RoomRepository";
+import {RoomRepositoryI} from "../../infrastructure/repositories/interfaces/RoomRepository";
 import {Timestamp} from "../../shared/Timestamp";
-import {RoomMap} from "./RoomMap";
-import {UserRepositoryI} from "../User/UserRepository";
+import {RoomMap} from "../../application/Room/RoomMap";
+import {UserRepositoryI} from "../../infrastructure/repositories/interfaces/UserRepository";
 
 type RoomProps = {
     id: RoomId;

@@ -92,6 +92,7 @@ This is a simple game of tic tac toe with a server. The game is played in the ho
 - Player can see which player's turn it is.
   - API:
     - GameLastTurnEvent
+    - GET /games/:id
 - Player can see players names and marks.
   - API:
     - GET /games/:id

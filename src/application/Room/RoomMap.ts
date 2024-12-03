@@ -1,7 +1,7 @@
-import {Room} from "./Room";
-import {GameRepository} from "../Game/GameRepository";
-import {Game} from "../Game/Game";
-import {UserPersistence} from "../User/UserRepository";
+import {Room} from "../../domain/Room/Room";
+import {GameRepository} from "../../infrastructure/repositories/interfaces/GameRepository";
+import {Game} from "../../domain/Game/Game";
+import {UserPersistence} from "../../infrastructure/repositories/interfaces/UserRepository";
 import {UserDTO} from "../User/UserMap";
 import {GamePersistence} from "../Game/GameMap";
 
