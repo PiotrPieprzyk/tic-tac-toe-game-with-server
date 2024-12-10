@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Game Class playerLeave Player not found. Should throw error. 1`] = `"Player not found"`;
+
+exports[`Game Class playerMarkCell Player cannot mark already marked. 1`] = `"Cell already marked"`;
+
+exports[`Game Class playerMarkCell Player cannot mark cell if game is ended. 1`] = `"Game already ended"`;
+
+exports[`Game Class playerMarkCell Player cannot mark cell if game is waiting for players. 1`] = `"Game is waiting for players"`;
+
+exports[`Game Class playerMarkCell Player cannot mark cell if player not found. 1`] = `"Player not found"`;
+
+exports[`Game Class playerMarkCell Player cannot mark cell with invalid position. 1`] = `"Position must be less than 9"`;
+
+exports[`Game Class playerMarkCell Player cannot mark cell with invalid position. 2`] = `"Position cannot be less than 0"`;

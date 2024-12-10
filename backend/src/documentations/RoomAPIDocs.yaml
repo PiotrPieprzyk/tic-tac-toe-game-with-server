@@ -1,0 +1,175 @@
+openapi: "3.0.0"
+info:
+  title: "Room API"
+  version: "1.0.0"
+servers:
+  - url: "http://localhost:3000"
+    description: "Local server"
+
+
+
+paths:
+  /rooms:
+    get:
+      parameters:
+        - $ref: './Shared.yaml#/components/parameters/pageToken'
+        - $ref: './Shared.yaml#/components/parameters/pageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rooms'
+    
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomCreateRequestBody'
+      
+      responses:
+        '200':
+          description: OK
+  /rooms/{roomId}:
+    parameters:
+      - $ref: '#/components/parameters/roomId'
+    
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+    
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomEditRequestBody'
+      
+      responses:
+        '200':
+          description: OK
+    
+    delete:
+      responses:
+        '200':
+          description: OK
+  
+  /rooms/{roomId}/join:
+    parameters:
+      - $ref: '#/components/parameters/roomId'
+    
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomJoinRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+  
+  
+  
+  /rooms/{roomId}/leave:
+    parameters:
+      - $ref: '#/components/parameters/roomId'
+
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomLeaveRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+
+
+
+components:
+  parameters:
+    roomId:
+      name: "roomId"
+      in: "path"
+      schema:
+        type: "string"
+      required: true
+
+  schemas:
+    Rooms:
+      allOf:
+        - $ref: "./Shared.yaml#/components/schemas/PaginatedResponse"
+        - type: object
+          properties:
+            results:
+              type: "array"
+              items:
+                $ref: "./RoomAPIDocs.yaml#/components/schemas/Room"
+    
+    Room:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        name:
+          type: "string"
+        hostId:
+          $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
+        activeGameId:
+          type: "string"
+        users:
+          type: "array"
+          items:
+            $ref: "./UserAPIDocs.yaml#/components/schemas/UserDTO"
+        status:
+          type: "string"
+    
+    RoomCreateRequestBody:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        hostId:
+          $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
+        usersIds:
+          type: "array"
+          items:
+            $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
+    
+    RoomEditRequestBody:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        usersIds:
+          type: "array"
+          items:
+            $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
+    
+    RoomJoinRequestBody:
+      type: "object"
+      properties:
+        userId:
+          $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
+    
+    RoomLeaveRequestBody:
+      type: "object"
+      properties:
+        userId:
+          $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
+

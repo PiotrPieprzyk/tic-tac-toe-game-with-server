@@ -251,8 +251,8 @@ This is a simple game of tic tac toe with a server. The game is played in the ho
 - GET /rooms/:id
 - POST /rooms
 - PUT /rooms/:id
-- PUT /rooms/join
-- PUT /rooms/leave
+- PUT /rooms/:id/join
+- PUT /rooms/:id/leave
 - DELETE /rooms/:id
 
 ### Game Endpoints

@@ -1,0 +1,71 @@
+components:
+  
+  parameters:
+
+    pageToken:
+      in: query
+      name: pageToken
+      description: >
+        Token string value that references a page for pagination. This value is received when retrieving the first page
+        in the `nextPageToken` and `prevPageToken` fields.
+      example: b2Zmc2V0PTEwJmxpbWl0PTEw
+      required: false
+      schema:
+        type: string
+
+    pageSize:
+      in: query
+      name: pageSize
+      description: >
+        The number of entries to return per page. The maximum range of valid page sizes is documented with minimum and 
+        maximum values, but the range might be further limited dynamically based on the requested information, account,
+        and system status. Values outside of the (dynamic) allowed range will not result in an error, but will be clamped
+        to the nearest limit. Thus, logic to detect the last page should not be based on comparing the requested size
+        with the received size, but on the existence of a `nextPageToken` value.
+      example: 100
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 100
+            
+  schemas:
+    PaginatedResponse:
+      type: object
+      description: >
+        Used to wrap results for a paginated response, containing information on how to retrieve further pages and, if 
+        available, the total number of results.
+      properties:
+        nextPageToken:
+          type: string
+          readOnly: true
+          nullable: true
+          description: >
+            Token to retrieve the next page. The value of this token is passed into the field pageToken. 
+            This value can be null if there is no next page.
+        prevPageToken:
+          type: string
+          readOnly: true
+          nullable: true
+          description: >
+            Token to retrieve the previous page. The value of this token is passed into the field pageToken. 
+            This value can be null of there is no previous page.
+        totalSize:
+          type: integer
+          minimum: 0
+          readOnly: true
+          nullable: true
+          description: >
+            The number of resource entries being returned from the result set. 
+            This can be omitted if the API endpoint does not have total size information.
+        results:
+          type: array
+          readOnly: true
+          description: The result set from a collection API call.
+          items:
+            type: object
+      required:
+        - nextPageToken
+        - prevPageToken
+        - results
