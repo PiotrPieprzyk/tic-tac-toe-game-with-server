@@ -1,6 +1,7 @@
 import {Room} from "../../domain/Room/Room";
 import {UserDTO} from "../User/UserMap";
 import {GamePersistence} from "../Game/GameMap";
+import {GameStatusEnum} from "../../domain/Game/valueObject/GameStatus";
 
 export type RoomPersistence = {
     id?: string,
@@ -20,7 +21,7 @@ export type RoomDTO = {
         id: string,
         name: string
     }[],
-    status: string
+    status: GameStatusEnum
 }
 
 export class RoomMap {
@@ -42,7 +43,7 @@ export class RoomMap {
             hostId: room.hostId.value,
             users: userDTO.map(u => ({id: u.id, name: u.name})),
             activeGameId: room.activeGameId?.value,
-            status: gamePersistence?.status || "WAITING_FOR_PLAYERS"
+            status: gamePersistence?.status || GameStatusEnum.WAITING_FOR_PLAYERS
         };
     }
 }

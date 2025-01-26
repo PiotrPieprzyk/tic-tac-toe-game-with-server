@@ -7,6 +7,7 @@ import TextInput from "@/_modules/shared/components/Input/TextInput";
 import {UserAPI} from "@/_modules/User/infra/UserAPI";
 import {UserName} from "@/_modules/User/domain/UserName";
 import {ValueObjectRuleHandler} from "@/_modules/shared/validation/GenericRule";
+import {redirect} from "next/navigation";
 
 
 const rules = {
@@ -34,7 +35,10 @@ export default function Home() {
         }
 
         const user = await UserAPI.addUser({name: userName});
-        window.my_user = user;
+        // save user in local storage
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        redirect(`/rooms`);
     }
 
 

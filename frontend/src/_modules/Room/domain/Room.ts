@@ -1,14 +1,19 @@
 import {RoomName} from "./RoomName";
 import {Timestamp} from "@/_modules/shared/models/Timestamp";
-import {RoomAPI, RoomAPIResponse} from "@/_modules/Room/infra/RoomApi";
+import {RoomAPIDeletedResponse, RoomAPII, RoomAPIResponse} from "@/_modules/Room/infra/RoomApi";
 import {CommonError} from "@/_modules/shared/api/API";
+import {User, UserPropsRaw} from "@/_modules/User/domain/User";
+import {GameStatus, GameStatusEnum} from "@/_modules/Game/domain/GameStatus";
+
 
 type RoomProps = {
     id: string;
     name: RoomName;
     hostId: string;
     activeGameId?: string;
-    usersIds: string[];
+    users: User[];
+    roomAPI: RoomAPII;
+    status: GameStatus
 };
 
 type RoomPropsRaw = {
@@ -16,7 +21,9 @@ type RoomPropsRaw = {
     name: string,
     hostId: string,
     activeGameId?: string,
-    usersIds: string[],
+    users: UserPropsRaw[],
+    roomAPI: RoomAPII;
+    status: GameStatusEnum
 }
 
 export class Room {
@@ -24,14 +31,20 @@ export class Room {
     public readonly name: RoomName;
     public readonly hostId: string;
     public readonly activeGameId: string | undefined;
-    public readonly usersIds: string[];
+    public readonly users: User[];
+    public readonly roomAPI: RoomAPII;
+    public readonly status: GameStatus;
+    
+    public static MAX_USERS_IN_ROOM = 2;
 
     private constructor(props: RoomProps) {
         this.id = props.id;
         this.name = props.name;
         this.hostId = props.hostId;
         this.activeGameId = props.activeGameId;
-        this.usersIds = props.usersIds;
+        this.users = props.users;
+        this.roomAPI = props.roomAPI;
+        this.status = props.status;
     }
 
     public static create(props: RoomPropsRaw): Room {
@@ -39,11 +52,11 @@ export class Room {
             throw new Error('Host id is required');
         }
         
-        if(!props.usersIds || props.usersIds.length === 0) {
+        if(!props.users || props.users.length === 0) {
             throw new Error('Room must have at least 1 user');
         }
         
-        if(props.usersIds.length > 2) {
+        if(props.users.length > 2) {
             throw new Error('Room can have at most 2 users');
         }
         
@@ -52,26 +65,28 @@ export class Room {
             name: RoomName.create(props.name),
             hostId: props.hostId,
             activeGameId: props.activeGameId ? props.activeGameId: undefined,
-            usersIds: props.usersIds,
+            users: props.users.map(u => User.create(u)),
+            roomAPI: props.roomAPI,
+            status: GameStatus.create(props.status)
         });
     }
 
     public async userJoinsRoom(userId: string): Promise<RoomAPIResponse|CommonError> {
-        if (this.usersIds.some(u => u === userId)) {
+        if (this.users.some(u => u.id === userId)) {
             throw new Error('User is already in the room');
         }
 
         const newRoom = new Room({
             ...this,
-            usersIds: [...this.usersIds, userId],
+            users: [...this.users, userId],
             updatedTimestamp: Timestamp.create()
         })
 
-        return await RoomAPI.join(newRoom.id, {userId});
+        return await this.roomAPI.userJoinRoom(newRoom.id, {userId});
     }
 
     public async userLeavesRoom(userId: string) {
-       await RoomAPI.leave(this.id, {userId});
+       await this.roomAPI.userLeaveRoom(this.id, {userId});
     }
 
     public async hostRemovesPlayerFromRoom(hostId: string, userId: string): Promise<RoomAPIResponse|CommonError> {
@@ -79,8 +94,8 @@ export class Room {
             throw new Error('Only the host can remove a player from the room');
         }
         
-        return await RoomAPI.update(this.id, {
-            usersIds: this.usersIds.filter(u => u !== userId)
+        return await this.roomAPI.updateRoom(this.id, {
+            usersIds: this.users.filter(u => u.id !== userId).map(u => u.id)
         });
     }
 
@@ -94,17 +109,17 @@ export class Room {
             name: RoomName.create(newName),
         });
         
-        return await RoomAPI.update(this.id, {
+        return await this.roomAPI.updateRoom(this.id, {
             name: newName
         });
     }
     
-    public async hostDeletesRoom(hostId: string): Promise<undefined | CommonError> {
+    public async hostDeletesRoom(hostId: string): Promise<RoomAPIDeletedResponse | CommonError> {
         if (this.isCurrentUserHost(hostId)) {
             throw new Error('Only the host can remove a player from the room');
         }
         
-        return await RoomAPI.delete(this.id);
+        return await this.roomAPI.deleteRoom(this.id);
     }
     
     public isCurrentUserHost(userId: string): boolean {
@@ -112,7 +127,7 @@ export class Room {
     }
     
     public canNewUserJoin(): boolean {
-        return this.usersIds.length < 2;
+        return this.users.length < 2;
     }
 
 }

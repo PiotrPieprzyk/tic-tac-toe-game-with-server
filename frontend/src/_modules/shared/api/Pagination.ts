@@ -7,14 +7,19 @@
  */
 
 // noinspection DuplicatedCode
-export type PageSizeValue = number | null;
-export type PageTokenValue = number | null;
+export type PageSizeValue = string | null;
+export type PageTokenValue = string | null;
 
 export type PaginatedResponse<T> = {
     results: T[],
     nextPageToken: PageTokenValue,
-    prevPageToken: PageTokenValue
+    prevPageToken: PageTokenValue,
     totalSize: number
+}
+
+export type PaginationRequest = {
+    pageToken?: PageToken,
+    pageSize?: PageSize
 }
 
 export class PageToken {
@@ -43,7 +48,7 @@ export class PageToken {
             throw new Error('Invalid page token');
         }
         
-        return new PageToken(parsedValue);
+        return new PageToken(parsedValue.toString());
     }
 }
 
@@ -73,6 +78,6 @@ export class PageSize {
             throw new Error('Invalid page size');
         }
         
-        return new PageSize(parsedValue);
+        return new PageSize(parsedValue.toString());
     }
 }

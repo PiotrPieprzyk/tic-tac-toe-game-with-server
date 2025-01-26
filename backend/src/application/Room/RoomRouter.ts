@@ -1,12 +1,12 @@
 import {MockRoomRepository} from "../../infrastructure/repositories/mock/MockRoomRepository";
 import express from "express";
-import {RoomMap} from "./RoomMap";
+import {RoomDTO, RoomMap} from "./RoomMap";
 import {RoomId} from "../../domain/Room/RoomId";
 import {Room} from "../../domain/Room/Room";
 import {HTTPError} from "../../shared/HTTPError";
 import {MockUserRepository} from "../../infrastructure/repositories/mock/MockUserRepository";
 import {User} from "../../domain/User/User";
-import {UserMap} from "../User/UserMap";
+import {UserDTO, UserMap} from "../User/UserMap";
 import {MockGameRepository} from "../../infrastructure/repositories/mock/MockGameRepository";
 import {guidRegex} from "../../shared/GUID";
 import {PageSize, PageToken} from "../../shared/Pagination";
@@ -196,7 +196,7 @@ export class RoomRouter {
         return usersPersistenceOrUndefined.flatMap(user => user ? [User.create(user)] : []);
     }
     
-    static async getRoomDTO(room: Room) {
+    static async getRoomDTO(room: Room): Promise<RoomDTO> {
         const promises = await Promise.all([
             this.getRoomUsers(room),
             room.activeGameId ? gameRepository.find(room.activeGameId) : undefined
