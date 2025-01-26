@@ -1,0 +1,174 @@
+/* COLOR THEME*/
+:root {
+
+    --dark-color-bg: #091513;
+    --dark-color-app: #0C1B19;
+    --dark-color-label: #32746D;
+    --dark-color-label-error: #D15654;
+    --dark-color-text-bg: #F2F2D9;
+    --dark-color-text-app: #F2F2D9;
+    --dark-color-text-label: #F2F2D9;
+    --dark-color-text-bg-error: #EB7F7D;
+    --dark-color-text-app-error: #EB7F7D;
+    --dark-color-text-app-placeholder: #838372;
+    --dark-color-active-app: #32746D;
+    --dark-color-button-normal: #32746D;
+    --dark-color-button-active: #24524D;
+    --dark-color-button-hover: #2E6A63;
+    --dark-color-button-disable: #779491;
+
+
+    --bright-color-bg: #D9D9BD;
+    --bright-color-app: #F2F2D9;
+    --bright-color-label: #76A29D;
+    --bright-color-label-error: #EB7F7D;
+    --bright-color-text-bg: #132D2A;
+    --bright-color-text-app: #132D2A;
+    --bright-color-text-label: #F2F2D9;
+    --bright-color-text-bg-error: #EB7F7D;
+    --bright-color-text-app-error: #EB7F7D;
+    --bright-color-text-app-placeholder: #0C1B19;
+    --bright-color-active-app: #76A29D;
+    --bright-color-button-normal: #76A29D;
+    --bright-color-button-active: #395F5A;
+    --bright-color-button-hover: #587975;
+    --bright-color-button-disable: #779491
+
+}
+
+
+.theme-dark {
+    .color-bg {
+        position: relative;
+        background-color: var(--dark-color-bg);
+        z-index: 0;
+    }
+    .color-bg::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--dark-color-bg);
+        background-image: url('/images/background-dot-darkmode.svg') ;
+        background-size: 21px 21px;
+        background-repeat: space;
+        background-position: center;
+        opacity: 0.2;
+        z-index: 1;
+    }
+
+    .color-app {
+        background-color: var(--dark-color-app);
+    }
+
+    .color-label {
+        background-color: var(--dark-color-label);
+    }
+
+    .color-label-error {
+        background-color: var(--dark-color-label-error);
+    }
+
+    .color-text-bg {
+        color: var(--dark-color-text-bg);
+    }
+
+    .color-text-app {
+        color: var(--dark-color-text-app);
+    }
+    
+    .color-text-label {
+        color: var(--dark-color-text-label);
+    }
+    
+    .color-text-app-error {
+        color: var(--dark-color-text-app-error);
+    }
+
+    .color-text-app-placeholder {
+        color: var(--dark-color-text-app-placeholder);
+    }
+
+    .color-active-app {
+        background-color: var(--dark-color-active-app);
+    }
+
+    .color-button-normal {
+        background-color: var(--dark-color-button-normal);
+    }
+
+    .color-button-active {
+        background-color: var(--dark-color-button-active);
+    }
+
+    .color-button-hover {
+        background-color: var(--dark-color-button-hover);
+    }
+    
+    .color-button-disabled {
+        background: var(--dark-color-button-disable);
+    }
+}
+
+.theme-bright {
+    .color-bg {
+        background-color: var(--bright-color-bg);
+        background-image: url('/images/background-dot-brightmode.svg');
+        background-size: 21px 21px;
+        background-repeat: repeat;
+    }
+
+    .color-app {
+        background-color: var(--bright-color-app);
+    }
+
+    .color-label {
+        background-color: var(--bright-color-label);
+    }
+
+    .color-label-error {
+        background-color: var(--bright-color-label-error);
+    }
+
+    .color-text-bg {
+        color: var(--bright-color-text-bg);
+    }
+
+    .color-text-app {
+        color: var(--bright-color-text-app);
+    }
+
+    .color-text-label {
+        color: var(--bright-color-text-label);
+    }
+    
+    .color-text-app-error {
+        color: var(--bright-color-text-app-error);
+    }
+
+    .color-text-app-placeholder {
+        color: var(--bright-color-text-app-placeholder);
+    }
+
+    .color-active-app {
+        background-color: var(--bright-color-active-app);
+    }
+
+    .color-button-normal {
+        background-color: var(--bright-color-button-normal);
+    }
+
+    .color-button-active {
+        background-color: var(--bright-color-button-active);
+    }
+
+    .color-button-hover {
+        background-color: var(--bright-color-button-hover);
+    }
+    
+    .color-button-disabled {
+        background: var(--bright-color-button-disable)
+    }
+}

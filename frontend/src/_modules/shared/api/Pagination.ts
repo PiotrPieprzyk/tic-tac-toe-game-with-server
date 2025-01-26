@@ -1,10 +1,19 @@
+/**
+ * Pagination.ts has been copied from the backend to the frontend.
+ * 
+ * This decision has been made because:
+ * - The frontend should not depend on the backend
+ * - This file shouldn't change much
+ */
+
+// noinspection DuplicatedCode
 export type PageSizeValue = number | null;
 export type PageTokenValue = number | null;
 
 export type PaginatedResponse<T> = {
     results: T[],
     nextPageToken: PageTokenValue,
-    prevPageToken: PageTokenValue,
+    prevPageToken: PageTokenValue
     totalSize: number
 }
 

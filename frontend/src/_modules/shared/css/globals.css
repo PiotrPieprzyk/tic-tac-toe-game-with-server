@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+input {
+    background: none;
+}
+
+.app-holder {
+    position: relative;
+    width: 100vw;
+    min-height: 100vh;
+}
+
+.app-content {
+    z-index: 2;
+}
+
+.level-1 {
+    box-shadow: rgba(0, 0, 0, 0.20) 0 4px 4px 0;
+}
+
+.rounded-4 {
+    border-radius: 16px;
+}
+.rounded-2 {
+    border-radius: 8px;
+}

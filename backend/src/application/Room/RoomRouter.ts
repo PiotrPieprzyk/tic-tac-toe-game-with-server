@@ -10,6 +10,8 @@ import {UserMap} from "../User/UserMap";
 import {MockGameRepository} from "../../infrastructure/repositories/mock/MockGameRepository";
 import {guidRegex} from "../../shared/GUID";
 import {PageSize, PageToken} from "../../shared/Pagination";
+import {RoomName} from "../../domain/Room/RoomName";
+import {UserId} from "../../domain/User/UserId";
 
 const roomRepository = MockRoomRepository.create();
 const userRepository = MockUserRepository.create();
@@ -81,13 +83,12 @@ export class RoomRouter {
             try {
                 const roomId = RoomId.create(req.params.id);
                 const roomPersistence = await roomRepository.find(roomId);
-                const room = roomPersistence ? Room.create({...roomPersistence, roomRepository, userRepository}) : undefined;
-
-                if (!room) {
+                if (!roomPersistence) {
                     next(new HTTPError(404, 'Room not found'));
                     return;
                 }
 
+                const room = Room.create({...roomPersistence, roomRepository, userRepository});
                 await room.userJoinsRoom(req.body.userId);
                 const newRoomPersistence = await roomRepository.find(roomId);
                 if(!newRoomPersistence) {
@@ -110,14 +111,56 @@ export class RoomRouter {
                 
                 const roomId = RoomId.create(rawRoomId);
                 const roomPersistence = await roomRepository.find(roomId);
-                const room = roomPersistence ? Room.create({...roomPersistence, roomRepository, userRepository}) : undefined;
-
-                if (!room) {
+                if (!roomPersistence) {
                     next(new HTTPError(404, 'Room not found'));
                     return;
                 }
 
+                const room = Room.create({...roomPersistence, roomRepository, userRepository});
                 await room.userLeavesRoom(rawUserId);
+
+                const newRoomPersistence = await roomRepository.find(roomId);
+                if(!newRoomPersistence) {
+                    next();
+                    return;
+                }
+                const newRoom = Room.create({...newRoomPersistence, roomRepository, userRepository});
+                const roomDTO = await this.getRoomDTO(newRoom);
+
+                res.status(200).json(roomDTO);
+            } catch (e) {
+                next(e);
+            }
+        });
+        
+        app.put('rooms/:id', async (req, res, next) => {
+            try {
+                const roomId = RoomId.create(req.params.id);
+                const roomPersistence = await roomRepository.find(roomId);
+                
+                if (!roomPersistence) {
+                    next(new HTTPError(404, 'Room not found'));
+                    return;
+                }
+
+                const room = Room.create({...roomPersistence, roomRepository, userRepository});
+                
+                const promises: Promise<void>[] = [];
+                
+                if(req.body.name) {
+                    promises.push(room.hostRenamesRoom(req.body.hostId, req.body.name))
+                }
+                
+                if(req.body.usersIds) {
+                    // find users that are not in the room
+                    const usersNotInTheRoom = room.usersIds.filter(userId => !req.body.usersIds.includes(userId));
+                    promises.push(
+                        ...usersNotInTheRoom.map(userId => room.userLeavesRoom(userId.value))
+                    );
+                }
+                
+                await Promise.all(promises);
+
 
                 const newRoomPersistence = await roomRepository.find(roomId);
                 if(!newRoomPersistence) {

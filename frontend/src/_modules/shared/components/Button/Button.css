@@ -1,0 +1,35 @@
+.theme-dark {
+    .button-color {
+        background: var(--dark-color-button-normal);
+    }
+    
+    .button-color:hover {
+        background: var(--dark-color-button-hover);
+    }
+    
+    .button-color:active {
+        background: var(--dark-color-button-active);
+    }
+
+    .button-color:disabled {
+        background: var(--dark-color-button-disable);
+    }
+}
+
+.theme-bright {
+    .button-color {
+        background: var(--bright-color-button-normal);
+    }
+    
+    .button-color:hover {
+        background: var(--bright-color-button-hover);
+    }
+    
+    .button-color:active {
+        background: var(--bright-color-button-active);
+    }
+
+    .button-color:disabled {
+        background: var(--bright-color-button-disable);
+    }
+}

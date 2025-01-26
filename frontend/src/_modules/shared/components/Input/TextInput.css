@@ -1,0 +1,29 @@
+
+
+.text-input {
+    input::placeholder {
+        color: var(--dark-color-text-app-placeholder);
+    }
+
+    input:focus ~ .text-input__divider {
+        border-bottom: var(--dark-color-active-app) 1px solid;
+    }
+
+    .text-input__divider {
+        width: 100%;
+        border-bottom: var(--dark-color-text-app) 1px solid;
+    }
+    
+    .text-input__error {
+        min-height: 16px;
+    }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active{
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: var(--dark-color-text-app);
+        transition: background-color 5000s ease-in-out 0s;
+    }
+}

@@ -154,6 +154,8 @@ components:
     RoomEditRequestBody:
       type: "object"
       properties:
+        hostId:
+          $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
         name:
           type: "string"
         usersIds:

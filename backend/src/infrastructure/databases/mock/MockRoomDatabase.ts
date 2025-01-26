@@ -38,6 +38,7 @@ export class MockRoomDatabase {
             results,
             nextPageToken,
             prevPageToken,
+            totalSize: this.items.length
         }
     }
     

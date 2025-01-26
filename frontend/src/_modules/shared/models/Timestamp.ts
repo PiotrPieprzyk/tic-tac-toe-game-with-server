@@ -18,10 +18,4 @@ export class Timestamp {
     public toPersistent(): number {
         return this.value.getTime()
     }
-    
-    public isWithinLastMilliseconds(milliseconds: number): boolean {
-        const nowEpoch = Date.now();
-        const timestampEpoch = this.value.getTime();
-        return timestampEpoch < nowEpoch - milliseconds
-    }
 }

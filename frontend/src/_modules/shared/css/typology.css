@@ -1,0 +1,27 @@
+* {
+    font-weight: 300;
+}
+
+.text-bold {
+    font-weight: 500;
+}
+
+.text-display {
+    font-size: 32px;
+}
+
+.text-heading {
+    font-size: 24px;
+}
+
+.text-title {
+    font-size: 16px;
+}
+
+.text-body {
+    font-size: 12px;
+}
+
+.text-label {
+    font-size: 10px;
+}
