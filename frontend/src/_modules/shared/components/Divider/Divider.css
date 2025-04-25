@@ -1,0 +1,15 @@
+.divider {
+    width: 100%;
+}
+
+.theme-dark {
+    .divider {
+        border-bottom: 1px solid var(--dark-color-text-app);
+    }
+}
+
+.theme-bright {
+    .divider {
+        border-bottom: 1px solid var(--bright-color-text-app);
+    }
+}

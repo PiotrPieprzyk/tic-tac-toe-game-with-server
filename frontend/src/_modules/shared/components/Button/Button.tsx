@@ -6,12 +6,13 @@ export type ButtonProps = {
     className?: string,
     onClick?: MouseEventHandler<HTMLButtonElement> | undefined
     disabled?: boolean
+    flat?: boolean
 };
 
-const Button: FC<ButtonProps> = ({children, className, onClick, disabled = false}) => {
+const Button: FC<ButtonProps> = ({children, className, onClick, disabled = false, flat}) => {
     return (
         <button
-            className={`${className} button-color rounded-2 color-text-label text-body`}
+            className={`${className} ${flat ? 'button-color-flat' : 'button-color'} rounded-2 color-text-label text-body`}
             onClick={onClick}
             disabled={disabled}
         >

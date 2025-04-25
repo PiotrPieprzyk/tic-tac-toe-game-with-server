@@ -42,15 +42,10 @@ const idDoNotExistValue = "16fd6658-89af-4bbb-9149-721ae0e23982";
 const exampleGamePersistence: GamePersistence = {
     id: exampleGameIdValue,
     roomId: '15afd6658-89af-4bbb-9149-721ae0e23982',
+    players: [],
     activePlayerId: examplePlayerIdValue1,
     status: GameStatusEnum.IN_PROGRESS,
     updatedTimestamp: Date.now(),
-}
-
-const exampleUserPersistence: UserPersistence = {
-    id: exampleUserIdValue1,
-    name: "User Name",
-    lastActiveDate: Date.now(),
 }
 
 const examplePlayerPersistence: PlayerPersistence = {
@@ -77,21 +72,6 @@ const mockGameRepository: GameRepositoryI = {
     }),
     delete: jest.fn(() => Promise.resolve()),
 }
-
-const mockUserRepository: UserRepositoryI = {
-    save: jest.fn(() => Promise.resolve()),
-    find: jest.fn((id: UserId) => {
-        if (id.value === idDoNotExistValue) {
-            return Promise.resolve(undefined);
-        }
-
-        return Promise.resolve({...exampleUserPersistence})
-    }),
-    delete: jest.fn(() => Promise.resolve()),
-    getAll(): Promise<UserPersistence[]> {
-        throw new Error("Method not implemented.");
-    }
-};
 
 const mockPlayerRepository: PlayerRepositoryI = {
     save: jest.fn(() => Promise.resolve()),
@@ -125,21 +105,21 @@ const mockCellRepository: CellRepositoryI = {
 
 describe("Game Class", () => {
     let exampleGameRawProps: GamePropsRaw;
-    let examplePlayer1: Player;
-    let examplePlayer2: Player;
+    let examplePlayer1: PlayerPersistence;
+    let examplePlayer2: PlayerPersistence;
 
     beforeEach(() => {
-        examplePlayer1 = Player.create({
+        examplePlayer1 = {
             id: examplePlayerIdValue1,
             userId: exampleUserIdValue1,
             mark: 'X',
-        });
+        };
 
-        examplePlayer2 = Player.create({
+        examplePlayer2 = {
             id: examplePlayerIdValue2,
             userId: exampleUserIdValue2,
             mark: 'O',
-        });
+        };
 
         exampleGameRawProps = {
             id: exampleGameIdValue,
@@ -186,11 +166,11 @@ describe("Game Class", () => {
                 id: exampleGameIdValue,
                 cellRepository: mockCellRepository,
                 players: [examplePlayer1, examplePlayer2],
-                activePlayerId: examplePlayer2.id.value
+                activePlayerId: examplePlayer2.id
             });
 
 
-            await expect(game.playerMarkCell(examplePlayer2.id.value, 4)).resolves.toBeUndefined();
+            await expect(game.playerMarkCell(examplePlayer2.id, 4)).resolves.toBeUndefined();
 
             expect(mockCellRepository.save).toHaveBeenCalledWith(expect.objectContaining({
                 gameId: exampleGameIdValue,
@@ -201,7 +181,7 @@ describe("Game Class", () => {
             expect(mockGameRepository.save).toHaveBeenCalledWith(expect.objectContaining({
                 id: exampleGameIdValue,
                 status: GameStatusEnum.IN_PROGRESS,
-                activePlayerId: examplePlayer1.id.value,
+                activePlayerId: examplePlayer1.id,
             }))
             expect(mockGameRepository.save).toHaveBeenCalledTimes(1);
         })
@@ -264,10 +244,10 @@ describe("Game Class", () => {
                 id: exampleGameIdValue,
                 cellRepository: mockCellRepository,
                 players: [examplePlayer1, examplePlayer2],
-                activePlayerId: examplePlayer2.id.value
+                activePlayerId: examplePlayer2.id
             });
             
-            await expect(game.playerMarkCell(examplePlayer2.id.value, 7)).resolves.toBeUndefined();
+            await expect(game.playerMarkCell(examplePlayer2.id, 7)).resolves.toBeUndefined();
             
             expect(mockCellRepository.save).toHaveBeenCalledWith(expect.objectContaining({
                 gameId: exampleGameIdValue,
@@ -351,10 +331,10 @@ describe("Game Class", () => {
                 id: exampleGameIdValue,
                 cellRepository: mockCellRepository,
                 players: [examplePlayer1, examplePlayer2],
-                activePlayerId: examplePlayer2.id.value
+                activePlayerId: examplePlayer2.id
             });
             
-            await expect(game.playerMarkCell(examplePlayer2.id.value, 8)).resolves.toBeUndefined();
+            await expect(game.playerMarkCell(examplePlayer2.id, 8)).resolves.toBeUndefined();
             
             expect(mockCellRepository.save).toHaveBeenCalledWith(expect.objectContaining({
                 gameId: exampleGameIdValue,
@@ -400,10 +380,10 @@ describe("Game Class", () => {
                 id: exampleGameIdValue,
                 cellRepository: mockCellRepository,
                 players: [examplePlayer1, examplePlayer2],
-                activePlayerId: examplePlayer1.id.value
+                activePlayerId: examplePlayer1.id
             });
 
-            await expect(game.playerMarkCell(examplePlayer1.id.value, 1)).rejects.toThrowErrorMatchingSnapshot();
+            await expect(game.playerMarkCell(examplePlayer1.id, 1)).rejects.toThrowErrorMatchingSnapshot();
             expect(mockCellRepository.save).not.toHaveBeenCalled();
             expect(mockGameRepository.save).not.toHaveBeenCalled();
         })
@@ -414,11 +394,11 @@ describe("Game Class", () => {
                 id: exampleGameIdValue,
                 cellRepository: mockCellRepository,
                 players: [examplePlayer1],
-                activePlayerId: examplePlayer1.id.value,
+                activePlayerId: examplePlayer1.id,
                 status: GameStatusEnum.WAITING_FOR_PLAYERS
             });
 
-            await expect(game.playerMarkCell(examplePlayer1.id.value, 1)).rejects.toThrowErrorMatchingSnapshot();
+            await expect(game.playerMarkCell(examplePlayer1.id, 1)).rejects.toThrowErrorMatchingSnapshot();
             expect(mockCellRepository.save).not.toHaveBeenCalled();
             expect(mockGameRepository.save).not.toHaveBeenCalled();
         })
@@ -429,11 +409,11 @@ describe("Game Class", () => {
                 id: exampleGameIdValue,
                 cellRepository: mockCellRepository,
                 players: [examplePlayer1, examplePlayer2],
-                activePlayerId: examplePlayer1.id.value,
+                activePlayerId: examplePlayer1.id,
                 status: GameStatusEnum.ENDED
             });
 
-            await expect(game.playerMarkCell(examplePlayer1.id.value, 1)).rejects.toThrowErrorMatchingSnapshot();
+            await expect(game.playerMarkCell(examplePlayer1.id, 1)).rejects.toThrowErrorMatchingSnapshot();
             expect(mockCellRepository.save).not.toHaveBeenCalled();
             expect(mockGameRepository.save).not.toHaveBeenCalled();
         })
@@ -446,7 +426,7 @@ describe("Game Class", () => {
                 id: exampleGameIdValue,
                 cellRepository: mockCellRepository,
                 players: [examplePlayer1, examplePlayer2],
-                activePlayerId: examplePlayer1.id.value,
+                activePlayerId: examplePlayer1.id,
 
             });
 
@@ -463,14 +443,14 @@ describe("Game Class", () => {
                 id: exampleGameIdValue,
                 cellRepository: mockCellRepository,
                 players: [examplePlayer1, examplePlayer2],
-                activePlayerId: examplePlayer1.id.value,
+                activePlayerId: examplePlayer1.id,
             });
 
-            await expect(game.playerMarkCell(examplePlayer1.id.value, 10)).rejects.toThrowErrorMatchingSnapshot();
+            await expect(game.playerMarkCell(examplePlayer1.id, 10)).rejects.toThrowErrorMatchingSnapshot();
             expect(mockCellRepository.save).not.toHaveBeenCalled();
             expect(mockGameRepository.save).not.toHaveBeenCalled();
 
-            await expect(game.playerMarkCell(examplePlayer1.id.value, -1)).rejects.toThrowErrorMatchingSnapshot();
+            await expect(game.playerMarkCell(examplePlayer1.id, -1)).rejects.toThrowErrorMatchingSnapshot();
             expect(mockCellRepository.save).not.toHaveBeenCalled();
             expect(mockGameRepository.save).not.toHaveBeenCalled();
         })
@@ -485,10 +465,10 @@ describe("Game Class", () => {
                 id: exampleGameIdValue,
                 cellRepository: mockCellRepository,
                 players: [examplePlayer1, examplePlayer2],
-                activePlayerId: examplePlayer1.id.value,
+                activePlayerId: examplePlayer1.id,
             });
             
-            await expect(game.playerLeave(examplePlayer1.id.value)).resolves.toBeUndefined();
+            await expect(game.playerLeave(examplePlayer1.id)).resolves.toBeUndefined();
             
             expect(mockGameRepository.save).toHaveBeenCalledWith(expect.objectContaining({
                 id: exampleGameIdValue,
@@ -502,7 +482,7 @@ describe("Game Class", () => {
                 id: exampleGameIdValue,
                 cellRepository: mockCellRepository,
                 players: [examplePlayer1, examplePlayer2],
-                activePlayerId: examplePlayer1.id.value,
+                activePlayerId: examplePlayer1.id,
             });
             
             await expect(game.playerLeave(idDoNotExistValue)).rejects.toThrowErrorMatchingSnapshot();
@@ -515,10 +495,10 @@ describe("Game Class", () => {
                 id: exampleGameIdValue,
                 cellRepository: mockCellRepository,
                 players: [examplePlayer1],
-                activePlayerId: examplePlayer1.id.value,
+                activePlayerId: examplePlayer1.id,
             });
             
-            await expect(game.playerLeave(examplePlayer1.id.value)).resolves.toBeUndefined();
+            await expect(game.playerLeave(examplePlayer1.id)).resolves.toBeUndefined();
             
             expect(mockGameRepository.delete).toHaveBeenCalledWith(GameId.create(exampleGameIdValue));
             expect(mockGameRepository.delete).toHaveBeenCalledTimes(1);

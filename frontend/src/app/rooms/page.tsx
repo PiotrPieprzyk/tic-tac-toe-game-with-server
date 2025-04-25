@@ -1,49 +1,69 @@
 'use client'
+import {redirect} from "next/navigation";
+import {useEffect, useRef, useState} from "react";
 
-import {useEffect, useState} from "react";
-import {RoomAPI} from "@/_modules/Room/infra/RoomApi";
-import {CommonError, SuccessResponse} from "@/_modules/shared/api/API";
-import {PageToken} from "@/_modules/shared/api/Pagination";
+import {CommonError} from "@/_modules/shared/api/API";
+import Button from "@/_modules/shared/components/Button/Button";
+
 import {Room} from "@/_modules/Room/domain/Room";
 import {RoomListItem} from "@/_modules/Room/components/RoomListItem";
-import Button from "@/_modules/shared/components/Button/Button";
-import {redirect} from "next/navigation";
-
-const roomAPI = new RoomAPI();
+import {RoomList} from "@/_modules/Room/domain/RoomList";
+import {CurrentUser} from "@/_modules/shared/services/CurrentUser";
+import {useRouter} from "next/navigation";
 
 export default function Rooms() {
+    const router = useRouter();
     const [rooms, setRooms] = useState<Room[]>([]);
-    let nextPageToken: PageToken | null = null;
-    let totalSize: number = 0;
-    const user = JSON.parse(localStorage.getItem('user') as string).value;
+    const [hasNextPage, setHasNextPage] = useState<boolean>(true);
+    const roomList = new RoomList();
+    const user = CurrentUser.getCurrentUser();
+    
+    if(!user) {
+        router.push('/');
+        return null;
+    }
+    
+    const appendNextPage = async () => {
+        const response = await roomList.appendNextPage();
+
+        if (response instanceof CommonError) {
+            // TODO: Display generic error message popup
+            console.table([{
+                message: response.message,
+                status: response.status
+            }])
+            return;
+        }
+
+        setRooms(response);
+        setHasNextPage(roomList.paginatedList.hasNextPage());
+    }
+    
+    // Intersection observer for appending next page
+    const appendNextPageTriggerRef = useRef<HTMLDivElement>(null);
+    const appendNextPageTriggerOptions: IntersectionObserverInit = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 1.0
+    }
+    const appendNextPageTriggerCallback: IntersectionObserverCallback = async (entries) => {
+        if (entries[0].isIntersecting) {
+            await appendNextPage();
+        }
+    }
 
     useEffect(() => {
-        (async () => {
-            const response = await roomAPI.getRooms();
-
-            if (response instanceof CommonError) {
-                // TODO: Display generic error message popup
-                console.table([{
-                    message: response.message,
-                    status: response.status
-                }])
-                return;
-            }
-
-            const rawRooms = response.value.results;
-            const rooms = rawRooms.map(room => Room.create({...room, roomAPI: roomAPI}));
-            setRooms(rooms);
-            if (response.value.nextPageToken) {
-                nextPageToken = PageToken.create(response.value.nextPageToken);
-            }
-            totalSize = response.value.totalSize;
-        })()
+        const observer = new IntersectionObserver(appendNextPageTriggerCallback, appendNextPageTriggerOptions);
+        
+        appendNextPageTriggerRef.current && observer.observe(appendNextPageTriggerRef.current)
+        
+        return () => {
+            observer.disconnect();
+        }
     }, [])
 
     const redirectToCreateRoomPage = () => {
-        // TODO: Redirect to create room page
-        console.log('Redirecting to create room page');
-        redirect(`/rooms/create`)
+        router.push(`/rooms/create`)
     }
 
     return (
@@ -53,18 +73,21 @@ export default function Rooms() {
                 <Button onClick={redirectToCreateRoomPage} className={'px-2 py-1'}>Create room</Button>
             </div>
 
-            {rooms.length > 0 ?
-                rooms.map(room => (
-                    <RoomListItem key={room.id} room={room} userId={user.id}/>
-                )) :
-                null
-            }
+            {rooms.length > 0 && rooms.map(room => (
+                <RoomListItem key={room.id} room={room} userId={user.id}/>
+            ))}
 
-            {rooms.length === 0 ? (
+            {hasNextPage && (
+                <div ref={appendNextPageTriggerRef} className={'color-app rounded-4 level-1 p-4'}>
+                    Loading...
+                </div>
+            )}
+
+            {rooms.length === 0 && (
                 <div className={'color-app rounded-4 level-1 p-4 '}>
                     No active rooms. Click the Create room button to create the first room!
                 </div>
-            ) : null}
+            )}
         </div>
     )
 }

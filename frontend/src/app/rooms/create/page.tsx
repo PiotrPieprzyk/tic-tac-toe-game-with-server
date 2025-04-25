@@ -9,6 +9,9 @@ import {RoomName} from "@/_modules/Room/domain/RoomName";
 import {RoomAPI} from "@/_modules/Room/infra/RoomApi";
 import {CommonError} from "@/_modules/shared/api/API";
 import {redirect} from "next/navigation";
+import {useRouter} from "next/navigation";
+import {CurrentRoom} from "@/_modules/Room/domain/CurrentRoom";
+import {Room} from "@/_modules/Room/domain/Room";
 
 
 const rules = {
@@ -16,8 +19,10 @@ const rules = {
 }
 
 const roomAPI = new RoomAPI();
+const currentRoom = new CurrentRoom();
 
 export default function CreateRoom() {
+    const router = useRouter()
     const [isFormValid, setIsFormValid] = useState(false);
     const formValidators: { [key: string]: boolean } = {};
     const [serverError, setServerError] = useState<string | null>(null);
@@ -52,12 +57,8 @@ export default function CreateRoom() {
         }
         
         setServerError(null);
-        
-        // TODO: Redirect to room page
-        console.log('Redirecting to room page');
-        console.log(response.value);
-        // redirect(`/rooms/${response.value.id}`);
-        redirect(`/rooms`);
+        currentRoom.setCurrentRoom(Room.create({...response.value, roomAPI}));
+        router.push(`/rooms/${response.value.id}`);
     }
 
 

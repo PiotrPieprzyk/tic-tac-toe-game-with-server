@@ -1,5 +1,4 @@
 import {API, CommonError, SuccessResponse} from "@/_modules/shared/api/API";
-import {PaginatedResponse, PaginationRequest} from "@/_modules/shared/api/Pagination";
 import {GameStatusEnum} from "@/_modules/Game/domain/GameStatus";
 import {UserPropsRaw} from "@/_modules/User/domain/User";
 
@@ -13,10 +12,6 @@ export type RoomAPIResponseRaw = {
 }
 
 export type RoomAPIResponse = SuccessResponse<RoomAPIResponseRaw>
-
-export type PaginatedRoomsAPIResponseRaw = PaginatedResponse<RoomAPIResponseRaw>;
-
-export type PaginatedRoomsAPIResponse = SuccessResponse<PaginatedRoomsAPIResponseRaw>;
 
 export type RoomAPIAddRequest = {
     name: string;
@@ -37,8 +32,6 @@ export type RoomAPILeaveRequest = {
     userId: string;
 }
 
-export type RoomAPIGetRoomsRequest = PaginationRequest;
-
 
 export type RoomAPIDeletedResponse = SuccessResponse<undefined>;
 
@@ -51,47 +44,36 @@ export interface RoomAPII {
 
     userJoinRoom(roomId: string, body: RoomAPIJoinRequest): Promise<RoomAPIResponse | CommonError>;
 
-    userLeaveRoom(roomId: string, body: RoomAPILeaveRequest): Promise<RoomAPIResponse | CommonError>;
-
-    getRooms(options?: RoomAPIGetRoomsRequest): Promise<PaginatedRoomsAPIResponse | CommonError>;
-
+    userLeaveRoom(roomId: string, body: RoomAPILeaveRequest): Promise<{} | CommonError>;
+    
     deleteRoom(roomId: string): Promise<RoomAPIDeletedResponse | CommonError>;
 }
 
 
 export class RoomAPI implements RoomAPII {
+    static path = '/rooms';
+    
     async addRoom(body: RoomAPIAddRequest): Promise<RoomAPIResponse | CommonError> {
-        return await API.post<RoomAPIResponseRaw>('/rooms', body);
+        return await API.post<RoomAPIResponseRaw>(`${RoomAPI.path}`, body);
     }
 
     async getRoom(roomId: string): Promise<RoomAPIResponse | CommonError> {
-        return await API.get<RoomAPIResponseRaw>(`/rooms/${roomId}`);
+        return await API.get<RoomAPIResponseRaw>(`${RoomAPI.path}/${roomId}`);
     }
 
     async updateRoom(roomId: string, body: RoomAPIUpdateRequest): Promise<RoomAPIResponse | CommonError> {
-        return await API.put<RoomAPIResponseRaw>(`/rooms/${roomId}`, body);
+        return await API.put<RoomAPIResponseRaw>(`${RoomAPI.path}/${roomId}`, body);
     }
 
     async userJoinRoom(roomId: string, body: RoomAPIJoinRequest): Promise<RoomAPIResponse | CommonError> {
-        return await API.put<RoomAPIResponseRaw>(`/rooms/${roomId}/join`, body);
+        return await API.put<RoomAPIResponseRaw>(`${RoomAPI.path}/${roomId}/join`, body);
     }
 
-    async userLeaveRoom(roomId: string, body: RoomAPILeaveRequest): Promise<RoomAPIResponse | CommonError> {
-        return await API.put<RoomAPIResponseRaw>(`/rooms/${roomId}/leave`, body);
-    }
-
-    async getRooms(options?: RoomAPIGetRoomsRequest): Promise<PaginatedRoomsAPIResponse | CommonError> {
-        const queries = [];
-        if (options?.pageToken) {
-            queries.push(`pageToken=${options.pageToken.value}`);
-        }
-        if (options?.pageSize) {
-            queries.push(`pageSize=${options.pageSize.value}`);
-        }
-        return await API.get<PaginatedRoomsAPIResponseRaw>('/rooms');
+    async userLeaveRoom(roomId: string, body: RoomAPILeaveRequest): Promise<{} | CommonError> {
+        return await API.put<undefined>(`${RoomAPI.path}/${roomId}/leave`, body);
     }
 
     async deleteRoom(roomId: string): Promise<RoomAPIDeletedResponse | CommonError> {
-        return await API.delete<undefined>(`/rooms/${roomId}`);
+        return await API.delete<undefined>(`${RoomAPI.path}/${roomId}`);
     }
 }

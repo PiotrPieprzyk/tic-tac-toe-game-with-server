@@ -7,6 +7,11 @@ export class MockCellDatabase {
         this.items.push(persistence);
     }
 
+    async edit(id: any, persistence: any): Promise<void> {
+        const index = this.items.findIndex(item => item.id === id);
+        this.items[index] = persistence;
+    }
+
     async find(id: any): Promise<any> {
         return this.items.find(item => item.id === id);
     }

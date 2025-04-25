@@ -15,7 +15,7 @@ import {UserId} from "../../domain/User/UserId";
 
 const roomRepository = MockRoomRepository.create();
 const userRepository = MockUserRepository.create();
-const gameRepository = new MockGameRepository();
+const gameRepository = MockGameRepository.create();
 
 
 export class RoomRouter {
@@ -108,26 +108,23 @@ export class RoomRouter {
             try {
                 const rawRoomId: string = req.params.id;
                 const rawUserId: string = req.body.userId;
+
+                console.log(rawRoomId, rawUserId);
                 
                 const roomId = RoomId.create(rawRoomId);
                 const roomPersistence = await roomRepository.find(roomId);
+                console.log('roomPersistence', roomPersistence);
+
                 if (!roomPersistence) {
                     next(new HTTPError(404, 'Room not found'));
                     return;
                 }
 
+
                 const room = Room.create({...roomPersistence, roomRepository, userRepository});
                 await room.userLeavesRoom(rawUserId);
 
-                const newRoomPersistence = await roomRepository.find(roomId);
-                if(!newRoomPersistence) {
-                    next();
-                    return;
-                }
-                const newRoom = Room.create({...newRoomPersistence, roomRepository, userRepository});
-                const roomDTO = await this.getRoomDTO(newRoom);
-
-                res.status(200).json(roomDTO);
+                res.status(200).json({});
             } catch (e) {
                 next(e);
             }

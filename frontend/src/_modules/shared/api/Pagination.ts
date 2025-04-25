@@ -5,10 +5,11 @@
  * - The frontend should not depend on the backend
  * - This file shouldn't change much
  */
+import {API, CommonError} from "@/_modules/shared/api/API";
 
 // noinspection DuplicatedCode
-export type PageSizeValue = string | null;
-export type PageTokenValue = string | null;
+export type PageSizeValue = number | null;
+export type PageTokenValue = number | null;
 
 export type PaginatedResponse<T> = {
     results: T[],
@@ -29,26 +30,20 @@ export class PageToken {
         this.value = value;
     }
 
-    static create(value: string): PageToken {
-        if(!value) {
+    static create(valueRaw: number | null): PageToken {
+        if(!valueRaw) {
             return new PageToken(null);
         }
         
-        if(value === 'null') {
-            return new PageToken(null);
-        }
-        
-        const parsedValue = Number(value);
-        
-        if(isNaN(parsedValue)) {
+        if(isNaN(valueRaw)) {
             throw new Error('Invalid page token');
         }
         
-        if(parsedValue < 0) {
+        if(valueRaw < 0) {
             throw new Error('Invalid page token');
         }
         
-        return new PageToken(parsedValue.toString());
+        return new PageToken(valueRaw);
     }
 }
 
@@ -59,25 +54,77 @@ export class PageSize {
         this.value = value;
     }
 
-    static create(value: string): PageSize {
-        if(!value) {
+    static create(valueRaw: number | null): PageSize {
+        if(!valueRaw) {
             return new PageSize(null);
         }
         
-        if(value === 'null') {
-            return new PageSize(null);
-        }
-        
-        const parsedValue = Number(value);
-        
-        if(isNaN(parsedValue)) {
+        if(isNaN(valueRaw)) {
             throw new Error('Invalid page size');
         }
         
-        if(parsedValue < 0) {
+        if(valueRaw < 0) {
             throw new Error('Invalid page size');
         }
         
-        return new PageSize(parsedValue.toString());
+        return new PageSize(valueRaw);
     }
 }
+
+
+export type PaginatedListProps = {
+    APIUrl: string
+    pageSize?: number,
+}
+
+export class PaginatedList<T> {
+    private pageSize: PageSize;
+    private pageToken: PageToken = PageToken.create(null);
+    private totalSize: number = 0;
+    private readonly APIUrl: string;
+
+    private constructor(APIUrl: string, pageSize: PageSize) {
+        this.pageSize = pageSize;
+        this.APIUrl = APIUrl;
+    }
+
+    static create<T>(props: PaginatedListProps): PaginatedList<T> {
+        return new PaginatedList(
+            props.APIUrl,
+            PageSize.create(props.pageSize ?? 25)
+        );
+    }
+    
+    public hasNextPage(): boolean {
+        return !!this.pageToken.value;
+    }
+    
+    public getTotalSize(): number {
+        return this.totalSize;
+    }
+    
+    public async getNextPage(): Promise<T[] | CommonError> {
+        const response = await API.get<PaginatedResponse<T>>(this.APIUrl, {
+            queries: [
+                `pageSize=${this.pageSize.value}`,
+                this.pageToken.value && `pageToken=${this.pageToken.value}`
+            ].flatMap(i => i? [i]: [])
+        })
+        
+        if(response instanceof CommonError) {
+            return response;
+        }
+        
+        this.setPageToken(response.value.nextPageToken);
+        this.totalSize = response.value.totalSize || 0;
+        
+        return response.value.results;
+    }
+
+    private setPageToken(pageTokenRaw: number|null): void {
+        this.pageToken = PageToken.create(pageTokenRaw);
+    }
+    
+}
+
+

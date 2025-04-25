@@ -2,17 +2,23 @@ import {Room} from "@/_modules/Room/domain/Room";
 import {FC} from "react";
 import Button from "@/_modules/shared/components/Button/Button";
 import {CommonError, SuccessResponse} from "@/_modules/shared/api/API";
-
+import {useRouter} from "next/navigation";
+import {CurrentRoom} from "@/_modules/Room/domain/CurrentRoom";
+import {RoomAPI} from "@/_modules/Room/infra/RoomApi";
 
 type props = {
     room: Room
     userId: string;
 }
+const roomAPI = new RoomAPI();
 
 export const RoomListItem: FC<props> = ({room, userId}) => {
     let loading = false;
+    const router = useRouter();
+    const currentRoom = new CurrentRoom();
 
-    const userJoinsRoom = async () => {
+
+    const onUserJoinsRoom = async () => {
         if (loading) return;
 
         loading = true;
@@ -24,12 +30,25 @@ export const RoomListItem: FC<props> = ({room, userId}) => {
         }
 
         if (response instanceof SuccessResponse) {
-            // TODO: Redirect to room page
-            console.log('User joined room');
-            console.log(response.value);
+            currentRoom.setCurrentRoom(Room.create({...response.value, roomAPI}));
+            router.push(`/rooms/${room.id}`);
         }
 
         loading = false;
+    }
+    
+    const onUserJoinsAgain = () => {
+        router.push(`/rooms/${room.id}`)
+    }
+    
+    let buttonUI;
+    
+    if(room.isCurrentUserInRoom(userId)) {
+        buttonUI = <Button onClick={onUserJoinsAgain} className={'px-2 py-1'}>Join again</Button>;
+    } else if (room.canNewUserJoin()) {
+        buttonUI = <Button onClick={onUserJoinsRoom} className={'px-2 py-1'}>Join</Button>;
+    } else {
+        buttonUI = null;
     }
 
     return (
@@ -48,10 +67,7 @@ export const RoomListItem: FC<props> = ({room, userId}) => {
                         Status: {room.status.toUserFriendlyString()}
                     </span>
             </div>
-            {room.canNewUserJoin() ? 
-                (<Button onClick={userJoinsRoom} className={'px-2 py-1'}>Join</Button>) :
-                null
-            }
+            {buttonUI}
         </div>
     );
 }

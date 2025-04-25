@@ -14,6 +14,23 @@
     .button-color:disabled {
         background: var(--dark-color-button-disable);
     }
+    
+    .button-color-flat {
+        background: var(--dark-color-app);
+        color: var(--dark-color-button-normal)
+    }
+    
+    .button-color-flat:hover {
+        color: var(--dark-color-button-hover)
+    }
+    
+    .button-color-flat:active {
+        color: var(--dark-color-button-active)
+    }
+    
+    .button-color-flat:disabled {
+        color: var(--dark-color-button-disable)
+    }
 }
 
 .theme-bright {
@@ -31,5 +48,22 @@
 
     .button-color:disabled {
         background: var(--bright-color-button-disable);
+    }
+    
+    .button-color-flat {
+        background: var(--bright-color-app);
+        color: var(--bright-color-button-normal)
+    }
+    
+    .button-color-flat:hover {
+        color: var(--bright-color-button-hover)
+    }
+    
+    .button-color-flat:active {
+        color: var(--bright-color-button-active)
+    }
+    
+    .button-color-flat:disabled {
+        color: var(--bright-color-button-disable)
     }
 }

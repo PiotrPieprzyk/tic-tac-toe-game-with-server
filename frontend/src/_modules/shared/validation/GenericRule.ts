@@ -1,6 +1,6 @@
 import {UIError} from "@/_modules/shared/models/UIError";
 
-export const ValueObjectRuleHandler = (callback: any ) => {
+export const ValueObjectRuleHandler = (callback: any) => {
     return (value: unknown) => {
         try {
             callback(value)
@@ -9,8 +9,9 @@ export const ValueObjectRuleHandler = (callback: any ) => {
             if (e instanceof UIError) {
                 return e.message
             }
-            return 'Unknown error'
+            console.error(e);
+            return 'Unknown error';
         }
     }
-   
+
 }

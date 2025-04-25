@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+    transition: background-color 0.3s, color 0.3s ease-in-out;
+}
 
 input {
     background: none;
@@ -13,9 +16,42 @@ input {
     min-height: 100vh;
 }
 
+.app-header {
+    width: 100%;
+    max-width: 300px;
+    top: 0;
+    z-index: 2;
+    position: fixed;
+    border-radius: 0 0 16px 16px;
+}
+
 .app-content {
+    width: 100%;
+    max-width: 300px;
+    margin-top: 42px;
     z-index: 2;
 }
+
+.app-error {
+    width: calc(100% - 24px);
+    max-width: 300px;
+    position: fixed;
+    bottom: 0;
+    left: auto;
+    right: auto;
+    z-index: 3;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.app-error-visible {
+    transform: translateY(-12px);
+}
+
+ul {
+    padding-left: 1rem
+}
+
 
 .level-1 {
     box-shadow: rgba(0, 0, 0, 0.20) 0 4px 4px 0;

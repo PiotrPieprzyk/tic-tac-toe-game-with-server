@@ -14,6 +14,7 @@ import {CellMap} from "../../application/Game/CellMap";
 import {Position} from "./Cell/valueObject/Position";
 import {HTTPError} from "../../shared/HTTPError";
 import {PlayerRepositoryI} from "../../infrastructure/repositories/interfaces/PlayerRepositoryI";
+import {PlayerPersistence} from "../../application/Game/PlayerMap";
 
 
 export type GameProps = {
@@ -33,7 +34,7 @@ export type GameProps = {
 export type GamePropsRaw = {
     id?: string,
     roomId: string,
-    players: Player[],
+    players: PlayerPersistence[],
     status?: GameStatusEnum,
     result?: GameResultEnum,
     activePlayerId?: string,
@@ -79,7 +80,7 @@ export class Game {
         return new Game({
             id: GameId.create(props.id),
             roomId: RoomId.create(props.roomId),
-            players: props.players,
+            players: props.players.map(player => Player.create(player)),
             status: GameStatus.create(props.status),
             result: props.result ? GameResult.create(props.result) : undefined,
             activePlayerId: props.activePlayerId ? PlayerId.create(props.activePlayerId) : undefined,

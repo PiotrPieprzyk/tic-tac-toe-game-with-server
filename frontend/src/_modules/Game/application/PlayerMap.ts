@@ -3,7 +3,7 @@ import {PlayerId} from "../../domain/Game/Player/PlayerId";
 import {User} from "../../domain/User/User";
 
 export type PlayerPersistence = {
-    id: string,
+    id?: string,
     userId: string,
     mark: string,
 }
@@ -25,7 +25,7 @@ export class PlayerMap {
     static toDTO(player: Player, user: User): PlayerDTO {
         return {
             id: player.id.value,
-            userName: user.name.value,
+            userName: user.name,
             mark: player.mark.value
         };
     }
