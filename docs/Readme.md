@@ -24,36 +24,6 @@ This is a simple game of tic tac toe with a server. The game is played in the ho
 
 ## Stories
 
-### User stories
-- If the user didn't join to the room within last at least 24 hour, the user is deleted automatically.
-  - API: 
-    - PUT /rooms/join
-
-### Menu stories
-- User can copy the webapp url.
-
-- User can see the list of rooms and players in the room.
-  - API
-    - GET /rooms
-- User can choose a name. User can't choose a name that is already taken.
-  - API PUT /users/:id
-- User can create room, but only one. When user creates room they are the host.
-  - API
-    - POST /rooms
-- User can join a room.
-  - API
-    - PUT /rooms/join
-  - Business logic:
-    - If rooms are full, user can't join the room. Room can have only 2 players.
-    - If the game has started, user can't join the room.
-- The rooms list is updated automatically.
-  - Business logic:
-    - If the room is deleted, it is removed from the list.
-    - If the game has started, the room status is updated to "in game".
-    - If the room is full, the room status is updated to "full".
-    - If the room has been added, it is added to the list.
-  - API
-    - RoomAddedEvent, RoomEditedEvent, RoomDeletedEvent
 
 ### In-Room stories
 - Host can delete the room.
