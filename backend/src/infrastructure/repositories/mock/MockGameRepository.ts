@@ -1,10 +1,10 @@
-import {GameRepositoryI} from "../interfaces/GameRepositoryI";
-import {MockGameDatabase} from "../../databases/mock/MockGameDatabase";
-import {GamePersistence} from "../../../application/Game/GameMap";
-import {GameId} from "../../../domain/Game/valueObject/GameId";
-import {MockUserRepository} from "./MockUserRepository";
-import {MockUserDatabase} from "../../databases/mock/MockUserDatabase";
-import {UserId} from "../../../domain/User/UserId";
+import {GameRepositoryI} from "@/infrastructure/repositories/interfaces/GameRepositoryI";
+import {MockGameDatabase} from "@/infrastructure/databases/mock/MockGameDatabase";
+import {GamePersistence} from "@/application/Game/GameMap";
+import {GameId} from "@/domain/Game/valueObject/GameId";
+import {MockUserRepository} from "@/infrastructure/repositories/mock/MockUserRepository";
+import {MockUserDatabase} from "@/infrastructure/databases/mock/MockUserDatabase";
+import {UserId} from "@/domain/User/UserId";
 
 type Id = GameId; 
 type Persistence = GamePersistence;

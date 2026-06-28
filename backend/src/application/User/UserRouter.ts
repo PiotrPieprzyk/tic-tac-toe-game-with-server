@@ -1,9 +1,9 @@
 import express, {NextFunction, Request, Response} from "express";
-import {MockUserRepository} from "../../infrastructure/repositories/mock/MockUserRepository";
-import {UserId} from "../../domain/User/UserId";
-import {User} from "../../domain/User/User";
-import {UserMap} from "./UserMap";
-import {HTTPError} from "../../shared/HTTPError";
+import {MockUserRepository} from "@/infrastructure/repositories/mock/MockUserRepository";
+import {UserId} from "@/domain/User/UserId";
+import {User} from "@/domain/User/User";
+import {UserMap} from "@/application/User/UserMap";
+import {HTTPError} from "@/shared/HTTPError";
 
 
 const userRepository = MockUserRepository.create();
@@ -14,6 +14,12 @@ export class UserRouter {
         // send all users
         app.get('/users/:id', async (req: Request, res: Response, next: NextFunction) => {
             try {
+
+                if(Array.isArray(req.params.id)) {
+                    next(new HTTPError(404, 'Do not send multiple ids'));
+                    return;
+                }
+
                 const userId = UserId.create(req.params.id);
                 let user: User | undefined;
 

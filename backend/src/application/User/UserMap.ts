@@ -1,4 +1,4 @@
-import {User} from "../../domain/User/User";
+import {User} from "@/domain/User/User";
 
 export type UserDTO = {
     id: string,

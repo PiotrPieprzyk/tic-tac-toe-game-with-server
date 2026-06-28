@@ -1,5 +1,5 @@
-import {GameId} from "../../../domain/Game/valueObject/GameId";
-import {GamePersistence} from "../../../application/Game/GameMap";
+import {GameId} from "@/domain/Game/valueObject/GameId";
+import {GamePersistence} from "@/application/Game/GameMap";
 
 export interface GameRepositoryI {
     save(roomPersistence: GamePersistence): Promise<void>;

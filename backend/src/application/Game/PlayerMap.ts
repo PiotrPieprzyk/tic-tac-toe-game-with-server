@@ -1,6 +1,6 @@
-import {Player} from "../../domain/Game/Player/Player";
-import {PlayerId} from "../../domain/Game/Player/PlayerId";
-import {User} from "../../domain/User/User";
+import {Player} from "@/domain/Game/Player/Player";
+import {PlayerId} from "@/domain/Game/Player/PlayerId";
+import {User} from "@/domain/User/User";
 
 export type PlayerPersistence = {
     id: string,

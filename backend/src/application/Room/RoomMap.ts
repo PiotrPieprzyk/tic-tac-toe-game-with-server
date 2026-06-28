@@ -1,7 +1,7 @@
-import {Room} from "../../domain/Room/Room";
-import {UserDTO} from "../User/UserMap";
-import {GamePersistence} from "../Game/GameMap";
-import {GameStatusEnum} from "../../domain/Game/valueObject/GameStatus";
+import {Room} from "@/domain/Room/Room";
+import {UserDTO} from "@/application/User/UserMap";
+import {GamePersistence} from "@/application/Game/GameMap";
+import {GameStatusEnum} from "@/domain/Game/valueObject/GameStatus";
 
 export type RoomPersistence = {
     id?: string,

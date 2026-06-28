@@ -1,7 +1,7 @@
-import {UserId} from "../../../domain/User/UserId";
-import {UserRepositoryI} from "../interfaces/UserRepositoryI";
-import {MockUserDatabase} from "../../databases/mock/MockUserDatabase";
-import {UserPersistence} from "../../../application/User/UserMap";
+import {UserId} from "@/domain/User/UserId";
+import {UserRepositoryI} from "@/infrastructure/repositories/interfaces/UserRepositoryI";
+import {MockUserDatabase} from "@/infrastructure/databases/mock/MockUserDatabase";
+import {UserPersistence} from "@/application/User/UserMap";
 
 type Id = UserId;
 type Persistence = UserPersistence;

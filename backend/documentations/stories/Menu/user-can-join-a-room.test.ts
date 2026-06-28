@@ -1,8 +1,8 @@
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import supertest from 'supertest';
-import {getApp} from '../../src/app';
-import {UserDTO} from '../../src/application/User/UserMap';
-import {RoomDTO} from '../../src/application/Room/RoomMap';
+import {getApp} from '@/app';
+import {UserDTO} from '@/application/User/UserMap';
+import {RoomDTO} from '@/application/Room/RoomMap';
 
 const request = supertest(getApp());
 

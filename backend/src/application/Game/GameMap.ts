@@ -1,9 +1,9 @@
-import {Game} from "../../domain/Game/Game";
-import {GameStatusEnum} from "../../domain/Game/valueObject/GameStatus";
-import {GameResultEnum} from "../../domain/Game/valueObject/GameResult";
-import {PlayerDTO, PlayerMap, PlayerPersistence} from "./PlayerMap";
-import {CellDTO} from "./CellMap";
-import {Player} from "../../domain/Game/Player/Player";
+import {Game} from "@/domain/Game/Game";
+import {GameStatusEnum} from "@/domain/Game/valueObject/GameStatus";
+import {GameResultEnum} from "@/domain/Game/valueObject/GameResult";
+import {PlayerDTO, PlayerMap, PlayerPersistence} from "@/application/Game/PlayerMap";
+import {CellDTO} from "@/application/Game/CellMap";
+import {Player} from "@/domain/Game/Player/Player";
 
 
 export type GamePersistence = {

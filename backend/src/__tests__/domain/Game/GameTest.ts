@@ -1,21 +1,21 @@
 import {beforeEach, describe, expect, it, jest} from '@jest/globals';
-import {GameRepositoryI} from "../../../infrastructure/repositories/interfaces/GameRepositoryI";
-import {GameStatusEnum} from "../../../domain/Game/valueObject/GameStatus";
-import {UserRepositoryI} from "../../../infrastructure/repositories/interfaces/UserRepositoryI";
-import {UserId} from "../../../domain/User/UserId";
-import {GameId} from "../../../domain/Game/valueObject/GameId";
-import {PlayerId} from "../../../domain/Game/Player/PlayerId";
-import {Player} from "../../../domain/Game/Player/Player";
-import {Game, GamePropsRaw} from "../../../domain/Game/Game";
-import {CellRepositoryI} from "../../../infrastructure/repositories/interfaces/CellRepositoryI";
-import {CellId} from "../../../domain/Game/Cell/valueObject/CellId";
-import {Mark, MarkTypes} from "../../../domain/Game/Cell/valueObject/Mark";
-import {GamePersistence} from "../../../application/Game/GameMap";
-import {PlayerPersistence} from "../../../application/Game/PlayerMap";
-import {CellPersistence} from "../../../application/Game/CellMap";
-import {GameResultEnum} from "../../../domain/Game/valueObject/GameResult";
-import {PlayerRepositoryI} from "../../../infrastructure/repositories/interfaces/PlayerRepositoryI";
-import {UserPersistence} from "../../../application/User/UserMap";
+import {GameRepositoryI} from "@/infrastructure/repositories/interfaces/GameRepositoryI";
+import {GameStatusEnum} from "@/domain/Game/valueObject/GameStatus";
+import {UserRepositoryI} from "@/infrastructure/repositories/interfaces/UserRepositoryI";
+import {UserId} from "@/domain/User/UserId";
+import {GameId} from "@/domain/Game/valueObject/GameId";
+import {PlayerId} from "@/domain/Game/Player/PlayerId";
+import {Player} from "@/domain/Game/Player/Player";
+import {Game, GamePropsRaw} from "@/domain/Game/Game";
+import {CellRepositoryI} from "@/infrastructure/repositories/interfaces/CellRepositoryI";
+import {CellId} from "@/domain/Game/Cell/valueObject/CellId";
+import {Mark, MarkTypes} from "@/domain/Game/Cell/valueObject/Mark";
+import {GamePersistence} from "@/application/Game/GameMap";
+import {PlayerPersistence} from "@/application/Game/PlayerMap";
+import {CellPersistence} from "@/application/Game/CellMap";
+import {GameResultEnum} from "@/domain/Game/valueObject/GameResult";
+import {PlayerRepositoryI} from "@/infrastructure/repositories/interfaces/PlayerRepositoryI";
+import {UserPersistence} from "@/application/User/UserMap";
 
 
 const exampleGameIdValue = '1afd6658-89af-4bbb-9149-721ae0e23982';

@@ -1,5 +1,5 @@
-import {ValueObject} from "./UserId";
-import {HTTPError} from "../../shared/HTTPError";
+import {ValueObject} from "@/domain/User/UserId";
+import {HTTPError} from "@/shared/HTTPError";
 
 export class UserName extends ValueObject<string> {
     private constructor(value: string) {

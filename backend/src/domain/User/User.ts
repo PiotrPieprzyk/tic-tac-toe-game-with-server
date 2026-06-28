@@ -1,6 +1,6 @@
-import {Timestamp} from "../../shared/Timestamp";
-import {UserId} from "./UserId";
-import {UserName} from "./UserName";
+import {Timestamp} from "@/shared/Timestamp";
+import {UserId} from "@/domain/User/UserId";
+import {UserName} from "@/domain/User/UserName";
 
 export class User {
     public readonly id: UserId;

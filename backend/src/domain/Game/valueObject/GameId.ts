@@ -1,5 +1,5 @@
-import {Guid} from "../../../shared/GUID";
-import {ValueObject} from "../../User/UserId";
+import {Guid} from "@/shared/GUID";
+import {ValueObject} from "@/domain/User/UserId";
 
 export class GameId extends ValueObject<string>{
     private constructor(value: string) {

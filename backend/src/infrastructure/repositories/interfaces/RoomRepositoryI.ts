@@ -1,7 +1,7 @@
-import {RoomId} from "../../../domain/Room/RoomId";
-import {RoomPersistence} from "../../../application/Room/RoomMap";
+import {RoomId} from "@/domain/Room/RoomId";
+import {RoomPersistence} from "@/application/Room/RoomMap";
 
-import {PageSize, PageToken, PaginatedResponse} from "../../../shared/Pagination";
+import {PageSize, PageToken, PaginatedResponse} from "@/shared/Pagination";
 
 export interface RoomRepositoryI {
     save(roomPersistence: RoomPersistence): Promise<void>;

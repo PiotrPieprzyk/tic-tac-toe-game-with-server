@@ -2,10 +2,10 @@ import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import supertest from 'supertest';
 import * as http from 'http';
 import WebSocket from 'ws';
-import {getApp} from '../../src/app';
-import {WebsocketServer} from '../../src/websocket';
-import {UserDTO} from '../../src/application/User/UserMap';
-import {RoomDTO} from '../../src/application/Room/RoomMap';
+import {getApp} from '@/app';
+import {WebsocketServer} from '@/websocket';
+import {UserDTO} from '@/application/User/UserMap';
+import {RoomDTO} from '@/application/Room/RoomMap';
 
 const app = getApp();
 let server: http.Server;

@@ -1,12 +1,12 @@
 import {describe, expect, it, beforeEach, jest} from '@jest/globals';
-import {RoomRepositoryI} from "../../../infrastructure/repositories/interfaces/RoomRepositoryI";
-import {UserRepositoryI} from "../../../infrastructure/repositories/interfaces/UserRepositoryI";
-import {UserId} from "../../../domain/User/UserId";
-import {Room} from "../../../domain/Room/Room";
-import {RoomId} from "../../../domain/Room/RoomId";
-import {RoomPersistence} from "../../../application/Room/RoomMap";
-import {UserPersistence} from "../../../application/User/UserMap";
-import {PageSize, PageToken, PaginatedResponse} from "../../../shared/Pagination";
+import {RoomRepositoryI} from "@/infrastructure/repositories/interfaces/RoomRepositoryI";
+import {UserRepositoryI} from "@/infrastructure/repositories/interfaces/UserRepositoryI";
+import {UserId} from "@/domain/User/UserId";
+import {Room} from "@/domain/Room/Room";
+import {RoomId} from "@/domain/Room/RoomId";
+import {RoomPersistence} from "@/application/Room/RoomMap";
+import {UserPersistence} from "@/application/User/UserMap";
+import {PageSize, PageToken, PaginatedResponse} from "@/shared/Pagination";
 
 const exampleHostIdValue = '1afd6658-89af-4bbb-9149-721ae0e23982'
 const exampleUserIdValue1 = '2afd6658-89af-4bbb-9149-721ae0e23982'

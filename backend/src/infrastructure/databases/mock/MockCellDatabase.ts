@@ -1,4 +1,4 @@
-import {CellPersistence} from "../../../application/Game/CellMap";
+import {CellPersistence} from "@/application/Game/CellMap";
 
 export class MockCellDatabase {
     private items: CellPersistence[] = [];

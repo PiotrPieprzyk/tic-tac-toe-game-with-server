@@ -1,5 +1,5 @@
-import {ValueObject} from "../../../User/UserId";
-import {HTTPError} from "../../../../shared/HTTPError";
+import {ValueObject} from "@/domain/User/UserId";
+import {HTTPError} from "@/shared/HTTPError";
 
 export enum MarkTypes {
     X = 'X',

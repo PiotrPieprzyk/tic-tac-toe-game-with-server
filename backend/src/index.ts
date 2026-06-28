@@ -1,5 +1,5 @@
-import {WebsocketServer} from "./websocket";
-import {getApp} from "./app";
+import {WebsocketServer} from "@/websocket";
+import {getApp} from "@/app";
 import os from "os";
 
 const port = 3000;

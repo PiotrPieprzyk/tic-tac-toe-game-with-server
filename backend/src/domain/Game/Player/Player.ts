@@ -1,7 +1,7 @@
-import {UserId} from "../../User/UserId";
-import {Mark} from "../Cell/valueObject/Mark";
-import {PlayerId} from "./PlayerId";
-import {UserName} from "../../User/UserName";
+import {UserId} from "@/domain/User/UserId";
+import {Mark} from "@/domain/Game/Cell/valueObject/Mark";
+import {PlayerId} from "@/domain/Game/Player/PlayerId";
+import {UserName} from "@/domain/User/UserName";
 
 type PlayerPropsRaw = {
     id?: string,

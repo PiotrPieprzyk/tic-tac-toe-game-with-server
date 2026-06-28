@@ -1,8 +1,8 @@
-import {RoomRepositoryI} from "../interfaces/RoomRepositoryI";
-import {MockRoomDatabase} from "../../databases/mock/MockRoomDatabase";
-import {RoomId} from "../../../domain/Room/RoomId";
-import {RoomPersistence} from "../../../application/Room/RoomMap";
-import {PageSize, PageToken, PaginatedResponse} from "../../../shared/Pagination";
+import {RoomRepositoryI} from "@/infrastructure/repositories/interfaces/RoomRepositoryI";
+import {MockRoomDatabase} from "@/infrastructure/databases/mock/MockRoomDatabase";
+import {RoomId} from "@/domain/Room/RoomId";
+import {RoomPersistence} from "@/application/Room/RoomMap";
+import {PageSize, PageToken, PaginatedResponse} from "@/shared/Pagination";
 
 type Id = RoomId; 
 type Persistence = RoomPersistence;

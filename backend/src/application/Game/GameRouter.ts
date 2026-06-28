@@ -1,19 +1,19 @@
 import express, {NextFunction, Request, Response} from "express";
-import {MockGameRepository} from "../../infrastructure/repositories/mock/MockGameRepository";
-import {GameId} from "../../domain/Game/valueObject/GameId";
-import {Game} from "../../domain/Game/Game";
-import {HTTPError} from "../../shared/HTTPError";
-import {MockPlayerRepository} from "../../infrastructure/repositories/mock/MockPlayerRepository";
-import {MockCellRepository} from "../../infrastructure/repositories/mock/MockCellRepository";
-import {PlayerDTO, PlayerMap} from "./PlayerMap";
-import {MockUserRepository} from "../../infrastructure/repositories/mock/MockUserRepository";
-import {Room} from "../../domain/Room/Room";
-import {User} from "../../domain/User/User";
-import {Player} from "../../domain/Game/Player/Player";
-import {CellDTO, CellMap} from "./CellMap";
-import {Cell} from "../../domain/Game/Cell/Cell";
-import {CellId} from "../../domain/Game/Cell/valueObject/CellId";
-import {gameDTO, GameMap} from "./GameMap";
+import {MockGameRepository} from "@/infrastructure/repositories/mock/MockGameRepository";
+import {GameId} from "@/domain/Game/valueObject/GameId";
+import {Game} from "@/domain/Game/Game";
+import {HTTPError} from "@/shared/HTTPError";
+import {MockPlayerRepository} from "@/infrastructure/repositories/mock/MockPlayerRepository";
+import {MockCellRepository} from "@/infrastructure/repositories/mock/MockCellRepository";
+import {PlayerDTO, PlayerMap} from "@/application/Game/PlayerMap";
+import {MockUserRepository} from "@/infrastructure/repositories/mock/MockUserRepository";
+import {Room} from "@/domain/Room/Room";
+import {User} from "@/domain/User/User";
+import {Player} from "@/domain/Game/Player/Player";
+import {CellDTO, CellMap} from "@/application/Game/CellMap";
+import {Cell} from "@/domain/Game/Cell/Cell";
+import {CellId} from "@/domain/Game/Cell/valueObject/CellId";
+import {gameDTO, GameMap} from "@/application/Game/GameMap";
 
 
 const gameRepository = MockGameRepository.create();

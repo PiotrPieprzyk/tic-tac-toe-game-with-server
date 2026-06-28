@@ -1,5 +1,5 @@
-import {ValueObject} from "../../../User/UserId";
-import {HTTPError} from "../../../../shared/HTTPError";
+import {ValueObject} from "@/domain/User/UserId";
+import {HTTPError} from "@/shared/HTTPError";
 
 export class Position extends ValueObject<number>{
     private constructor(value: number) {

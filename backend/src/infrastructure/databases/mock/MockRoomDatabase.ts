@@ -1,4 +1,4 @@
-import {PageSize, PageToken, PaginatedResponse} from "../../../shared/Pagination";
+import {PageSize, PageToken, PaginatedResponse} from "@/shared/Pagination";
 
 export class MockRoomDatabase {
     private items: any[] = [];

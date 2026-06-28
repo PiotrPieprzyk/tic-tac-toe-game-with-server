@@ -1,7 +1,7 @@
 import express, {Request, Response} from "express";
 import path from "path";
-import {UserRouter} from "./User/UserRouter";
-import {RoomRouter} from "./Room/RoomRouter";
+import {UserRouter} from "@/application/User/UserRouter";
+import {RoomRouter} from "@/application/Room/RoomRouter";
 
 export class Router {
     static setup(app: express.Application) {

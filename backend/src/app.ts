@@ -1,7 +1,7 @@
 import express, {NextFunction, Request, Response} from "express";
 import path from "path";
-import {Router} from "./application/Router";
-import {HTTPError} from "./shared/HTTPError";
+import {Router} from "@/application/Router";
+import {HTTPError} from "@/shared/HTTPError";
 import cors from "cors";
 
 

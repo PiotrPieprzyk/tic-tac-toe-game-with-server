@@ -1,8 +1,8 @@
-import {GameId} from "../valueObject/GameId";
-import {CellId} from "./valueObject/CellId";
-import {Mark} from "./valueObject/Mark";
-import {Position} from "./valueObject/Position";
-import {CellRepositoryI} from "../../../infrastructure/repositories/interfaces/CellRepositoryI";
+import {GameId} from "@/domain/Game/valueObject/GameId";
+import {CellId} from "@/domain/Game/Cell/valueObject/CellId";
+import {Mark} from "@/domain/Game/Cell/valueObject/Mark";
+import {Position} from "@/domain/Game/Cell/valueObject/Position";
+import {CellRepositoryI} from "@/infrastructure/repositories/interfaces/CellRepositoryI";
 
 type CellProps = {
     id: CellId;

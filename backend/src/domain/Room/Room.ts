@@ -1,11 +1,11 @@
-import {RoomId} from "./RoomId";
-import {RoomName} from "./RoomName";
-import {UserId} from "../User/UserId";
-import {GameId} from "../Game/valueObject/GameId";
-import {RoomRepositoryI} from "../../infrastructure/repositories/interfaces/RoomRepositoryI";
-import {Timestamp} from "../../shared/Timestamp";
-import {RoomMap} from "../../application/Room/RoomMap";
-import {UserRepositoryI} from "../../infrastructure/repositories/interfaces/UserRepositoryI";
+import {RoomId} from "@/domain/Room/RoomId";
+import {RoomName} from "@/domain/Room/RoomName";
+import {UserId} from "@/domain/User/UserId";
+import {GameId} from "@/domain/Game/valueObject/GameId";
+import {RoomRepositoryI} from "@/infrastructure/repositories/interfaces/RoomRepositoryI";
+import {Timestamp} from "@/shared/Timestamp";
+import {RoomMap} from "@/application/Room/RoomMap";
+import {UserRepositoryI} from "@/infrastructure/repositories/interfaces/UserRepositoryI";
 
 type RoomProps = {
     id: RoomId;

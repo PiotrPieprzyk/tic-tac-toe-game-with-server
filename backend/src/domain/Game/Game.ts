@@ -1,20 +1,20 @@
-import {GameId} from "./valueObject/GameId";
-import {RoomId} from "../Room/RoomId";
-import {GameRepositoryI} from "../../infrastructure/repositories/interfaces/GameRepositoryI";
-import {Player} from "./Player/Player";
-import {CellRepositoryI} from "../../infrastructure/repositories/interfaces/CellRepositoryI";
-import {PlayerId} from "./Player/PlayerId";
-import {Timestamp} from "../../shared/Timestamp";
-import {GameStatus, GameStatusEnum} from "./valueObject/GameStatus";
-import {GameResult, GameResultEnum} from "./valueObject/GameResult";
-import {Mark} from "./Cell/valueObject/Mark";
-import {GameMap} from "../../application/Game/GameMap";
-import {Cell} from "./Cell/Cell";
-import {CellMap} from "../../application/Game/CellMap";
-import {Position} from "./Cell/valueObject/Position";
-import {HTTPError} from "../../shared/HTTPError";
-import {PlayerRepositoryI} from "../../infrastructure/repositories/interfaces/PlayerRepositoryI";
-import {PlayerPersistence} from "../../application/Game/PlayerMap";
+import {GameId} from "@/domain/Game/valueObject/GameId";
+import {RoomId} from "@/domain/Room/RoomId";
+import {GameRepositoryI} from "@/infrastructure/repositories/interfaces/GameRepositoryI";
+import {Player} from "@/domain/Game/Player/Player";
+import {CellRepositoryI} from "@/infrastructure/repositories/interfaces/CellRepositoryI";
+import {PlayerId} from "@/domain/Game/Player/PlayerId";
+import {Timestamp} from "@/shared/Timestamp";
+import {GameStatus, GameStatusEnum} from "@/domain/Game/valueObject/GameStatus";
+import {GameResult, GameResultEnum} from "@/domain/Game/valueObject/GameResult";
+import {Mark} from "@/domain/Game/Cell/valueObject/Mark";
+import {GameMap} from "@/application/Game/GameMap";
+import {Cell} from "@/domain/Game/Cell/Cell";
+import {CellMap} from "@/application/Game/CellMap";
+import {Position} from "@/domain/Game/Cell/valueObject/Position";
+import {HTTPError} from "@/shared/HTTPError";
+import {PlayerRepositoryI} from "@/infrastructure/repositories/interfaces/PlayerRepositoryI";
+import {PlayerPersistence} from "@/application/Game/PlayerMap";
 
 
 export type GameProps = {

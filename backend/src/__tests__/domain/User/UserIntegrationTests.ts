@@ -1,6 +1,6 @@
 import {describe, expect, it, beforeEach, jest} from '@jest/globals';
 import supertest from 'supertest';
-import {getApp} from '../../../app';
+import {getApp} from '@/app';
 
 const request = supertest(getApp());
 

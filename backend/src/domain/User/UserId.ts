@@ -1,4 +1,4 @@
-import {Guid} from "../../shared/GUID";
+import {Guid} from "@/shared/GUID";
 
 export class ValueObject<T> {
     public readonly value: T;

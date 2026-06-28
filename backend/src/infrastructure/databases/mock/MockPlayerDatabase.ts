@@ -1,4 +1,4 @@
-import {PlayerPersistence} from "../../../application/Game/PlayerMap";
+import {PlayerPersistence} from "@/application/Game/PlayerMap";
 
 export class MockPlayerDatabase {
     private items: PlayerPersistence[] = [];
