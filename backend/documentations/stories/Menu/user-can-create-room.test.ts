@@ -7,17 +7,12 @@ const request = supertest(getApp());
 
 describe('User can create a room, but only one.', () => {
     let user: UserDTO;
-    const createdRoomIds: string[] = [];
 
     beforeAll(async () => {
         const response = await request.post('/users').send({name: 'RoomHost'});
         user = response.body;
     });
 
-    afterAll(async () => {
-        await Promise.all(createdRoomIds.map(id => request.delete(`/rooms/${id}`)));
-        await request.delete(`/users/${user.id}`);
-    });
 
     it('WHEN user creates a room with a valid name SHOULD return 200 with the created room, the user set as host, and the user added as a player', async () => {
         const response = await request.post('/rooms').send({
@@ -33,9 +28,7 @@ describe('User can create a room, but only one.', () => {
         expect(response.body.users).toHaveLength(1);
         expect(response.body.users[0].id).toBe(user.id);
 
-        createdRoomIds.push(response.body.id);
         await request.delete(`/rooms/${response.body.id}`);
-        createdRoomIds.pop();
     });
 
     it('WHEN user creates a room with a name shorter than 3 characters SHOULD return 400', async () => {
@@ -86,7 +79,6 @@ describe('User can create a room, but only one.', () => {
             usersIds: [user.id],
         });
         expect(firstRoom.status).toBe(200);
-        createdRoomIds.push(firstRoom.body.id);
 
         const secondRoom = await request.post('/rooms').send({
             name: 'Second Room',
@@ -99,5 +91,7 @@ describe('User can create a room, but only one.', () => {
             (r: {hostId: string}) => r.hostId === user.id
         );
         expect(roomsOwnedByHost).toHaveLength(1);
+
+        await request.delete(`/rooms/${firstRoom.body.id}`);
     });
 });

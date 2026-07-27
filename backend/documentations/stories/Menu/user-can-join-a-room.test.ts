@@ -3,6 +3,7 @@ import supertest from 'supertest';
 import {getApp} from '@/app';
 import {UserDTO} from '@/application/User/UserMap';
 import {RoomDTO} from '@/application/Room/RoomMap';
+import {Guid} from '@/shared/GUID';
 
 const request = supertest(getApp());
 
@@ -61,7 +62,7 @@ describe('User can join a room.', () => {
         // This test requires a room with an active IN_PROGRESS game.
         // Skipping setup as game start API is not available in the current scope.
         // Once game-start endpoint is implemented, set room.activeGameId and verify.
-        expect(true).toBe(true);
+        expect(true).toBe(false);
     });
 
     it('WHEN user tries to join a room they are already in SHOULD return 400', async () => {
@@ -73,7 +74,8 @@ describe('User can join a room.', () => {
     });
 
     it('WHEN user tries to join a room that does not exist SHOULD return 404', async () => {
-        const response = await request.put('/rooms/non-existent-room-id/join').send({userId: userB.id});
+        const guid = Guid.createNewGuid()
+        const response = await request.put(`/rooms/${guid}/join`).send({userId: userB.id});
 
         expect(response.status).toBe(404);
     });

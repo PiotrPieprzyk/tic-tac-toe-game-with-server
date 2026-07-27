@@ -70,6 +70,13 @@ export class RoomRouter {
                     userRepository: userRepository,
                 })
 
+                const userCreatedAlreadyRoom = !!(await roomRepository.findRoomByHostId(room.hostId));
+
+                if(userCreatedAlreadyRoom) {
+                    next(new HTTPError(400, 'User already created room'));
+                    return;
+                }
+
                 await roomRepository.save(RoomMap.toPersistence(room));
                 const roomDTO = await this.getRoomDTO(room);
                 
@@ -108,12 +115,8 @@ export class RoomRouter {
             try {
                 const rawRoomId: string = req.params.id;
                 const rawUserId: string = req.body.userId;
-
-                console.log(rawRoomId, rawUserId);
-                
                 const roomId = RoomId.create(rawRoomId);
                 const roomPersistence = await roomRepository.find(roomId);
-                console.log('roomPersistence', roomPersistence);
 
                 if (!roomPersistence) {
                     next(new HTTPError(404, 'Room not found'));

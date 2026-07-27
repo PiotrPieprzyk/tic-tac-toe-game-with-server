@@ -1,3 +1,5 @@
+import {HTTPError} from "@/shared/HTTPError";
+
 export const guidRegex = '^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$';
 
 export class Guid {
@@ -17,7 +19,7 @@ export class Guid {
 
     public static createFromValue(value: string): string {
         if (!Guid.isValidGuid(value)) {
-            throw new Error('Invalid GUID');
+            throw new HTTPError(400, 'Invalid GUID');
         }
         return value;
     }

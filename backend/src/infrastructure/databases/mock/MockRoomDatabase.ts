@@ -45,4 +45,8 @@ export class MockRoomDatabase {
     async getLength(): Promise<number> {
         return this.items.length;
     }
+
+    async findByHostId(hostId: any): Promise<any> {
+        return this.items.find(item => item.hostId === hostId);
+    }
 }

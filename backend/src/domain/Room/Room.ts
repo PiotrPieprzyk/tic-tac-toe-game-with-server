@@ -6,6 +6,7 @@ import {RoomRepositoryI} from "@/infrastructure/repositories/interfaces/RoomRepo
 import {Timestamp} from "@/shared/Timestamp";
 import {RoomMap} from "@/application/Room/RoomMap";
 import {UserRepositoryI} from "@/infrastructure/repositories/interfaces/UserRepositoryI";
+import {HTTPError} from "@/shared/HTTPError";
 
 type RoomProps = {
     id: RoomId;
@@ -52,15 +53,15 @@ export class Room {
 
     public static create(props: RoomPropsRaw): Room {
         if(!props.hostId) {
-            throw new Error('Host id is required');
+            throw new HTTPError(400, 'Host id is required');
         }
         
         if(!props.usersIds || props.usersIds.length === 0) {
-            throw new Error('Room must have at least 1 user');
+            throw new HTTPError(400, 'Room must have at least 1 user');
         }
         
         if(props.usersIds.length > 2) {
-            throw new Error('Room can have at most 2 users');
+            throw new HTTPError(400, 'Room can have at most 2 users');
         }
         
         return new Room({
@@ -79,11 +80,11 @@ export class Room {
         const userIdValueObject = UserId.create(userId);
         
         if(!(await this.userRepository.find(userIdValueObject))) { 
-            throw new Error('User does not exist');
+            throw new HTTPError(400, 'User does not exist');
         }
         
         if (this.usersIds.some(u => u.exact(userIdValueObject))) {
-            throw new Error('User is already in the room');
+            throw new HTTPError(400, 'User is already in the room');
         }
 
         const newRoom = new Room({
@@ -114,7 +115,7 @@ export class Room {
         const hostId = UserId.create(rawHostId);
         
         if (!this.hostId.exact(hostId)) {
-            throw new Error('Only the host can remove a player from the room');
+            throw new HTTPError(400, 'Only the host can remove a player from the room');
         }
         
         await this.userLeavesRoom(rawUserId);
@@ -124,7 +125,7 @@ export class Room {
         const hostId = UserId.create(rawHostId);
         
         if(!this.hostId.exact(hostId)) {
-            throw new Error('Only the host can rename the room');
+            throw new HTTPError(400, 'Only the host can rename the room');
         }
         
         const newRoom = new Room({
@@ -140,7 +141,7 @@ export class Room {
         const hostId = UserId.create(rawHostId);
         
         if(!this.hostId.exact(hostId)) {
-            throw new Error('Only the host can delete the room');
+            throw new HTTPError(400, 'Only the host can delete the room');
         }
         
         await this.roomRepository.delete(this.id);

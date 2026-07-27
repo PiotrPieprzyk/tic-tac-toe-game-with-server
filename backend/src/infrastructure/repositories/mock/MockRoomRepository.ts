@@ -3,6 +3,7 @@ import {MockRoomDatabase} from "@/infrastructure/databases/mock/MockRoomDatabase
 import {RoomId} from "@/domain/Room/RoomId";
 import {RoomPersistence} from "@/application/Room/RoomMap";
 import {PageSize, PageToken, PaginatedResponse} from "@/shared/Pagination";
+import {UserId} from "@/domain/User/UserId";
 
 type Id = RoomId; 
 type Persistence = RoomPersistence;
@@ -35,6 +36,10 @@ export class MockRoomRepository implements RoomRepositoryI {
     
     async find (id: Id): Promise<Persistence|undefined> {
         return await this.database.find(id.value)
+    }
+
+    async findRoomByHostId (id: UserId): Promise<Persistence|undefined> {
+        return await this.database.findByHostId(id.value);
     }
     
     async delete (id: Id): Promise<void> {
