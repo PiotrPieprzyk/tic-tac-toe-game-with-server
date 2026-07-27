@@ -15,7 +15,7 @@ export class UserRouter {
         app.get('/users/:id', async (req: Request, res: Response, next: NextFunction) => {
             try {
 
-                if(Array.isArray(req.params.id)) {
+                if (Array.isArray(req.params.id)) {
                     next(new HTTPError(404, 'Do not send multiple ids'));
                     return;
                 }
@@ -57,6 +57,13 @@ export class UserRouter {
                     name: req.body.name as string,
                 })
 
+                const userNameTaken = !!(await userRepository.findBy('name', user.name.value))
+
+                if (userNameTaken) {
+                    next(new HTTPError(400, 'User name already taken'));
+                    return;
+                }
+
                 await userRepository.save(UserMap.toPersistence(user));
 
                 // set cookie UserId
@@ -83,7 +90,7 @@ export class UserRouter {
                 next(e);
             }
         })
-        
+
         app.delete('/users/:id', async (req, res, next) => {
             try {
                 const userId = UserId.create(req.params.id);

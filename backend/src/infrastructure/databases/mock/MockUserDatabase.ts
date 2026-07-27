@@ -14,6 +14,10 @@ export class MockUserDatabase {
         return this.items.find(item => item.id === id);
     }
 
+    async findBy(key: any, value: any): Promise<any> {
+        return this.items.find(item => item[key] === value);
+    }
+
     async delete(id: any): Promise<void> {
         this.items = this.items.filter(item => item.id !== id);
     }

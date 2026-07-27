@@ -36,6 +36,10 @@ export class MockUserRepository implements UserRepositoryI {
         return await this.database.find(id.value)
     }
 
+    async findBy<Key extends keyof Persistence>(key: Key, value: Persistence[Key]): Promise<Persistence | undefined> {
+        return await this.database.findBy(key, value)
+    }
+
     async delete(id: Id): Promise<void> {
         await this.database.delete(id.value)
     }
