@@ -22,40 +22,6 @@ This is a simple game of tic tac toe with a server. The game is played in the ho
 4. The player who succeeds in placing three of their marks in a horizontal, vertical, or diagonal row wins the game.
 5. The game is a draw if the grid is full and no player has won.
 
-## Stories
-
-
-### In-Room stories
-- Host can delete the room.
-  - API: 
-    - DELETE /rooms/:id
-- Host can rename the room.
-  - API:
-    - PUT /rooms/:id
-- Host can remove a player from the room.
-  - API: 
-    - PUT /rooms/:id
-- Player can leave the room. 
-  - Business logic:
-    - Room is automatically deleted when the last player leaves the room.
-  - API:
-    - PUT /rooms/leave
-- Auto archiving of the room
-  - Business logic:
-    - If the game is not started within at least 24 hour, the room is deleted automatically.
-- If game is in progress, but player go to the different page, they can come back to the game.
-  - API:
-    - PUT /rooms/join
-  - Business logic:
-    - Only already added players can come back to the game.
-- Host can start a game.
-  - API:
-    - POST /games
-  - Business logic:
-    - Game is started only if there are 2 players in the room.
-    - Game is started only if the game is not already started.
-
-
 ### In-Game stories
 
 - Player can mark a cell if it is their turn.
@@ -72,9 +38,6 @@ This is a simple game of tic tac toe with a server. The game is played in the ho
 - Player can leave the game and go back to the room. Game is automatically deleted when the last player leaves the game.
   - API:
     - PUT /games/leave
-- Auto archiving of the game
-  - Business logic:
-    - If the game is not ended within at least 24 hour, the game is deleted automatically.
 
 ## Models
 
