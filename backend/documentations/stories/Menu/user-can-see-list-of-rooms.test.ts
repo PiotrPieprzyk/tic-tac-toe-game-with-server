@@ -15,8 +15,11 @@ describe('User can see the list of rooms and players in the room.', () => {
         user = response.body;
     });
 
+    const createdUserIds: string[] = [];
+
     afterAll(async () => {
         await Promise.all(createdRoomIds.map(id => request.delete(`/rooms/${id}`)));
+        await Promise.all(createdUserIds.map(id => request.delete(`/users/${id}`)));
         await request.delete(`/users/${user.id}`);
     });
 
@@ -73,10 +76,13 @@ describe('User can see the list of rooms and players in the room.', () => {
     });
 
     it('WHEN rooms list is requested with pageSize=1 and two rooms exist SHOULD return only one room and a nextPageToken', async () => {
+        const secondHost = (await request.post('/users').send({name: 'ListUser3'})).body;
+        createdUserIds.push(secondHost.id);
+
         const secondRoomRes = await request.post('/rooms').send({
             name: 'List Room 2',
-            hostId: user.id,
-            usersIds: [user.id],
+            hostId: secondHost.id,
+            usersIds: [secondHost.id],
         });
         createdRoomIds.push(secondRoomRes.body.id);
 
