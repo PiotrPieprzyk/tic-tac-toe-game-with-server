@@ -153,7 +153,7 @@ export class RoomRouter {
                 
                 if(req.body.usersIds) {
                     // find users that are not in the room
-                    const usersNotInTheRoom = room.usersIds.filter(userId => !req.body.usersIds.includes(userId));
+                    const usersNotInTheRoom = room.usersIds.values.filter(userId => !req.body.usersIds.includes(userId));
                     promises.push(
                         ...usersNotInTheRoom.map(userId => room.userLeavesRoom(userId.value))
                     );
@@ -190,7 +190,7 @@ export class RoomRouter {
 
     static async getRoomUsers(room: Room): Promise<(User)[]> {
         const usersPersistenceOrUndefined = await Promise.all(
-            room.usersIds.map(userId => userRepository.find(userId))
+            room.usersIds.values.map(userId => userRepository.find(userId))
         );
 
         return usersPersistenceOrUndefined.flatMap(user => user ? [User.create(user)] : []);

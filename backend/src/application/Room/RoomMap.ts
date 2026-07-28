@@ -30,7 +30,7 @@ export class RoomMap {
             id: room.id.value,
             name: room.name.value,
             hostId: room.hostId.value,
-            usersIds: room.usersIds.map(u => u.value),
+            usersIds: room.usersIds.values.map(u => u.value),
             activeGameId: room.activeGameId?.value,
             updatedTimestamp: room.updatedTimestamp.toPersistent()
         };

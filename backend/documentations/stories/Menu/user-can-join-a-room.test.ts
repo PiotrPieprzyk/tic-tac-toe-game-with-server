@@ -10,15 +10,18 @@ const request = supertest(getApp());
 describe('User can join a room.', () => {
     let userA: UserDTO;
     let userB: UserDTO;
+    let userC: UserDTO;
     let room: RoomDTO;
 
     beforeAll(async () => {
-        const [resA, resB] = await Promise.all([
+        const [resA, resB, resC] = await Promise.all([
             request.post('/users').send({name: 'UserJoinA'}),
             request.post('/users').send({name: 'UserJoinB'}),
+            request.post('/users').send({name: 'UserJoinC'}),
         ]);
         userA = resA.body;
         userB = resB.body;
+        userC = resC.body;
 
         const roomRes = await request.post('/rooms').send({
             name: 'Join Room',
@@ -33,6 +36,7 @@ describe('User can join a room.', () => {
         await Promise.all([
             request.delete(`/users/${userA.id}`),
             request.delete(`/users/${userB.id}`),
+            request.delete(`/users/${userC.id}`),
         ]);
     });
 
@@ -49,7 +53,7 @@ describe('User can join a room.', () => {
     it('WHEN user tries to join a room that is already full (2 players) SHOULD return 400', async () => {
         await request.put(`/rooms/${room.id}/join`).send({userId: userB.id});
 
-        const response = await request.put(`/rooms/${room.id}/join`).send({userId: userB.id});
+        const response = await request.put(`/rooms/${room.id}/join`).send({userId: userC.id});
 
         expect(response.status).toBe(400);
         const roomAfter = (await request.get(`/rooms/${room.id}`)).body;
@@ -79,4 +83,12 @@ describe('User can join a room.', () => {
 
         expect(response.status).toBe(404);
     });
+
+    it('WHEN user tries to join a room, even though they already joined to another one SHOULD return 400', async () => {
+        const roomRes2 = await request.post('/rooms').send({
+            name: 'Join Room',
+            hostId: userA.id,
+            usersIds: [userA.id],
+        });
+    })
 });

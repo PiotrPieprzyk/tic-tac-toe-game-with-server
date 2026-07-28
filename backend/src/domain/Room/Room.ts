@@ -1,6 +1,7 @@
 import {RoomId} from "@/domain/Room/RoomId";
 import {RoomName} from "@/domain/Room/RoomName";
 import {UserId} from "@/domain/User/UserId";
+import {UsersIds} from "@/domain/Room/UsersIds";
 import {GameId} from "@/domain/Game/valueObject/GameId";
 import {RoomRepositoryI} from "@/infrastructure/repositories/interfaces/RoomRepositoryI";
 import {Timestamp} from "@/shared/Timestamp";
@@ -13,7 +14,7 @@ type RoomProps = {
     name: RoomName;
     hostId: UserId;
     activeGameId?: GameId;
-    usersIds: UserId[];
+    usersIds: UsersIds;
     updatedTimestamp: Timestamp,
     roomRepository: RoomRepositoryI,
     userRepository: UserRepositoryI
@@ -35,7 +36,7 @@ export class Room {
     public readonly name: RoomName;
     public readonly hostId: UserId;
     public readonly activeGameId: GameId | undefined;
-    public readonly usersIds: UserId[];
+    public readonly usersIds: UsersIds;
     public readonly updatedTimestamp: Timestamp;
     public readonly roomRepository: RoomRepositoryI;
     public readonly userRepository: UserRepositoryI;
@@ -55,21 +56,13 @@ export class Room {
         if(!props.hostId) {
             throw new HTTPError(400, 'Host id is required');
         }
-        
-        if(!props.usersIds || props.usersIds.length === 0) {
-            throw new HTTPError(400, 'Room must have at least 1 user');
-        }
-        
-        if(props.usersIds.length > 2) {
-            throw new HTTPError(400, 'Room can have at most 2 users');
-        }
-        
+
         return new Room({
             id: RoomId.create(props.id),
             name: RoomName.create(props.name),
             hostId: UserId.create(props.hostId),
             activeGameId: props.activeGameId ? GameId.create(props.activeGameId): undefined,
-            usersIds: props.usersIds.map(UserId.create),
+            usersIds: UsersIds.create(props.usersIds),
             updatedTimestamp: Timestamp.create(props.updatedTimestamp),
             roomRepository: props.roomRepository,
             userRepository: props.userRepository
@@ -79,17 +72,13 @@ export class Room {
     public async userJoinsRoom(userId: string) {
         const userIdValueObject = UserId.create(userId);
         
-        if(!(await this.userRepository.find(userIdValueObject))) { 
+        if(!(await this.userRepository.find(userIdValueObject))) {
             throw new HTTPError(400, 'User does not exist');
-        }
-        
-        if (this.usersIds.some(u => u.exact(userIdValueObject))) {
-            throw new HTTPError(400, 'User is already in the room');
         }
 
         const newRoom = new Room({
             ...this,
-            usersIds: [...this.usersIds, userIdValueObject],
+            usersIds: this.usersIds.add(userIdValueObject),
             updatedTimestamp: Timestamp.create()
         })
 
@@ -98,13 +87,13 @@ export class Room {
 
     public async userLeavesRoom(rawUserId: string) {
         const userId = UserId.create(rawUserId);
-        if (this.usersIds.length === 1) {
+        if (this.usersIds.values.length === 1) {
             return await this.roomRepository.delete(this.id);
         }
-        
+
         const newRoom = new Room({
            ...this,
-            usersIds: this.usersIds.filter(u => !u.exact(userId)),
+            usersIds: this.usersIds.remove(userId),
             updatedTimestamp: Timestamp.create()
         })
         

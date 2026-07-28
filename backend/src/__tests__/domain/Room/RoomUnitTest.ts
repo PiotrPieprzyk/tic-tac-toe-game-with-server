@@ -84,7 +84,7 @@ describe("Room Class", () => {
             const room = Room.create(exampleRoomProps);
             expect(room).toBeInstanceOf(Room);
             expect(room.hostId.exact(exampleHostId)).toBe(true);
-            expect(room.usersIds).toHaveLength(2);
+            expect(room.usersIds.values).toHaveLength(2);
         });
         
         it("should throw an error if name is missing", () => {
