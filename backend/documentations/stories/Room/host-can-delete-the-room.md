@@ -19,7 +19,7 @@ Test cycle prerequisites:
 Prerequisites:
 - Created one room
 
-#### WHEN NOT host delete room SHOULD return 200
+#### WHEN NOT host delete room SHOULD return 400
 
 Prerequisites:
 - Create one room

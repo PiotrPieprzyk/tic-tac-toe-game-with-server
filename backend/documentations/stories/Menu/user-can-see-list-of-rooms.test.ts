@@ -4,21 +4,25 @@ import {getApp} from '@/app';
 import {UserDTO} from '@/application/User/UserMap';
 import {RoomDTO} from '@/application/Room/RoomMap';
 
-const request = supertest(getApp());
+const app = getApp();
+const request = supertest(app);
 
 describe('User can see the list of rooms and players in the room.', () => {
     let user: UserDTO;
+    let agent: ReturnType<typeof supertest.agent>;
+    const roomAgentsById: Record<string, ReturnType<typeof supertest.agent>> = {};
     const createdRoomIds: string[] = [];
 
     beforeAll(async () => {
-        const response = await request.post('/users').send({name: 'ListUser'});
+        agent = supertest.agent(app);
+        const response = await agent.post('/users').send({name: 'ListUser'});
         user = response.body;
     });
 
     const createdUserIds: string[] = [];
 
     afterAll(async () => {
-        await Promise.all(createdRoomIds.map(id => request.delete(`/rooms/${id}`)));
+        await Promise.all(createdRoomIds.map(id => roomAgentsById[id].delete(`/rooms/${id}`)));
         await Promise.all(createdUserIds.map(id => request.delete(`/users/${id}`)));
         await request.delete(`/users/${user.id}`);
     });
@@ -31,13 +35,12 @@ describe('User can see the list of rooms and players in the room.', () => {
     });
 
     it('WHEN rooms list is requested and one room exists SHOULD return 200 with that room in results', async () => {
-        const roomRes = await request.post('/rooms').send({
+        const roomRes = await agent.post('/rooms').send({
             name: 'List Room 1',
-            hostId: user.id,
-            usersIds: [user.id],
         });
         const room: RoomDTO = roomRes.body;
         createdRoomIds.push(room.id);
+        roomAgentsById[room.id] = agent;
 
         const response = await request.get('/rooms');
 
@@ -59,10 +62,11 @@ describe('User can see the list of rooms and players in the room.', () => {
     });
 
     it('WHEN rooms list is requested SHOULD include the players currently in each room', async () => {
-        const secondUser = (await request.post('/users').send({name: 'ListUser2'})).body;
+        const secondUserAgent = supertest.agent(app);
+        const secondUser = (await secondUserAgent.post('/users').send({name: 'ListUser2'})).body;
         const roomId = createdRoomIds[createdRoomIds.length - 1];
 
-        await request.put(`/rooms/${roomId}/join`).send({userId: secondUser.id});
+        await secondUserAgent.put(`/rooms/${roomId}/join`).send();
 
         const response = await request.get('/rooms');
         const room = response.body.results.find((r: RoomDTO) => r.id === roomId);
@@ -71,20 +75,20 @@ describe('User can see the list of rooms and players in the room.', () => {
         expect(room.users.map((u: UserDTO) => u.id)).toContain(user.id);
         expect(room.users.map((u: UserDTO) => u.id)).toContain(secondUser.id);
 
-        await request.put(`/rooms/${roomId}/leave`).send({userId: secondUser.id});
+        await secondUserAgent.put(`/rooms/${roomId}/leave`).send();
         await request.delete(`/users/${secondUser.id}`);
     });
 
     it('WHEN rooms list is requested with pageSize=1 and two rooms exist SHOULD return only one room and a nextPageToken', async () => {
-        const secondHost = (await request.post('/users').send({name: 'ListUser3'})).body;
+        const secondHostAgent = supertest.agent(app);
+        const secondHost = (await secondHostAgent.post('/users').send({name: 'ListUser3'})).body;
         createdUserIds.push(secondHost.id);
 
-        const secondRoomRes = await request.post('/rooms').send({
+        const secondRoomRes = await secondHostAgent.post('/rooms').send({
             name: 'List Room 2',
-            hostId: secondHost.id,
-            usersIds: [secondHost.id],
         });
         createdRoomIds.push(secondRoomRes.body.id);
+        roomAgentsById[secondRoomRes.body.id] = secondHostAgent;
 
         const response = await request.get('/rooms?pageSize=1');
 

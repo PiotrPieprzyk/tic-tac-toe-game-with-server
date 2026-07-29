@@ -33,7 +33,7 @@ export class RoomRouter {
                     return;
                 }
 
-               const roomDTO = await this.getRoomDTO(room);
+                const roomDTO = await this.getRoomDTO(room);
 
                 res.status(200).json(roomDTO);
             } catch (e) {
@@ -64,8 +64,8 @@ export class RoomRouter {
             try {
                 const room = Room.create({
                     name: req.body.name as string,
-                    hostId: req.body.hostId as string,
-                    usersIds: req.body.usersIds as string[],
+                    hostId: req.cookies.UserId as string,
+                    usersIds: [req.cookies.UserId as string],
                     roomRepository: roomRepository,
                     userRepository: userRepository,
                 })
@@ -96,7 +96,7 @@ export class RoomRouter {
                 }
 
                 const room = Room.create({...roomPersistence, roomRepository, userRepository});
-                await room.userJoinsRoom(req.body.userId);
+                await room.userJoinsRoom(req.cookies.UserId);
                 const newRoomPersistence = await roomRepository.find(roomId);
                 if(!newRoomPersistence) {
                     next();
@@ -114,7 +114,7 @@ export class RoomRouter {
         app.put('/rooms/:id/leave', async (req, res, next) => {
             try {
                 const rawRoomId: string = req.params.id;
-                const rawUserId: string = req.body.userId;
+                const rawUserId: string = req.cookies.UserId;
                 const roomId = RoomId.create(rawRoomId);
                 const roomPersistence = await roomRepository.find(roomId);
 
@@ -133,7 +133,7 @@ export class RoomRouter {
             }
         });
         
-        app.put('rooms/:id', async (req, res, next) => {
+        app.put('/rooms/:id', async (req, res, next) => {
             try {
                 const roomId = RoomId.create(req.params.id);
                 const roomPersistence = await roomRepository.find(roomId);
@@ -146,9 +146,16 @@ export class RoomRouter {
                 const room = Room.create({...roomPersistence, roomRepository, userRepository});
                 
                 const promises: Promise<void>[] = [];
+                const currentUserId = UserId.create(req.cookies.UserId);
+                const isHost = room.hostId.exact(currentUserId);
+
+                if(!isHost) {
+                    next(new HTTPError(400, 'Only host can edit room'));
+                    return;
+                }
                 
                 if(req.body.name) {
-                    promises.push(room.hostRenamesRoom(req.body.hostId, req.body.name))
+                    promises.push(room.hostRenamesRoom(req.cookies.UserId, req.body.name))
                 }
                 
                 if(req.body.usersIds) {
@@ -179,7 +186,16 @@ export class RoomRouter {
         app.delete('/rooms/:id', async (req, res, next) => {
             try {
                 const roomId = RoomId.create(req.params.id);
-                await roomRepository.delete(roomId);
+                const roomPersistence = await roomRepository.find(roomId);
+
+                if (!roomPersistence) {
+                    next(new HTTPError(404, 'Room not found'));
+                    return;
+                }
+
+                const room = Room.create({...roomPersistence, roomRepository, userRepository});
+
+                await room.hostDeleteRoom(req.cookies.UserId)
 
                 res.status(200).send();
             } catch (e) {

@@ -3,6 +3,7 @@ import path from "path";
 import {Router} from "@/application/Router";
 import {HTTPError} from "@/shared/HTTPError";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 
 export const getApp = () => {
@@ -10,6 +11,9 @@ export const getApp = () => {
 
     // Middleware to parse JSON bodies
     app.use(express.json());
+
+    // Middleware to parse cookies
+    app.use(cookieParser());
 
 
     // Serve static files from the "public" directory

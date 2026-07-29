@@ -25,7 +25,7 @@ Prerequisites:
 - Created one room
 - Two users joined
 
-#### WHEN host renames the room with a name shorter than 3 characters, longer than 50 characters, or missing SHOULD return 400
+#### WHEN host renames the room with a name shorter than 3 characters, longer than 50 characters SHOULD return 400
 
 Prerequisites:
 - Created one room

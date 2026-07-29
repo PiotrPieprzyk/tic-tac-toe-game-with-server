@@ -35,7 +35,7 @@ This is a simple game of tic tac toe with a server. The game is played in the ho
 - Player can see the game result (win, draw) when the game ends.
   - API:
     - GameEndedEvent
-- Player can leave the game and go back to the room. Game is automatically deleted when the last player leaves the game.
+- Player can leave the game. Game is automatically deleted when the last player leaves the game.
   - API:
     - PUT /games/leave
 

@@ -136,4 +136,14 @@ export class Room {
         await this.roomRepository.delete(this.id);
     }
 
+    public async hostDeleteRoom(rawHostId: string): Promise<void> {
+        const hostId = UserId.create(rawHostId);
+
+        if(!this.hostId.exact(hostId)) {
+            throw new HTTPError(400, 'Only the host can delete the room');
+        }
+
+        await this.roomRepository.delete(this.id);
+    }
+
 }

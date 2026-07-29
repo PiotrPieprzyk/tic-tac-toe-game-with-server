@@ -25,11 +25,6 @@ Prerequisites:
 - Created one room
 - Only one user in the room
 
-#### WHEN a user who is not in the room tries to leave SHOULD return 400
-
-Prerequisites:
-- Created one room
-
 #### WHEN room does not exist SHOULD return 404
 
 Prerequisites:
@@ -37,12 +32,11 @@ Prerequisites:
 
 ### Required API
 
-- PUT /rooms/leave
+- PUT /rooms/:id/leave
 
 ```typescript
 // Request body
 type LeaveRoomRequest = {
-  roomId: string;
   userId: string;
 };
 ```
