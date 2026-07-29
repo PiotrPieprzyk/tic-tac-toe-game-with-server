@@ -22,39 +22,7 @@ This is a simple game of tic tac toe with a server. The game is played in the ho
 4. The player who succeeds in placing three of their marks in a horizontal, vertical, or diagonal row wins the game.
 5. The game is a draw if the grid is full and no player has won.
 
-### In-Game stories
-
-- Player can mark a cell if it is their turn.
-- Player can see which player's turn it is.
-  - API:
-    - GameLastTurnEvent
-    - GET /games/:id
-- Player can see players names and marks.
-  - API:
-    - GET /games/:id
-- Player can see the game result (win, draw) when the game ends.
-  - API:
-    - GameEndedEvent
-- Player can leave the game. Game is automatically deleted when the last player leaves the game.
-  - API:
-    - PUT /games/leave
-
 ## Models
-
-### Room 
-- properties
-  - name
-  - hostId
-  - userIds
-  - activeGameId
-  - lastActiveDate
-- methods
-  - userJoinsToRoom
-  - userLeavesRoom
-  - hostDeletesRoom
-  - hostRenamesRoom
-  - hostRemovesPlayerFromRoom
-  - isRoomFull
 
 ### Game
 - properties
@@ -86,14 +54,6 @@ This is a simple game of tic tac toe with a server. The game is played in the ho
 - draw
 - playerLeftTheGame
 
-
-### User
-- properties
-  - id
-  - name
-  - lastActiveDate
-- methods
-  - isUserActive
 
 ### Cell
 - properties
