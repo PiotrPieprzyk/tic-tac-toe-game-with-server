@@ -43,7 +43,7 @@ infrastructure. Ever.** Application may import domain. Infrastructure may import
 
 ## Value objects at method boundaries
 
-- Entity methods other than the raw-input factories (see below) take **value objects**, not primitives, for any
+- Entity methods other than the raw-input factories take **value objects**, not primitives, for any
   parameter that has a matching value object (e.g. `playerMarksCell(userId: UserId, cellPosition: Position)`,
   `hostRenames(hostId: UserId, newName: RoomName)`).
 
