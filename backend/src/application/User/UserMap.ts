@@ -5,21 +5,7 @@ export type UserDTO = {
     name: string,
 }
 
-export type UserPersistence = {
-    id?: string,
-    name: string,
-    lastActiveDate: number,
-}
-
 export class UserMap {
-    static toPersistence(user: User): UserPersistence {
-        return {
-            id: user.id.value,
-            name: user.name.value,
-            lastActiveDate: user.lastActiveDate.toPersistent()
-        }
-    }
-    
     static toDTO(user: User): UserDTO {
         return {
             id: user.id.value,

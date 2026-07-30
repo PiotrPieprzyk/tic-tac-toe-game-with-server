@@ -1,5 +1,5 @@
 import {UserId} from "@/domain/User/UserId";
-import {HTTPError} from "@/shared/HTTPError";
+import {ValidationError} from "@/shared/DomainError";
 
 export class UsersIds {
     public readonly values: UserId[];
@@ -10,11 +10,11 @@ export class UsersIds {
 
     public static create(rawIds: string[]): UsersIds {
         if (!rawIds || rawIds.length === 0) {
-            throw new HTTPError(400, 'Room must have at least 1 user');
+            throw new ValidationError('Room must have at least 1 user');
         }
 
         if (rawIds.length > 2) {
-            throw new HTTPError(400, 'Room can have at most 2 users');
+            throw new ValidationError('Room can have at most 2 users');
         }
 
         return new UsersIds(rawIds.map(UserId.create));
@@ -22,7 +22,7 @@ export class UsersIds {
 
     public add(userId: UserId): UsersIds {
         if (this.values.some(u => u.exact(userId))) {
-            throw new HTTPError(400, 'User is already in the room');
+            throw new ValidationError('User is already in the room');
         }
 
         return UsersIds.create([...this.values.map(u => u.value), userId.value]);

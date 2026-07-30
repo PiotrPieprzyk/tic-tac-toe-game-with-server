@@ -1,12 +1,8 @@
-import {CellRepositoryI} from "@/infrastructure/repositories/interfaces/CellRepositoryI";
+import {CellRepository} from "@/infrastructure/repositories/interfaces/CellRepository";
 import {CellId} from "@/domain/Game/Cell/valueObject/CellId";
 import {MockCellDatabase} from "@/infrastructure/databases/mock/MockCellDatabase";
 import {CellPersistence} from "@/application/Game/CellMap";
 import {GameId} from "@/domain/Game/valueObject/GameId";
-import {MockGameRepository} from "@/infrastructure/repositories/mock/MockGameRepository";
-import {GamePersistence} from "@/application/Game/GameMap";
-import {MockGameDatabase} from "@/infrastructure/databases/mock/MockGameDatabase";
-import {Cell} from "@/domain/Game/Cell/Cell";
 
 type Id = CellId;
 type Persistence = CellPersistence;
@@ -16,7 +12,7 @@ const database = MockCellDatabase;
 let repository: MockCellRepository;
 
 
-export class MockCellRepository implements CellRepositoryI {
+export class MockCellRepository implements CellRepository {
     private database: Database;
 
     private constructor() {
@@ -32,14 +28,14 @@ export class MockCellRepository implements CellRepositoryI {
 
     async save(persistence: Persistence): Promise<void> {
         const id = persistence.id;
-        const exits = id ? await this.find(GameId.create(id)) : false;
+        const exits = id ? await this.find(CellId.create(id)) : false;
         if (exits) {
             await this.database.edit(id, persistence)
             return
         }
         await this.database.save(persistence)
     }
-    
+
     async find (id: Id): Promise<Persistence|undefined> {
         return await this.database.find(id.value)
     }

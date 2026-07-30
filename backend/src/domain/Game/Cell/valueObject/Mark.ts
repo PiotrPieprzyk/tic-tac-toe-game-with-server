@@ -1,10 +1,10 @@
 import {ValueObject} from "@/domain/User/UserId";
-import {HTTPError} from "@/shared/HTTPError";
+import {ValidationError} from "@/shared/DomainError";
 
 export enum MarkTypes {
     X = 'X',
     O = 'O',
-} 
+}
 
 export class Mark extends ValueObject<string> {
     private constructor(value: string) {
@@ -13,13 +13,13 @@ export class Mark extends ValueObject<string> {
 
     public static create(value: string): Mark {
         if(!value) {
-            throw new HTTPError(400, 'Mark is required');
+            throw new ValidationError('Mark is required');
         }
-        
+
         if(!MarkTypes[value as keyof typeof MarkTypes]) {
-            throw new HTTPError(400, 'Invalid mark type');
+            throw new ValidationError('Invalid mark type');
         }
-        
+
         return new Mark(value);
     }
 }

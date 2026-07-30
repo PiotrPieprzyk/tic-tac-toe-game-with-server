@@ -1,15 +1,14 @@
 import express, {NextFunction, Request, Response} from "express";
-import {MockUserRepository} from "@/infrastructure/repositories/mock/MockUserRepository";
+import {UserRepository} from "@/domain/User/UserRepository";
 import {UserId} from "@/domain/User/UserId";
 import {User} from "@/domain/User/User";
 import {UserMap} from "@/application/User/UserMap";
 import {HTTPError} from "@/shared/HTTPError";
 
-
-const userRepository = MockUserRepository.create();
-
 export class UserRouter {
-    static setup(app: express.Application) {
+    constructor(private readonly userRepository: UserRepository) {}
+
+    setup(app: express.Application) {
 
         // send all users
         app.get('/users/:id', async (req: Request, res: Response, next: NextFunction) => {
@@ -21,10 +20,7 @@ export class UserRouter {
                 }
 
                 const userId = UserId.create(req.params.id);
-                let user: User | undefined;
-
-                const userPersistance = await userRepository.find(userId);
-                user = userPersistance ? User.create(userPersistance) : undefined;
+                const user = await this.userRepository.find(userId);
 
                 if (user) {
                     res.status(200).json(UserMap.toDTO(user));
@@ -39,11 +35,9 @@ export class UserRouter {
 
         app.get('/users', async (req, res, next) => {
             try {
-                const users = await userRepository.getAll();
+                const users = await this.userRepository.getAll();
                 res.status(200).json({
-                        results: users
-                            .map(User.create)
-                            .map(UserMap.toDTO)
+                        results: users.map(UserMap.toDTO)
                     }
                 );
             } catch (e) {
@@ -57,14 +51,14 @@ export class UserRouter {
                     name: req.body.name as string,
                 })
 
-                const userNameTaken = !!(await userRepository.findBy('name', user.name.value))
+                const userNameTaken = !!(await this.userRepository.findByName(user.name.value))
 
                 if (userNameTaken) {
                     next(new HTTPError(400, 'User name already taken'));
                     return;
                 }
 
-                await userRepository.save(UserMap.toPersistence(user));
+                await this.userRepository.save(user);
 
                 // set cookie UserId
                 res.cookie('UserId', user.id.value);
@@ -83,7 +77,7 @@ export class UserRouter {
                     name: req.body.name,
                 })
 
-                await userRepository.save(UserMap.toPersistence(user));
+                await this.userRepository.save(user);
 
                 res.status(200).json(UserMap.toDTO(user));
             } catch (e) {
@@ -94,7 +88,7 @@ export class UserRouter {
         app.delete('/users/:id', async (req, res, next) => {
             try {
                 const userId = UserId.create(req.params.id);
-                await userRepository.delete(userId);
+                await this.userRepository.delete(userId);
                 res.status(200).send();
             } catch (e) {
                 next(e);
@@ -102,4 +96,3 @@ export class UserRouter {
         })
     }
 }
-    

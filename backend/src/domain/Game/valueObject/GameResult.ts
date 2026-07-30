@@ -1,5 +1,5 @@
 import {ValueObject} from "@/domain/User/UserId";
-import {HTTPError} from "@/shared/HTTPError";
+import {InvalidStateError} from "@/shared/DomainError";
 
 
 export enum GameResultEnum {
@@ -15,7 +15,7 @@ export class GameResult extends ValueObject<GameResultEnum>{
 
     public static create(value: GameResultEnum): GameResult {
         if(!value || value && !Object.values(GameResultEnum).includes(value as GameResultEnum)){
-            throw new HTTPError(500, 'Invalid GameResult value');
+            throw new InvalidStateError('Invalid GameResult value');
         }
 
         return new GameResult(value);

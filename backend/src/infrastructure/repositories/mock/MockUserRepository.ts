@@ -1,14 +1,12 @@
 import {UserId} from "@/domain/User/UserId";
-import {UserRepositoryI} from "@/infrastructure/repositories/interfaces/UserRepositoryI";
+import {UserRepository} from "@/domain/User/UserRepository";
 import {MockUserDatabase} from "@/infrastructure/databases/mock/MockUserDatabase";
-import {UserPersistence} from "@/application/User/UserMap";
-
-type Id = UserId;
-type Persistence = UserPersistence;
+import {User} from "@/domain/User/User";
+import {UserPersistence, UserPersistenceMap} from "@/infrastructure/repositories/mock/UserPersistenceMap";
 
 let userRepository: MockUserRepository;
 
-export class MockUserRepository implements UserRepositoryI {
+export class MockUserRepository implements UserRepository {
     private database: MockUserDatabase;
 
     private constructor() {
@@ -22,9 +20,10 @@ export class MockUserRepository implements UserRepositoryI {
         return userRepository;
     }
 
-    async save(persistence: Persistence): Promise<void> {
+    async save(user: User): Promise<void> {
+        const persistence = UserPersistenceMap.toPersistence(user);
         const id = persistence.id;
-        const exits = id ? await this.find(UserId.create(id)) : false;
+        const exits = id ? await this.database.find(id) : false;
         if (exits) {
             await this.database.edit(id, persistence)
             return
@@ -32,19 +31,22 @@ export class MockUserRepository implements UserRepositoryI {
         await this.database.save(persistence)
     }
 
-    async find(id: Id): Promise<Persistence | undefined> {
-        return await this.database.find(id.value)
+    async find(id: UserId): Promise<User | undefined> {
+        const persistence: UserPersistence | undefined = await this.database.find(id.value)
+        return persistence ? UserPersistenceMap.toDomain(persistence) : undefined;
     }
 
-    async findBy<Key extends keyof Persistence>(key: Key, value: Persistence[Key]): Promise<Persistence | undefined> {
-        return await this.database.findBy(key, value)
+    async findByName(name: string): Promise<User | undefined> {
+        const persistence: UserPersistence | undefined = await this.database.findBy('name', name)
+        return persistence ? UserPersistenceMap.toDomain(persistence) : undefined;
     }
 
-    async delete(id: Id): Promise<void> {
+    async delete(id: UserId): Promise<void> {
         await this.database.delete(id.value)
     }
 
-    async getAll(): Promise<Persistence[]> {
-        return await this.database.getAll()
+    async getAll(): Promise<User[]> {
+        const persistences: UserPersistence[] = await this.database.getAll()
+        return persistences.map(UserPersistenceMap.toDomain)
     }
 }

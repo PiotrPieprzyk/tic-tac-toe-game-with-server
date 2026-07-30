@@ -1,48 +1,54 @@
-import {GameRepositoryI} from "@/infrastructure/repositories/interfaces/GameRepositoryI";
+import {GameRepository} from "@/domain/Game/GameRepository";
 import {MockGameDatabase} from "@/infrastructure/databases/mock/MockGameDatabase";
-import {GamePersistence} from "@/application/Game/GameMap";
 import {GameId} from "@/domain/Game/valueObject/GameId";
-import {MockUserRepository} from "@/infrastructure/repositories/mock/MockUserRepository";
-import {MockUserDatabase} from "@/infrastructure/databases/mock/MockUserDatabase";
-import {UserId} from "@/domain/User/UserId";
+import {Game} from "@/domain/Game/Game";
+import {GamePersistence, GamePersistenceMap} from "@/infrastructure/repositories/mock/GamePersistenceMap";
+import {MockCellRepository} from "@/infrastructure/repositories/mock/MockCellRepository";
+import {CellRepository} from "@/infrastructure/repositories/interfaces/CellRepository";
+import {CellMap} from "@/application/Game/CellMap";
 
-type Id = GameId; 
-type Persistence = GamePersistence;
-type Repository = MockGameRepository;
-type Database = MockGameDatabase;
-
-const database = MockGameDatabase;
 let repository: MockGameRepository;
 
-export class MockGameRepository implements GameRepositoryI {
-    private database: Database;
+export class MockGameRepository implements GameRepository {
+    private database: MockGameDatabase;
+    private cellRepository: CellRepository;
 
     private constructor() {
-        this.database = new database()
+        this.database = new MockGameDatabase()
+        this.cellRepository = MockCellRepository.create();
     }
 
-    static create(): Repository {
+    static create(): MockGameRepository {
         if(!repository) {
             repository = new MockGameRepository();
         }
         return repository;
     }
 
-    async save(persistence: Persistence): Promise<void> {
+    async save(game: Game): Promise<void> {
+        const persistence = GamePersistenceMap.toPersistence(game);
         const id = persistence.id;
-        const exits = id ? await this.find(GameId.create(id)) : false;
+        const exits = id ? await this.database.find(id) : false;
         if (exits) {
             await this.database.edit(id, persistence)
-            return
+        } else {
+            await this.database.save(persistence)
         }
-        await this.database.save(persistence)
+
+        await Promise.all(game.cells.map(cell => this.cellRepository.save(CellMap.toPersistence(cell))));
     }
-    
-    async find (id: Id): Promise<Persistence|undefined> {
-        return await this.database.find(id.value)
+
+    async find (id: GameId): Promise<Game|undefined> {
+        const persistence: GamePersistence | undefined = await this.database.find(id.value)
+        if (!persistence) {
+            return undefined;
+        }
+
+        const cells = await this.cellRepository.findByGameId(id);
+        return GamePersistenceMap.toDomain(persistence, cells);
     }
-    
-    async delete (id: Id): Promise<void> {
+
+    async delete (id: GameId): Promise<void> {
         await this.database.delete(id.value)
     }
 }

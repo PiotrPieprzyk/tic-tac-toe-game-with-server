@@ -1,138 +1,110 @@
 import {GameId} from "@/domain/Game/valueObject/GameId";
 import {RoomId} from "@/domain/Room/RoomId";
-import {GameRepositoryI} from "@/infrastructure/repositories/interfaces/GameRepositoryI";
-import {Player} from "@/domain/Game/Player/Player";
-import {CellRepositoryI} from "@/infrastructure/repositories/interfaces/CellRepositoryI";
+import {Player, PlayerPropsRaw} from "@/domain/Game/Player/Player";
 import {PlayerId} from "@/domain/Game/Player/PlayerId";
 import {Timestamp} from "@/shared/Timestamp";
 import {GameStatus, GameStatusEnum} from "@/domain/Game/valueObject/GameStatus";
 import {GameResult, GameResultEnum} from "@/domain/Game/valueObject/GameResult";
 import {Mark} from "@/domain/Game/Cell/valueObject/Mark";
-import {GameMap} from "@/application/Game/GameMap";
-import {Cell} from "@/domain/Game/Cell/Cell";
-import {CellMap} from "@/application/Game/CellMap";
+import {Cell, CellPropsRaw} from "@/domain/Game/Cell/Cell";
 import {Position} from "@/domain/Game/Cell/valueObject/Position";
-import {HTTPError} from "@/shared/HTTPError";
-import {PlayerRepositoryI} from "@/infrastructure/repositories/interfaces/PlayerRepositoryI";
-import {PlayerPersistence} from "@/application/Game/PlayerMap";
+import {ValidationError, NotFoundError} from "@/shared/DomainError";
 
 
 export type GameProps = {
     id: GameId,
     roomId: RoomId,
     players: Player[],
+    cells: Cell[],
     status: GameStatus,
     result?: GameResult,
     activePlayerId?: PlayerId,
     winnerPlayerId?: PlayerId,
     updatedTimestamp: Timestamp,
-    gameRepository: GameRepositoryI,
-    playerRepository: PlayerRepositoryI,
-    cellRepository: CellRepositoryI
 }
 
 export type GamePropsRaw = {
     id?: string,
     roomId: string,
-    players: PlayerPersistence[],
+    players: PlayerPropsRaw[],
+    cells?: CellPropsRaw[],
     status?: GameStatusEnum,
     result?: GameResultEnum,
     activePlayerId?: string,
     winnerPlayerId?: string,
     updatedTimestamp?: number,
-    gameRepository: GameRepositoryI,
-    playerRepository: PlayerRepositoryI,
-    cellRepository: CellRepositoryI
 }
 
 export class Game {
     public readonly id: GameId;
     public readonly roomId: RoomId;
     public readonly players: Player[];
+    public readonly cells: Cell[];
     public readonly status: GameStatus;
     public readonly result?: GameResult;
     public readonly activePlayerId?: PlayerId;
     public readonly winnerPlayerId?: PlayerId;
     public readonly updatedTimestamp: Timestamp;
-    public readonly gameRepository: GameRepositoryI;
-    public readonly playerRepository: PlayerRepositoryI;
-    public readonly cellRepository: CellRepositoryI;
 
     private constructor(props: GameProps) {
         this.id = props.id;
         this.roomId = props.roomId;
         this.players = props.players;
+        this.cells = props.cells;
         this.status = props.status;
         this.result = props.result;
         this.activePlayerId = props.activePlayerId;
         this.winnerPlayerId = props.winnerPlayerId;
         this.updatedTimestamp = props.updatedTimestamp;
-        this.gameRepository = props.gameRepository;
-        this.playerRepository = props.playerRepository;
-        this.cellRepository = props.cellRepository;
     }
 
     public static create(props: GamePropsRaw): Game {
         if (!props.roomId) {
-            throw new HTTPError(400, 'Room id is required');
+            throw new ValidationError('Room id is required');
         }
 
         return new Game({
             id: GameId.create(props.id),
             roomId: RoomId.create(props.roomId),
             players: props.players.map(player => Player.create(player)),
+            cells: (props.cells || []).map(cell => Cell.create(cell)),
             status: GameStatus.create(props.status),
             result: props.result ? GameResult.create(props.result) : undefined,
             activePlayerId: props.activePlayerId ? PlayerId.create(props.activePlayerId) : undefined,
             winnerPlayerId: props.winnerPlayerId ? PlayerId.create(props.winnerPlayerId) : undefined,
             updatedTimestamp: Timestamp.create(props.updatedTimestamp),
-            gameRepository: props.gameRepository,
-            playerRepository: props.playerRepository,
-            cellRepository: props.cellRepository
         });
     }
 
-    public async playerMarkCell(playerId: string, cellPosition: number): Promise<void> {
+    public playerMarksCell(playerId: string, cellPosition: number): Game {
         const playerIdValueObject = PlayerId.create(playerId);
         const cellPositionValueObject = Position.create(cellPosition);
 
         if (this.status.value === GameStatusEnum.ENDED) {
-            throw new HTTPError(400, 'Game already ended');
+            throw new ValidationError('Game already ended');
         }
 
         if (this.status.value === GameStatusEnum.WAITING_FOR_PLAYERS) {
-            throw new HTTPError(400, 'Game is waiting for players');
+            throw new ValidationError('Game is waiting for players');
         }
 
         const player = this.players.find(player => player.id.exact(playerIdValueObject));
         const secondPlayer = this.players.find(player => !player.id.exact(playerIdValueObject));
 
         if (!player) {
-            throw new HTTPError(404, 'Player not found');
+            throw new NotFoundError('Player not found');
         }
 
         if (!secondPlayer) {
-            await this.gameRepository.save({
-                ...GameMap.toPersistence(this),
-                status: GameStatusEnum.WAITING_FOR_PLAYERS
-            });
-            throw new HTTPError(400, 'Second player not found. Waiting for second player to join');
+            throw new ValidationError('Second player not found. Waiting for second player to join');
         }
 
         if (this.activePlayerId && !player.id.exact(this.activePlayerId)) {
-            throw new HTTPError(400, 'Not player turn');
+            throw new ValidationError('Not player turn');
         }
 
-        const gameCells = (await this.cellRepository.findByGameId(this.id)).map(cell => {
-            try {
-                return Cell.create(cell)
-            } catch (e) {
-                throw new HTTPError(400, 'Parsing already created cells was not possible');
-            }
-        });
-
-        if (gameCells.some(cell => cell.position.exact(cellPositionValueObject))) {
-            throw new HTTPError(400, 'Cell already marked');
+        if (this.cells.some(cell => cell.position.exact(cellPositionValueObject))) {
+            throw new ValidationError('Cell already marked');
         }
 
         const newCell = Cell.create({
@@ -141,39 +113,18 @@ export class Game {
             gameId: this.id.value
         });
 
-        await this.cellRepository.save(CellMap.toPersistence(newCell));
+        const newCells = [...this.cells, newCell];
+        const {newGameStatus, newGameResult, winner} = this.verifyWinningCombinations(newCells, player);
 
-        const {newGameStatus, newGameResult, winner} = this.verifyWinningCombinations([...gameCells, newCell], player);
-
-        if (newGameStatus !== GameStatusEnum.ENDED) {
-            await this.gameRepository.save({
-                ...GameMap.toPersistence(this),
-                activePlayerId: secondPlayer.id.value,
-                updatedTimestamp: Timestamp.create().toPersistent()
-            });
-            return;
-        }
-        
-        if(newGameResult === GameResultEnum.WIN && winner) {
-            await this.gameRepository.save({
-                ...GameMap.toPersistence(this),
-                status: GameStatusEnum.ENDED,
-                result: GameResultEnum.WIN,
-                winnerPlayerId: winner.id.value,
-                updatedTimestamp: Timestamp.create().toPersistent()
-            });
-            return;
-        }
-        
-        if(newGameResult === GameResultEnum.DRAW) {
-            await this.gameRepository.save({
-                ...GameMap.toPersistence(this),
-                status: GameStatusEnum.ENDED,
-                result: GameResultEnum.DRAW,
-                updatedTimestamp: Timestamp.create().toPersistent()
-            });
-            return;
-        }
+        return new Game({
+            ...this,
+            cells: newCells,
+            status: GameStatus.create(newGameStatus),
+            result: newGameResult ? GameResult.create(newGameResult) : this.result,
+            winnerPlayerId: winner ? winner.id : this.winnerPlayerId,
+            activePlayerId: newGameStatus === GameStatusEnum.ENDED ? this.activePlayerId : secondPlayer.id,
+            updatedTimestamp: Timestamp.create()
+        });
     }
 
     private verifyWinningCombinations(newGameCells: Cell[], currentPlayer: Player): {
@@ -198,7 +149,7 @@ export class Game {
             });
 
             const firstMarkType = marks[0];
-            
+
             if (!firstMarkType) {
                 continue;
             }
@@ -216,7 +167,7 @@ export class Game {
                 winner: currentPlayer
             }
         }
-        
+
         if (newGameCells.length === 9) {
             return {
                 newGameStatus: GameStatusEnum.ENDED,
@@ -229,27 +180,27 @@ export class Game {
             newGameResult: undefined
         }
     }
-    
-    public async playerLeave(playerId: string): Promise<void> {
+
+    /** Returns undefined when the game has no players left and should be deleted. */
+    public playerLeaves(playerId: string): Game | undefined {
         const playerIdValueObject = PlayerId.create(playerId);
         const player = this.players.find(player => player.id.exact(playerIdValueObject));
 
         if (!player) {
-            throw new HTTPError(404, 'Player not found');
-        }
-        
-        if(this.players.length === 1) {
-            await this.gameRepository.delete(this.id);
-            return;
+            throw new NotFoundError('Player not found');
         }
 
-        await this.gameRepository.save({
-            ...GameMap.toPersistence(this),
-            status: GameStatusEnum.WAITING_FOR_PLAYERS,
-            activePlayerId: !this.activePlayerId || this.activePlayerId.exact(playerIdValueObject) ? 
-                undefined : 
-                this.activePlayerId.value,
-            updatedTimestamp: Timestamp.create().toPersistent()
+        if (this.players.length === 1) {
+            return undefined;
+        }
+
+        return new Game({
+            ...this,
+            status: GameStatus.create(GameStatusEnum.WAITING_FOR_PLAYERS),
+            activePlayerId: !this.activePlayerId || this.activePlayerId.exact(playerIdValueObject) ?
+                undefined :
+                this.activePlayerId,
+            updatedTimestamp: Timestamp.create()
         });
     }
 }

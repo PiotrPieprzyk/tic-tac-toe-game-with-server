@@ -1,12 +1,21 @@
 import express, {NextFunction, Request, Response} from "express";
 import path from "path";
-import {Router} from "@/application/Router";
+import {Router, RouterRepositories} from "@/application/Router";
 import {HTTPError} from "@/shared/HTTPError";
+import {DomainError} from "@/shared/DomainError";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import {MockUserRepository} from "@/infrastructure/repositories/mock/MockUserRepository";
+import {MockRoomRepository} from "@/infrastructure/repositories/mock/MockRoomRepository";
+import {MockGameRepository} from "@/infrastructure/repositories/mock/MockGameRepository";
 
+const defaultRepositories = (): RouterRepositories => ({
+    userRepository: MockUserRepository.create(),
+    roomRepository: MockRoomRepository.create(),
+    gameRepository: MockGameRepository.create(),
+});
 
-export const getApp = () => {
+export const getApp = (repositories: RouterRepositories = defaultRepositories()) => {
     const app = express();
 
     // Middleware to parse JSON bodies
@@ -25,11 +34,11 @@ export const getApp = () => {
         credentials: true
     }));
 
-    Router.setup(app);
+    Router.setup(app, repositories);
 
     // HTTP error handling
     app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-        if (err instanceof HTTPError) {
+        if (err instanceof HTTPError || err instanceof DomainError) {
             res.status(err.status).json({
                 error: {
                     message: err.message,

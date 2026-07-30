@@ -1,21 +1,9 @@
 import {Game} from "@/domain/Game/Game";
 import {GameStatusEnum} from "@/domain/Game/valueObject/GameStatus";
 import {GameResultEnum} from "@/domain/Game/valueObject/GameResult";
-import {PlayerDTO, PlayerMap, PlayerPersistence} from "@/application/Game/PlayerMap";
+import {PlayerDTO} from "@/application/Game/PlayerMap";
 import {CellDTO} from "@/application/Game/CellMap";
-import {Player} from "@/domain/Game/Player/Player";
 
-
-export type GamePersistence = {
-    id?: string,
-    status: GameStatusEnum,
-    players: PlayerPersistence[],
-    activePlayerId?: string,
-    result?: GameResultEnum,
-    winnerPlayerId?: string,
-    roomId: string,
-    updatedTimestamp: number,
-}
 
 export type gameDTO = {
     id: string,
@@ -30,19 +18,6 @@ export type gameDTO = {
 }
 
 export class GameMap {
-    static toPersistence(game: Game): GamePersistence {
-        return {
-            id: game.id.value,
-            status: game.status.value,
-            players: game.players.map((player) => PlayerMap.toPersistence(player)),
-            activePlayerId: game.activePlayerId?.value,
-            result: game.result?.value,
-            winnerPlayerId: game.winnerPlayerId?.value,
-            roomId: game.roomId.value,
-            updatedTimestamp: game.updatedTimestamp.toPersistent()
-        };
-    }
-
     static toDTO(game: Game, playersDTOs: PlayerDTO[], cellsDTOs?: CellDTO[]): gameDTO {
         return {
             id: game.id.value,
@@ -57,4 +32,3 @@ export class GameMap {
         }
     }
 }
-

@@ -1,14 +1,5 @@
-import {CellRepositoryI} from "@/infrastructure/repositories/interfaces/CellRepositoryI";
-import {CellId} from "@/domain/Game/Cell/valueObject/CellId";
-import {MockCellDatabase} from "@/infrastructure/databases/mock/MockCellDatabase";
-import {CellPersistence} from "@/application/Game/CellMap";
-import {GameId} from "@/domain/Game/valueObject/GameId";
-import {MockGameRepository} from "@/infrastructure/repositories/mock/MockGameRepository";
-import {GamePersistence} from "@/application/Game/GameMap";
-import {MockGameDatabase} from "@/infrastructure/databases/mock/MockGameDatabase";
-import {Cell} from "@/domain/Game/Cell/Cell";
+import {PlayerRepository} from "@/infrastructure/repositories/interfaces/PlayerRepository";
 import {PlayerPersistence} from "@/application/Game/PlayerMap";
-import {PlayerRepositoryI} from "@/infrastructure/repositories/interfaces/PlayerRepositoryI";
 import {MockPlayerDatabase} from "@/infrastructure/databases/mock/MockPlayerDatabase";
 import {PlayerId} from "@/domain/Game/Player/PlayerId";
 
@@ -20,7 +11,7 @@ const database = MockPlayerDatabase;
 let repository: MockPlayerRepository;
 
 
-export class MockPlayerRepository implements PlayerRepositoryI {
+export class MockPlayerRepository implements PlayerRepository {
     private database: Database;
 
     private constructor() {
@@ -36,7 +27,7 @@ export class MockPlayerRepository implements PlayerRepositoryI {
 
     async save(persistence: Persistence): Promise<void> {
         const id = persistence.id;
-        const exits = id ? await this.find(GameId.create(id)) : false;
+        const exits = id ? await this.find(PlayerId.create(id)) : false;
         if (exits) {
             await this.database.edit(id, persistence)
             return

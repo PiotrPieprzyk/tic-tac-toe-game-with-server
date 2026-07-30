@@ -3,11 +3,8 @@ import {RoomName} from "@/domain/Room/RoomName";
 import {UserId} from "@/domain/User/UserId";
 import {UsersIds} from "@/domain/Room/UsersIds";
 import {GameId} from "@/domain/Game/valueObject/GameId";
-import {RoomRepositoryI} from "@/infrastructure/repositories/interfaces/RoomRepositoryI";
 import {Timestamp} from "@/shared/Timestamp";
-import {RoomMap} from "@/application/Room/RoomMap";
-import {UserRepositoryI} from "@/infrastructure/repositories/interfaces/UserRepositoryI";
-import {HTTPError} from "@/shared/HTTPError";
+import {ForbiddenError, ValidationError} from "@/shared/DomainError";
 
 type RoomProps = {
     id: RoomId;
@@ -16,19 +13,15 @@ type RoomProps = {
     activeGameId?: GameId;
     usersIds: UsersIds;
     updatedTimestamp: Timestamp,
-    roomRepository: RoomRepositoryI,
-    userRepository: UserRepositoryI
 };
 
-type RoomPropsRaw = {
+export type RoomPropsRaw = {
     id?: string,
     name: string,
     hostId: string,
     activeGameId?: string,
     usersIds: string[],
     updatedTimestamp?: number,
-    roomRepository: RoomRepositoryI,
-    userRepository: UserRepositoryI
 }
 
 export class Room {
@@ -38,8 +31,6 @@ export class Room {
     public readonly activeGameId: GameId | undefined;
     public readonly usersIds: UsersIds;
     public readonly updatedTimestamp: Timestamp;
-    public readonly roomRepository: RoomRepositoryI;
-    public readonly userRepository: UserRepositoryI;
 
     private constructor(props: RoomProps) {
         this.id = props.id;
@@ -48,13 +39,11 @@ export class Room {
         this.activeGameId = props.activeGameId;
         this.usersIds = props.usersIds;
         this.updatedTimestamp = props.updatedTimestamp;
-        this.roomRepository = props.roomRepository;
-        this.userRepository = props.userRepository;
     }
 
     public static create(props: RoomPropsRaw): Room {
         if(!props.hostId) {
-            throw new HTTPError(400, 'Host id is required');
+            throw new ValidationError('Host id is required');
         }
 
         return new Room({
@@ -64,86 +53,94 @@ export class Room {
             activeGameId: props.activeGameId ? GameId.create(props.activeGameId): undefined,
             usersIds: UsersIds.create(props.usersIds),
             updatedTimestamp: Timestamp.create(props.updatedTimestamp),
-            roomRepository: props.roomRepository,
-            userRepository: props.userRepository
         });
     }
 
-    public async userJoinsRoom(userId: string) {
-        const userIdValueObject = UserId.create(userId);
-        
-        if(!(await this.userRepository.find(userIdValueObject))) {
-            throw new HTTPError(400, 'User does not exist');
+    public static createForHost(props: RoomPropsRaw, hostAlreadyHasRoom: boolean): Room {
+        const room = Room.create(props);
+
+        if (hostAlreadyHasRoom) {
+            throw new ValidationError('User already created room');
         }
 
-        const newRoom = new Room({
-            ...this,
-            usersIds: this.usersIds.add(userIdValueObject),
-            updatedTimestamp: Timestamp.create()
-        })
-
-        await this.roomRepository.save(RoomMap.toPersistence(newRoom));
+        return room;
     }
 
-    public async userLeavesRoom(rawUserId: string) {
+    public userJoins(rawUserId: string): Room {
         const userId = UserId.create(rawUserId);
+
+        return new Room({
+            ...this,
+            usersIds: this.usersIds.add(userId),
+            updatedTimestamp: Timestamp.create()
+        });
+    }
+
+    /** Returns undefined when the room has no users left and should be deleted. */
+    public userLeaves(rawUserId: string): Room | undefined {
+        const userId = UserId.create(rawUserId);
+
         if (this.usersIds.values.length === 1) {
-            return await this.roomRepository.delete(this.id);
+            return undefined;
         }
 
-        const newRoom = new Room({
-           ...this,
+        return new Room({
+            ...this,
             usersIds: this.usersIds.remove(userId),
             updatedTimestamp: Timestamp.create()
-        })
-        
-        await this.roomRepository.save(RoomMap.toPersistence(newRoom));
+        });
     }
 
-    public async hostRemovesPlayerFromRoom(rawHostId: string, rawUserId: string): Promise<void> {
-        const hostId = UserId.create(rawHostId);
-        
-        if (!this.hostId.exact(hostId)) {
-            throw new HTTPError(400, 'Only the host can remove a player from the room');
-        }
-        
-        await this.userLeavesRoom(rawUserId);
+    public hostRemovesPlayer(rawHostId: string, rawUserId: string): Room | undefined {
+        this.assertIsHost(rawHostId, 'Only the host can remove a player from the room');
+
+        return this.userLeaves(rawUserId);
     }
 
-    public async hostRenamesRoom(rawHostId: string, newName: string): Promise<void> {
-        const hostId = UserId.create(rawHostId);
-        
-        if(!this.hostId.exact(hostId)) {
-            throw new HTTPError(400, 'Only the host can rename the room');
-        }
-        
-        const newRoom = new Room({
+    public hostRenames(rawHostId: string, newName: string): Room {
+        this.assertIsHost(rawHostId, 'Only the host can rename the room');
+
+        return new Room({
             ...this,
             name: RoomName.create(newName),
             updatedTimestamp: Timestamp.create()
         });
-        
-        await this.roomRepository.save(RoomMap.toPersistence(newRoom));
-    }
-    
-    public async hostDeletesRoom(rawHostId: string): Promise<void> {
-        const hostId = UserId.create(rawHostId);
-        
-        if(!this.hostId.exact(hostId)) {
-            throw new HTTPError(400, 'Only the host can delete the room');
-        }
-        
-        await this.roomRepository.delete(this.id);
     }
 
-    public async hostDeleteRoom(rawHostId: string): Promise<void> {
-        const hostId = UserId.create(rawHostId);
+    public hostEditsRoom(rawHostId: string, updates: { name?: string, usersIds?: string[] }): Room {
+        this.assertIsHost(rawHostId, 'Only host can edit room');
 
-        if(!this.hostId.exact(hostId)) {
-            throw new HTTPError(400, 'Only the host can delete the room');
+        let updatedName = this.name;
+        let updatedUsersIds = this.usersIds;
+
+        if (updates.name) {
+            updatedName = RoomName.create(updates.name);
         }
 
-        await this.roomRepository.delete(this.id);
+        if (updates.usersIds) {
+            const keptUserIds = updatedUsersIds.values
+                .filter(userId => updates.usersIds!.includes(userId.value))
+                .map(userId => userId.value);
+            updatedUsersIds = UsersIds.create(keptUserIds);
+        }
+
+        return new Room({
+            ...this,
+            name: updatedName,
+            usersIds: updatedUsersIds,
+            updatedTimestamp: Timestamp.create()
+        });
     }
 
+    public assertHostCanDelete(rawHostId: string): void {
+        this.assertIsHost(rawHostId, 'Only the host can delete the room');
+    }
+
+    private assertIsHost(rawHostId: string, message: string): void {
+        const hostId = UserId.create(rawHostId);
+
+        if (!this.hostId.exact(hostId)) {
+            throw new ForbiddenError(message);
+        }
+    }
 }

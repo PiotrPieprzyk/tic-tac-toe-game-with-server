@@ -2,7 +2,6 @@ import {GameId} from "@/domain/Game/valueObject/GameId";
 import {CellId} from "@/domain/Game/Cell/valueObject/CellId";
 import {Mark} from "@/domain/Game/Cell/valueObject/Mark";
 import {Position} from "@/domain/Game/Cell/valueObject/Position";
-import {CellRepositoryI} from "@/infrastructure/repositories/interfaces/CellRepositoryI";
 
 type CellProps = {
     id: CellId;
@@ -11,7 +10,7 @@ type CellProps = {
     gameId: GameId;
 }
 
-type CellPropsRaw = {
+export type CellPropsRaw = {
     id?: string,
     mark: string,
     position: number,
