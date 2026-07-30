@@ -89,8 +89,21 @@ describe('Host can start a game.', () => {
     });
 
     it('WHEN host start game again after the first one was finished SHOULD return 200', async () => {
-        // This test requires a way to finish the first game so it is automatically removed.
-        // Skipping full setup as a game-finishing API is not available in the current scope.
-        expect(true).toBe(false);
+        const restartRoomRes = await agentB.post('/rooms').send({name: 'Restart Game Room'});
+        const restartRoom: RoomDTO = restartRoomRes.body;
+        await agentA.put(`/rooms/${restartRoom.id}/join`).send();
+
+        const firstGameRes = await request.post('/games').send({roomId: restartRoom.id, hostId: userB.id});
+        const firstGame = firstGameRes.body;
+
+        await agentA.put('/games/leave').send({gameId: firstGame.id});
+        await agentB.put('/games/leave').send({gameId: firstGame.id});
+
+        const response = await request.post('/games').send({roomId: restartRoom.id, hostId: userB.id});
+
+        expect(response.status).toBe(200);
+
+        await agentA.put(`/rooms/${restartRoom.id}/leave`).send();
+        await agentB.delete(`/rooms/${restartRoom.id}`);
     });
 });

@@ -90,6 +90,8 @@ describe('Player can leave the game.', () => {
 
     afterEach(async () => {
         wsClient.close();
+        await agentA.put('/games/leave').send({gameId: game.id}).catch(() => {});
+        await agentB.put('/games/leave').send({gameId: game.id}).catch(() => {});
         await agentB.put(`/rooms/${room.id}/leave`).send().catch(() => {});
         await agentA.delete(`/rooms/${room.id}`).catch(() => {});
     });

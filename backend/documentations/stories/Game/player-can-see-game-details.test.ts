@@ -45,6 +45,8 @@ describe('Player can see game details.', () => {
     });
 
     afterEach(async () => {
+        await agentA.put('/games/leave').send({gameId: game.id}).catch(() => {});
+        await agentB.put('/games/leave').send({gameId: game.id}).catch(() => {});
         await agentB.put(`/rooms/${room.id}/leave`).send().catch(() => {});
         await agentA.delete(`/rooms/${room.id}`).catch(() => {});
     });
@@ -91,9 +93,7 @@ describe('Player can see game details.', () => {
 
         const response = await request.get(`/games/${game.id}`);
 
-        expect(response.status).toBe(400);
-        expect(response.body.status).toBe('ENDED');
-        expect(response.body.result).toBe('DRAW');
+        expect(response.status).toBe(404);
     });
 
     it('WHEN game does not exist SHOULD return 404', async () => {

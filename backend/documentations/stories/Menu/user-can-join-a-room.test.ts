@@ -69,10 +69,25 @@ describe('User can join a room.', () => {
     });
 
     it('WHEN user tries to join a room where a game is in progress SHOULD return 400', async () => {
-        // This test requires a room with an active IN_PROGRESS game.
-        // Skipping setup as game start API is not available in the current scope.
-        // Once game-start endpoint is implemented, set room.activeGameId and verify.
-        expect(true).toBe(false);
+        const gameRoomRes = await agentB.post('/rooms').send({name: 'Join Room In Progress'});
+        const gameRoom: RoomDTO = gameRoomRes.body;
+        await agentC.put(`/rooms/${gameRoom.id}/join`).send();
+        const gameRes = await request.post('/games').send({roomId: gameRoom.id, hostId: userB.id});
+        const game = gameRes.body;
+
+        const agentD = supertest.agent(app);
+        const userDRes = await agentD.post('/users').send({name: 'UserJoinD'});
+        const userD: UserDTO = userDRes.body;
+
+        const response = await agentD.put(`/rooms/${gameRoom.id}/join`).send();
+
+        expect(response.status).toBe(400);
+
+        await request.delete(`/users/${userD.id}`);
+        await agentB.put('/games/leave').send({gameId: game.id});
+        await agentC.put('/games/leave').send({gameId: game.id});
+        await agentC.put(`/rooms/${gameRoom.id}/leave`).send();
+        await agentB.delete(`/rooms/${gameRoom.id}`);
     });
 
     it('WHEN user tries to join a room they are already in SHOULD return 400', async () => {
@@ -91,8 +106,16 @@ describe('User can join a room.', () => {
     });
 
     it('WHEN user tries to join a room, even though they already joined to another one SHOULD return 400', async () => {
-        const roomRes2 = await agentA.post('/rooms').send({
-            name: 'Join Room',
-        });
+        await agentB.put(`/rooms/${room.id}/join`).send();
+
+        const roomRes2 = await agentC.post('/rooms').send({name: 'Another Room'});
+        const room2: RoomDTO = roomRes2.body;
+
+        const response = await agentB.put(`/rooms/${room2.id}/join`).send();
+
+        expect(response.status).toBe(400);
+
+        await agentB.put(`/rooms/${room.id}/leave`).send();
+        await agentC.delete(`/rooms/${room2.id}`);
     })
 });
