@@ -7,35 +7,13 @@ import {WebsocketServer} from '@/websocket';
 import {UserDTO} from '@/application/User/UserMap';
 import {RoomDTO} from '@/application/Room/RoomMap';
 import {Guid} from '@/shared/GUID';
+import {waitForEvent, connectAndSubscribeGame} from '../testUtils/websocket';
 
 const app = getApp();
 let server: http.Server;
 let serverPort: number;
 let request: ReturnType<typeof supertest>;
 let wsClient: WebSocket;
-
-function waitForEvent(eventType: string, timeoutMs = 3000): Promise<{eventType: string; dto: Record<string, unknown>}> {
-    return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error(`Timeout waiting for event: ${eventType}`)), timeoutMs);
-        wsClient.on('message', (data) => {
-            const message = JSON.parse(data.toString());
-            if (message.eventType === eventType) {
-                clearTimeout(timer);
-                resolve(message);
-            }
-        });
-    });
-}
-
-async function connectAndSubscribe(gameId: string): Promise<WebSocket> {
-    const client = new WebSocket(`ws://localhost:${serverPort}/ws`);
-    await new Promise<void>((resolve, reject) => {
-        client.on('open', resolve);
-        client.on('error', reject);
-    });
-    client.send(JSON.stringify({action: 'subscribeGame', gameId}));
-    return client;
-}
 
 describe('Player can leave the game.', () => {
     let userA: UserDTO;
@@ -82,10 +60,10 @@ describe('Player can leave the game.', () => {
         room = roomRes.body;
         await agentB.put(`/rooms/${room.id}/join`).send();
 
-        const gameRes = await agentA.post('/games').send({roomId: room.id, hostId: userA.id});
+        const gameRes = await agentA.post('/games').send({roomId: room.id});
         game = gameRes.body;
 
-        wsClient = await connectAndSubscribe(game.id);
+        wsClient = await connectAndSubscribeGame(serverPort, game.id);
     });
 
     afterEach(async () => {
@@ -97,7 +75,7 @@ describe('Player can leave the game.', () => {
     });
 
     it('WHEN a player leaves a game with the other player remaining SHOULD return 200 and broadcast a GameEndedEvent with result PLAYER_LEFT_THE_GAME', async () => {
-        const eventPromise = waitForEvent('gameEnded');
+        const eventPromise = waitForEvent(wsClient, 'gameEnded');
 
         const response = await agentB.put('/games/leave').send({gameId: game.id});
 
@@ -110,7 +88,7 @@ describe('Player can leave the game.', () => {
     it('WHEN the last player leaves a game SHOULD return 200 and broadcast a GameDeletedEvent (game is auto-deleted)', async () => {
         await agentB.put('/games/leave').send({gameId: game.id});
 
-        const eventPromise = waitForEvent('gameDeleted');
+        const eventPromise = waitForEvent(wsClient, 'gameDeleted');
         const response = await agentA.put('/games/leave').send({gameId: game.id});
 
         expect(response.status).toBe(200);

@@ -58,9 +58,9 @@ Prerequisites:
 
 ```typescript
 // Request body
+// The acting user is identified by the UserId cookie, not a request body field.
 type CreateGameRequest = {
   roomId: string;
-  hostId: string; // id of the host starting the game
 };
 
 // Response body — 200

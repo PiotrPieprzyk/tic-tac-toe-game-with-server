@@ -65,9 +65,8 @@ type JoinRoomParams = {
 };
 
 // Request body
-type JoinRoomRequest = {
-    userId: string;
-};
+// The joining user is identified by the UserId cookie, not a request body field.
+type JoinRoomRequest = {};
 
 // Response body — 200
 type JoinRoomResponse = {

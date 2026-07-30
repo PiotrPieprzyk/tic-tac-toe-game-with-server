@@ -41,9 +41,9 @@ Prerequisites:
 
 ```typescript
 // Request body
+// The acting user is identified by the UserId cookie, not a request body field.
 type RenameRoomRequest = {
-  hostId: string; // id of the host performing the action
-  name: string;   // 3–50 characters
+  name: string; // 3–50 characters
 };
 
 // Response body — 200

@@ -45,10 +45,9 @@ Prerequisites:
 
 ```typescript
 // Request body
+// The creating user is identified by the UserId cookie, not a request body field.
 type CreateRoomRequest = {
-  name: string;       // 3–50 characters
-  hostId: string;     // id of the creating user
-  usersIds: string[]; // must include hostId
+  name: string; // 3–50 characters
 };
 
 // Response body — 200

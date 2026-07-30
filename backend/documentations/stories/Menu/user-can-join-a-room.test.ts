@@ -12,7 +12,6 @@ describe('User can join a room.', () => {
     let userA: UserDTO;
     let userB: UserDTO;
     let userC: UserDTO;
-    let room: RoomDTO;
     let agentA: ReturnType<typeof supertest.agent>;
     let agentB: ReturnType<typeof supertest.agent>;
     let agentC: ReturnType<typeof supertest.agent>;
@@ -30,15 +29,9 @@ describe('User can join a room.', () => {
         userA = resA.body;
         userB = resB.body;
         userC = resC.body;
-
-        const roomRes = await agentA.post('/rooms').send({
-            name: 'Join Room',
-        });
-        room = roomRes.body;
     });
 
     afterAll(async () => {
-        await agentA.delete(`/rooms/${room.id}`);
         await Promise.all([
             request.delete(`/users/${userA.id}`),
             request.delete(`/users/${userB.id}`),
@@ -47,6 +40,9 @@ describe('User can join a room.', () => {
     });
 
     it('WHEN user joins a room with available space SHOULD return 200 with the updated room including the new player', async () => {
+        const roomRes = await agentA.post('/rooms').send({name: 'Join Room'});
+        const room: RoomDTO = roomRes.body;
+
         const response = await agentB.put(`/rooms/${room.id}/join`).send();
 
         expect(response.status).toBe(200);
@@ -54,9 +50,12 @@ describe('User can join a room.', () => {
         expect(response.body.users.map((u: UserDTO) => u.id)).toContain(userB.id);
 
         await agentB.put(`/rooms/${room.id}/leave`).send();
+        await agentA.delete(`/rooms/${room.id}`);
     });
 
     it('WHEN user tries to join a room that is already full (2 players) SHOULD return 400', async () => {
+        const roomRes = await agentA.post('/rooms').send({name: 'Join Room Full'});
+        const room: RoomDTO = roomRes.body;
         await agentB.put(`/rooms/${room.id}/join`).send();
 
         const response = await agentC.put(`/rooms/${room.id}/join`).send();
@@ -66,36 +65,37 @@ describe('User can join a room.', () => {
         expect(roomAfter.users).toHaveLength(2);
 
         await agentB.put(`/rooms/${room.id}/leave`).send();
+        await agentA.delete(`/rooms/${room.id}`);
     });
 
     it('WHEN user tries to join a room where a game is in progress SHOULD return 400', async () => {
-        const gameRoomRes = await agentB.post('/rooms').send({name: 'Join Room In Progress'});
+        const gameRoomRes = await agentA.post('/rooms').send({name: 'Join Room In Progress'});
         const gameRoom: RoomDTO = gameRoomRes.body;
-        await agentC.put(`/rooms/${gameRoom.id}/join`).send();
-        const gameRes = await request.post('/games').send({roomId: gameRoom.id, hostId: userB.id});
+        await agentB.put(`/rooms/${gameRoom.id}/join`).send();
+        const gameRes = await agentA.post('/games').send({roomId: gameRoom.id});
         const game = gameRes.body;
 
-        const agentD = supertest.agent(app);
-        const userDRes = await agentD.post('/users').send({name: 'UserJoinD'});
-        const userD: UserDTO = userDRes.body;
-
-        const response = await agentD.put(`/rooms/${gameRoom.id}/join`).send();
+        const response = await agentC.put(`/rooms/${gameRoom.id}/join`).send();
 
         expect(response.status).toBe(400);
 
-        await request.delete(`/users/${userD.id}`);
+        await agentA.put('/games/leave').send({gameId: game.id});
         await agentB.put('/games/leave').send({gameId: game.id});
-        await agentC.put('/games/leave').send({gameId: game.id});
-        await agentC.put(`/rooms/${gameRoom.id}/leave`).send();
-        await agentB.delete(`/rooms/${gameRoom.id}`);
+        await agentB.put(`/rooms/${gameRoom.id}/leave`).send();
+        await agentA.delete(`/rooms/${gameRoom.id}`);
     });
 
     it('WHEN user tries to join a room they are already in SHOULD return 400', async () => {
+        const roomRes = await agentA.post('/rooms').send({name: 'Join Room Already In'});
+        const room: RoomDTO = roomRes.body;
+
         const response = await agentA.put(`/rooms/${room.id}/join`).send();
 
         expect(response.status).toBe(400);
         const roomAfter = (await request.get(`/rooms/${room.id}`)).body;
         expect(roomAfter.users).toHaveLength(1);
+
+        await agentA.delete(`/rooms/${room.id}`);
     });
 
     it('WHEN user tries to join a room that does not exist SHOULD return 404', async () => {
@@ -106,9 +106,11 @@ describe('User can join a room.', () => {
     });
 
     it('WHEN user tries to join a room, even though they already joined to another one SHOULD return 400', async () => {
+        const roomRes = await agentA.post('/rooms').send({name: 'Join Room First'});
+        const room: RoomDTO = roomRes.body;
         await agentB.put(`/rooms/${room.id}/join`).send();
 
-        const roomRes2 = await agentC.post('/rooms').send({name: 'Another Room'});
+        const roomRes2 = await agentC.post('/rooms').send({name: 'Join Room Second'});
         const room2: RoomDTO = roomRes2.body;
 
         const response = await agentB.put(`/rooms/${room2.id}/join`).send();
@@ -116,6 +118,7 @@ describe('User can join a room.', () => {
         expect(response.status).toBe(400);
 
         await agentB.put(`/rooms/${room.id}/leave`).send();
+        await agentA.delete(`/rooms/${room.id}`);
         await agentC.delete(`/rooms/${room2.id}`);
     })
 });

@@ -7,35 +7,13 @@ import {WebsocketServer} from '@/websocket';
 import {UserDTO} from '@/application/User/UserMap';
 import {RoomDTO} from '@/application/Room/RoomMap';
 import {Guid} from '@/shared/GUID';
+import {waitForEvent, connectAndSubscribeGame} from '../testUtils/websocket';
 
 const app = getApp();
 let server: http.Server;
 let serverPort: number;
 let request: ReturnType<typeof supertest>;
 let wsClient: WebSocket;
-
-function waitForEvent(eventType: string, timeoutMs = 3000): Promise<{eventType: string; dto: Record<string, unknown>}> {
-    return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error(`Timeout waiting for event: ${eventType}`)), timeoutMs);
-        wsClient.on('message', (data) => {
-            const message = JSON.parse(data.toString());
-            if (message.eventType === eventType) {
-                clearTimeout(timer);
-                resolve(message);
-            }
-        });
-    });
-}
-
-async function connectAndSubscribe(gameId: string): Promise<WebSocket> {
-    const client = new WebSocket(`ws://localhost:${serverPort}/ws`);
-    await new Promise<void>((resolve, reject) => {
-        client.on('open', resolve);
-        client.on('error', reject);
-    });
-    client.send(JSON.stringify({action: 'subscribeGame', gameId}));
-    return client;
-}
 
 describe('Player can mark a cell.', () => {
     let userA: UserDTO;
@@ -82,10 +60,10 @@ describe('Player can mark a cell.', () => {
         room = roomRes.body;
         await agentB.put(`/rooms/${room.id}/join`).send();
 
-        const gameRes = await agentA.post('/games').send({roomId: room.id, hostId: userA.id});
+        const gameRes = await agentA.post('/games').send({roomId: room.id});
         game = gameRes.body;
 
-        wsClient = await connectAndSubscribe(game.id);
+        wsClient = await connectAndSubscribeGame(serverPort, game.id);
     });
 
     afterEach(async () => {
@@ -98,7 +76,7 @@ describe('Player can mark a cell.', () => {
 
     it('WHEN the active player marks an empty cell SHOULD return 200 and broadcast a GameLastTurnEvent with the updated cells and the next active player\'s id', async () => {
         const activeAgent = game.activePlayerId === game.players.find(p => p.userId === userA.id)?.id ? agentA : agentB;
-        const eventPromise = waitForEvent('gameLastTurn');
+        const eventPromise = waitForEvent(wsClient, 'gameLastTurn');
 
         const response = await activeAgent.put(`/games/${game.id}/mark`).send({position: 0});
 
@@ -137,7 +115,7 @@ describe('Player can mark a cell.', () => {
         await first.put(`/games/${game.id}/mark`).send({position: 1});
         await second.put(`/games/${game.id}/mark`).send({position: 4});
 
-        const eventPromise = waitForEvent('gameEnded');
+        const eventPromise = waitForEvent(wsClient, 'gameEnded');
         const response = await first.put(`/games/${game.id}/mark`).send({position: 2});
 
         expect(response.status).toBe(200);
@@ -165,7 +143,7 @@ describe('Player can mark a cell.', () => {
             await step.agent.put(`/games/${game.id}/mark`).send({position: step.position});
         }
 
-        const eventPromise = waitForEvent('gameEnded');
+        const eventPromise = waitForEvent(wsClient, 'gameEnded');
         const response = await first.put(`/games/${game.id}/mark`).send({position: 8});
 
         expect(response.status).toBe(200);

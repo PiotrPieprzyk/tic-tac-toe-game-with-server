@@ -61,7 +61,7 @@ describe('Host can delete the room.', () => {
             name: 'Delete Room In Progress',
         });
         await agentB.put(`/rooms/${roomRes.body.id}/join`).send();
-        await request.post('/games').send({roomId: roomRes.body.id, hostId: userA.id});
+        await agentA.post('/games').send({roomId: roomRes.body.id});
 
         const response = await agentA.delete(`/rooms/${roomRes.body.id}`);
 

@@ -40,7 +40,7 @@ describe('Player can see game details.', () => {
         room = roomRes.body;
         await agentB.put(`/rooms/${room.id}/join`).send();
 
-        const gameRes = await agentA.post('/games').send({roomId: room.id, hostId: userA.id});
+        const gameRes = await agentA.post('/games').send({roomId: room.id});
         game = gameRes.body;
     });
 

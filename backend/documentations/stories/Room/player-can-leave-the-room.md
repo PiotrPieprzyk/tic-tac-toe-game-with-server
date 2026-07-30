@@ -36,7 +36,6 @@ Prerequisites:
 
 ```typescript
 // Request body
-type LeaveRoomRequest = {
-  userId: string;
-};
+// The leaving user is identified by the UserId cookie, not a request body field.
+type LeaveRoomRequest = {};
 ```

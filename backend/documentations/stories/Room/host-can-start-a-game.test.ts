@@ -11,7 +11,6 @@ const request = supertest(app);
 describe('Host can start a game.', () => {
     let userA: UserDTO;
     let userB: UserDTO;
-    let room: RoomDTO;
     let agentA: ReturnType<typeof supertest.agent>;
     let agentB: ReturnType<typeof supertest.agent>;
 
@@ -25,15 +24,9 @@ describe('Host can start a game.', () => {
         ]);
         userA = resA.body;
         userB = resB.body;
-
-        const roomRes = await agentA.post('/rooms').send({
-            name: 'Start Game Room',
-        });
-        room = roomRes.body;
     });
 
     afterAll(async () => {
-        await agentA.delete(`/rooms/${room.id}`);
         await Promise.all([
             request.delete(`/users/${userA.id}`),
             request.delete(`/users/${userB.id}`),
@@ -41,69 +34,89 @@ describe('Host can start a game.', () => {
     });
 
     it('WHEN host starts a game with 2 players in the room SHOULD return 200 with the created game', async () => {
+        const roomRes = await agentA.post('/rooms').send({name: 'Start Game Room'});
+        const room: RoomDTO = roomRes.body;
         await agentB.put(`/rooms/${room.id}/join`).send();
 
-        const response = await request.post('/games').send({roomId: room.id, hostId: userA.id});
+        const response = await agentA.post('/games').send({roomId: room.id});
 
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('id');
         expect(response.body.roomId).toBe(room.id);
         expect(response.body.players).toHaveLength(2);
 
+        await agentA.put('/games/leave').send({gameId: response.body.id});
+        await agentB.put('/games/leave').send({gameId: response.body.id});
         await agentB.put(`/rooms/${room.id}/leave`).send();
+        await agentA.delete(`/rooms/${room.id}`);
     });
 
     it('WHEN not-host tries to start a game SHOULD return 400', async () => {
+        const roomRes = await agentA.post('/rooms').send({name: 'Start Game Room Not Host'});
+        const room: RoomDTO = roomRes.body;
         await agentB.put(`/rooms/${room.id}/join`).send();
 
-        const response = await request.post('/games').send({roomId: room.id, hostId: userB.id});
+        const response = await agentB.post('/games').send({roomId: room.id});
 
         expect(response.status).toBe(400);
 
         await agentB.put(`/rooms/${room.id}/leave`).send();
+        await agentA.delete(`/rooms/${room.id}`);
     });
 
     it('WHEN host starts a game with only 1 player in the room SHOULD return 400', async () => {
-        const response = await request.post('/games').send({roomId: room.id, hostId: userA.id});
+        const roomRes = await agentA.post('/rooms').send({name: 'Start Game Room Solo'});
+        const room: RoomDTO = roomRes.body;
+
+        const response = await agentA.post('/games').send({roomId: room.id});
 
         expect(response.status).toBe(400);
+
+        await agentA.delete(`/rooms/${room.id}`);
     });
 
     it('WHEN host tries to start a game that is already in progress SHOULD return 400', async () => {
+        const roomRes = await agentA.post('/rooms').send({name: 'Start Game Room In Progress'});
+        const room: RoomDTO = roomRes.body;
         await agentB.put(`/rooms/${room.id}/join`).send();
-        await request.post('/games').send({roomId: room.id, hostId: userA.id});
+        const firstGameRes = await agentA.post('/games').send({roomId: room.id});
 
-        const response = await request.post('/games').send({roomId: room.id, hostId: userA.id});
+        const response = await agentA.post('/games').send({roomId: room.id});
 
         expect(response.status).toBe(400);
 
+        await agentA.put('/games/leave').send({gameId: firstGameRes.body.id});
+        await agentB.put('/games/leave').send({gameId: firstGameRes.body.id});
         await agentB.put(`/rooms/${room.id}/leave`).send();
+        await agentA.delete(`/rooms/${room.id}`);
     });
 
     it('WHEN room does not exist SHOULD return 404', async () => {
         const guid = Guid.createNewGuid();
 
-        const response = await request.post('/games').send({roomId: guid, hostId: userA.id});
+        const response = await agentA.post('/games').send({roomId: guid});
 
         expect(response.status).toBe(404);
     });
 
     it('WHEN host start game again after the first one was finished SHOULD return 200', async () => {
-        const restartRoomRes = await agentB.post('/rooms').send({name: 'Restart Game Room'});
-        const restartRoom: RoomDTO = restartRoomRes.body;
-        await agentA.put(`/rooms/${restartRoom.id}/join`).send();
+        const roomRes = await agentA.post('/rooms').send({name: 'Restart Game Room'});
+        const room: RoomDTO = roomRes.body;
+        await agentB.put(`/rooms/${room.id}/join`).send();
 
-        const firstGameRes = await request.post('/games').send({roomId: restartRoom.id, hostId: userB.id});
+        const firstGameRes = await agentA.post('/games').send({roomId: room.id});
         const firstGame = firstGameRes.body;
 
         await agentA.put('/games/leave').send({gameId: firstGame.id});
         await agentB.put('/games/leave').send({gameId: firstGame.id});
 
-        const response = await request.post('/games').send({roomId: restartRoom.id, hostId: userB.id});
+        const response = await agentA.post('/games').send({roomId: room.id});
 
         expect(response.status).toBe(200);
 
-        await agentA.put(`/rooms/${restartRoom.id}/leave`).send();
-        await agentB.delete(`/rooms/${restartRoom.id}`);
+        await agentA.put('/games/leave').send({gameId: response.body.id});
+        await agentB.put('/games/leave').send({gameId: response.body.id});
+        await agentB.put(`/rooms/${room.id}/leave`).send();
+        await agentA.delete(`/rooms/${room.id}`);
     });
 });
