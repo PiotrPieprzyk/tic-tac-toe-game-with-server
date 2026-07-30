@@ -66,9 +66,7 @@ export class Room {
         return room;
     }
 
-    public userJoins(rawUserId: string): Room {
-        const userId = UserId.create(rawUserId);
-
+    public userJoins(userId: UserId): Room {
         return new Room({
             ...this,
             usersIds: this.usersIds.add(userId),
@@ -77,9 +75,7 @@ export class Room {
     }
 
     /** Returns undefined when the room has no users left and should be deleted. */
-    public userLeaves(rawUserId: string): Room | undefined {
-        const userId = UserId.create(rawUserId);
-
+    public userLeaves(userId: UserId): Room | undefined {
         if (this.usersIds.values.length === 1) {
             return undefined;
         }
@@ -91,35 +87,35 @@ export class Room {
         });
     }
 
-    public hostRemovesPlayer(rawHostId: string, rawUserId: string): Room | undefined {
-        this.assertIsHost(rawHostId, 'Only the host can remove a player from the room');
+    public hostRemovesPlayer(hostId: UserId, userId: UserId): Room | undefined {
+        this.assertIsHost(hostId, 'Only the host can remove a player from the room');
 
-        return this.userLeaves(rawUserId);
+        return this.userLeaves(userId);
     }
 
-    public hostRenames(rawHostId: string, newName: string): Room {
-        this.assertIsHost(rawHostId, 'Only the host can rename the room');
+    public hostRenames(hostId: UserId, newName: RoomName): Room {
+        this.assertIsHost(hostId, 'Only the host can rename the room');
 
         return new Room({
             ...this,
-            name: RoomName.create(newName),
+            name: newName,
             updatedTimestamp: Timestamp.create()
         });
     }
 
-    public hostEditsRoom(rawHostId: string, updates: { name?: string, usersIds?: string[] }): Room {
-        this.assertIsHost(rawHostId, 'Only host can edit room');
+    public hostEditsRoom(hostId: UserId, updates: { name?: RoomName, usersIds?: UserId[] }): Room {
+        this.assertIsHost(hostId, 'Only host can edit room');
 
         let updatedName = this.name;
         let updatedUsersIds = this.usersIds;
 
         if (updates.name) {
-            updatedName = RoomName.create(updates.name);
+            updatedName = updates.name;
         }
 
         if (updates.usersIds) {
             const keptUserIds = updatedUsersIds.values
-                .filter(userId => updates.usersIds!.includes(userId.value))
+                .filter(userId => updates.usersIds!.some(keptId => keptId.exact(userId)))
                 .map(userId => userId.value);
             updatedUsersIds = UsersIds.create(keptUserIds);
         }
@@ -132,16 +128,16 @@ export class Room {
         });
     }
 
-    public assertHostCanDelete(rawHostId: string, gameInProgress: boolean): void {
-        this.assertIsHost(rawHostId, 'Only the host can delete the room');
+    public assertHostCanDelete(hostId: UserId, gameInProgress: boolean): void {
+        this.assertIsHost(hostId, 'Only the host can delete the room');
 
         if (gameInProgress) {
             throw new ValidationError('Cannot delete a room while a game is in progress');
         }
     }
 
-    public startGame(rawHostId: string, gameId: string, gameInProgress: boolean): Room {
-        this.assertIsHost(rawHostId, 'Only the host can start a game');
+    public startGame(hostId: UserId, gameId: GameId, gameInProgress: boolean): Room {
+        this.assertIsHost(hostId, 'Only the host can start a game');
 
         if (this.usersIds.values.length !== 2) {
             throw new ValidationError('Room must have 2 players to start a game');
@@ -153,14 +149,12 @@ export class Room {
 
         return new Room({
             ...this,
-            activeGameId: GameId.create(gameId),
+            activeGameId: gameId,
             updatedTimestamp: Timestamp.create()
         });
     }
 
-    private assertIsHost(rawHostId: string, message: string): void {
-        const hostId = UserId.create(rawHostId);
-
+    private assertIsHost(hostId: UserId, message: string): void {
         if (!this.hostId.exact(hostId)) {
             throw new ForbiddenError(message);
         }

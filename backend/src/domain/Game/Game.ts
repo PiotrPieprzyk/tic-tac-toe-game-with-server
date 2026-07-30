@@ -1,5 +1,6 @@
 import {GameId} from "@/domain/Game/valueObject/GameId";
 import {RoomId} from "@/domain/Room/RoomId";
+import {UserId} from "@/domain/User/UserId";
 import {Player, PlayerPropsRaw} from "@/domain/Game/Player/Player";
 import {PlayerId} from "@/domain/Game/Player/PlayerId";
 import {Timestamp} from "@/shared/Timestamp";
@@ -76,9 +77,7 @@ export class Game {
         });
     }
 
-    public playerMarksCell(userId: string, cellPosition: number): Game {
-        const cellPositionValueObject = Position.create(cellPosition);
-
+    public playerMarksCell(userId: UserId, cellPosition: Position): Game {
         if (this.status.value === GameStatusEnum.ENDED) {
             throw new ValidationError('Game already ended');
         }
@@ -87,8 +86,8 @@ export class Game {
             throw new ValidationError('Game is waiting for players');
         }
 
-        const player = this.players.find(player => player.userId.value === userId);
-        const secondPlayer = this.players.find(player => player.userId.value !== userId);
+        const player = this.players.find(player => player.userId.exact(userId));
+        const secondPlayer = this.players.find(player => !player.userId.exact(userId));
 
         if (!player) {
             throw new ValidationError('User is not a player of this game');
@@ -102,13 +101,13 @@ export class Game {
             throw new ValidationError('Not player turn');
         }
 
-        if (this.cells.some(cell => cell.position.exact(cellPositionValueObject))) {
+        if (this.cells.some(cell => cell.position.exact(cellPosition))) {
             throw new ValidationError('Cell already marked');
         }
 
         const newCell = Cell.create({
             mark: player.mark.value,
-            position: cellPositionValueObject.value,
+            position: cellPosition.value,
             gameId: this.id.value
         });
 
@@ -181,8 +180,8 @@ export class Game {
     }
 
     /** Returns undefined when the game has no players left and should be deleted. */
-    public playerLeaves(userId: string): Game | undefined {
-        const player = this.players.find(player => player.userId.value === userId);
+    public playerLeaves(userId: UserId): Game | undefined {
+        const player = this.players.find(player => player.userId.exact(userId));
 
         if (!player) {
             throw new ValidationError('User is not a player of this game');

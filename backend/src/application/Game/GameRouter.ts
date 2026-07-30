@@ -5,6 +5,8 @@ import {Game} from "@/domain/Game/Game";
 import {GameStatusEnum} from "@/domain/Game/valueObject/GameStatus";
 import {HTTPError} from "@/shared/HTTPError";
 import {UserRepository} from "@/domain/User/UserRepository";
+import {UserId} from "@/domain/User/UserId";
+import {Position} from "@/domain/Game/Cell/valueObject/Position";
 import {RoomRepository} from "@/domain/Room/RoomRepository";
 import {RoomId} from "@/domain/Room/RoomId";
 import {Player} from "@/domain/Game/Player/Player";
@@ -51,8 +53,8 @@ export class GameRouter {
                     return;
                 }
 
-                const userId = req.cookies.UserId as string;
-                const updatedGame = game.playerMarksCell(userId, req.body.position);
+                const userId = UserId.create(req.cookies.UserId as string);
+                const updatedGame = game.playerMarksCell(userId, Position.create(req.body.position));
                 await this.gameRepository.save(updatedGame);
 
                 const dto = await this.getGameDTO(updatedGame);
@@ -78,7 +80,7 @@ export class GameRouter {
                     return;
                 }
 
-                const userId = req.cookies.UserId as string;
+                const userId = UserId.create(req.cookies.UserId as string);
                 const updatedGame = game.playerLeaves(userId);
 
                 if (updatedGame) {
@@ -106,15 +108,16 @@ export class GameRouter {
                     return;
                 }
 
-                const hostId = req.cookies.UserId as string;
+                const hostIdRaw = req.cookies.UserId as string;
+                const hostId = UserId.create(hostIdRaw);
                 const existingGame = room.activeGameId ? await this.gameRepository.find(room.activeGameId) : undefined;
                 const gameInProgress = !!existingGame && existingGame.status.value !== GameStatusEnum.ENDED;
 
                 const newGameId = GameId.create();
-                const updatedRoom = room.startGame(hostId, newGameId.value, gameInProgress);
+                const updatedRoom = room.startGame(hostId, newGameId, gameInProgress);
 
-                const otherUserId = room.usersIds.values.find(userId => userId.value !== hostId)!.value;
-                const game = Game.start(newGameId.value, room.id.value, hostId, otherUserId);
+                const otherUserId = room.usersIds.values.find(userId => !userId.exact(hostId))!.value;
+                const game = Game.start(newGameId.value, room.id.value, hostIdRaw, otherUserId);
 
                 await this.gameRepository.save(game);
                 await this.roomRepository.save(updatedRoom);
