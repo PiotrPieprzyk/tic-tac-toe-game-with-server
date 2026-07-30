@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 
-export function waitForEvent(wsClient: WebSocket, eventType: string, timeoutMs = 3000): Promise<{eventType: string; dto: Record<string, unknown>}> {
+export function waitForEvent(wsClient: WebSocket, eventType: string, timeoutMs = 100): Promise<{eventType: string; dto: Record<string, unknown>}> {
     return new Promise((resolve, reject) => {
         const timer = setTimeout(() => reject(new Error(`Timeout waiting for event: ${eventType}`)), timeoutMs);
         wsClient.on('message', (data) => {
