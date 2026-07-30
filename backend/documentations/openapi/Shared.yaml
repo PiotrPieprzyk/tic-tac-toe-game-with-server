@@ -1,5 +1,16 @@
 components:
-  
+
+  securitySchemes:
+    UserIdCookie:
+      type: apiKey
+      in: cookie
+      name: UserId
+      description: >
+        Identifies the requesting user. Set by the server as a response cookie from
+        `POST /users` (user creation). Endpoints that act on behalf of "the current user"
+        (e.g. creating/editing/leaving a room, marking/leaving a game) read this cookie
+        instead of taking a user id in the request body.
+
   parameters:
 
     pageToken:
@@ -69,3 +80,23 @@ components:
         - nextPageToken
         - prevPageToken
         - results
+
+    Error:
+      type: object
+      description: >
+        Shape returned by the app's error-handling middleware for both domain errors
+        (ValidationError, ForbiddenError, NotFoundError, InvalidStateError) and router-level
+        HTTPErrors.
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            status:
+              type: integer
+          required:
+            - message
+            - status
+      required:
+        - error

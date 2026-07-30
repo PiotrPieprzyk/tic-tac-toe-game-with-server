@@ -1,0 +1,252 @@
+openapi: "3.0.0"
+info:
+  title: "Game API"
+  version: "1.0.0"
+  description: >
+    Not implemented yet: only `GET /games/{gameId}` currently exists on the server.
+    `POST /games`, `PUT /games/{gameId}/mark` and `PUT /games/{gameId}/leave` below describe
+    the intended API derived from the `Game` domain aggregate (`Game.create`,
+    `Game.playerMarksCell`, `Game.playerLeaves`) so that frontend/API-consumer work can proceed
+    ahead of the server implementation.
+servers:
+  - url: "http://localhost:3000"
+    description: "Local server"
+
+
+
+paths:
+  /games:
+    post:
+      summary: "Create a game for a room"
+      description: >
+        Not implemented yet. Creates a game in WAITING_FOR_PLAYERS status for a room, with the
+        requesting user (read from the `UserId` cookie, see other endpoints) as the first player.
+      security:
+        - UserIdCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameCreateRequestBody'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          description: Validation error, e.g. missing roomId.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+
+  /games/{gameId}:
+    parameters:
+      - $ref: '#/components/parameters/gameId'
+
+    get:
+      summary: "Get a game by id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '404':
+          description: Game not found.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+
+  /games/{gameId}/mark:
+    parameters:
+      - $ref: '#/components/parameters/gameId'
+
+    put:
+      summary: "Mark a cell"
+      description: >
+        Not implemented yet. Corresponds to the domain method `Game.playerMarksCell`. The
+        marking player is identified via the `UserId` cookie (same convention as Room/User
+        endpoints), not a request body field.
+      security:
+        - UserIdCookie: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameMarkRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          description: >
+            Validation error. Raised by the domain when: the game already ended, the game is
+            still waiting for a second player, it isn't the requesting player's turn, or the
+            target cell is already marked.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+        '404':
+          description: Game not found, or requesting player is not part of this game.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+
+  /games/{gameId}/leave:
+    parameters:
+      - $ref: '#/components/parameters/gameId'
+
+    put:
+      summary: "Leave a game"
+      description: >
+        Not implemented yet. Corresponds to the domain method `Game.playerLeaves`. If the
+        leaving player was the only player left, the game is deleted instead of updated
+        (result: PLAYER_LEFT_THE_GAME); otherwise the game returns to WAITING_FOR_PLAYERS.
+        The leaving player is identified via the `UserId` cookie.
+      security:
+        - UserIdCookie: []
+      responses:
+        '200':
+          description: >
+            OK. Empty JSON object when the game had only one player left and was deleted
+            (mirrors the `Room` leave endpoint's empty-body convention); the updated Game
+            otherwise.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Game"
+                  - type: object
+                    description: Returned when the game was deleted because no players remained.
+        '404':
+          description: Game not found, or requesting player is not part of this game.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+
+
+
+components:
+  securitySchemes:
+    UserIdCookie:
+      $ref: './Shared.yaml#/components/securitySchemes/UserIdCookie'
+
+  parameters:
+    gameId:
+      name: "gameId"
+      in: "path"
+      schema:
+        type: "string"
+      required: true
+
+  schemas:
+    Game:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        roomId:
+          type: "string"
+        players:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Player"
+        cells:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Cell"
+        status:
+          $ref: "#/components/schemas/GameStatus"
+        result:
+          $ref: "#/components/schemas/GameResult"
+        activePlayerId:
+          description: "Id of the Player whose turn it is. Absent while WAITING_FOR_PLAYERS or once the game has ENDED."
+          type: "string"
+        winnerId:
+          description: "Id of the winning Player. Only present when result is WIN."
+          type: "string"
+        updatedTimestamp:
+          type: "integer"
+          format: "int64"
+          description: "Unix timestamp (ms) of the last domain change to this game."
+      required:
+        - id
+        - roomId
+        - players
+        - cells
+        - status
+        - updatedTimestamp
+
+    Player:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        userName:
+          type: "string"
+        mark:
+          $ref: "#/components/schemas/Mark"
+      required:
+        - id
+        - userName
+        - mark
+
+    Cell:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        mark:
+          $ref: "#/components/schemas/Mark"
+        position:
+          $ref: "#/components/schemas/Position"
+      required:
+        - id
+        - mark
+        - position
+
+    Position:
+      type: "integer"
+      description: "Board cell index, 0-8, left-to-right top-to-bottom on a 3x3 grid."
+      minimum: 0
+      maximum: 8
+
+    Mark:
+      type: "string"
+      enum: ["X", "O"]
+
+    GameStatus:
+      type: "string"
+      enum: ["WAITING_FOR_PLAYERS", "IN_PROGRESS", "ENDED"]
+
+    GameResult:
+      type: "string"
+      enum: ["WIN", "DRAW", "PLAYER_LEFT_THE_GAME"]
+
+    GameCreateRequestBody:
+      type: "object"
+      properties:
+        roomId:
+          type: "string"
+      required:
+        - roomId
+
+    GameMarkRequestBody:
+      type: "object"
+      properties:
+        position:
+          $ref: "#/components/schemas/Position"
+      required:
+        - position

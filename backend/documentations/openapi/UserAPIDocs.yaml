@@ -9,6 +9,7 @@ servers:
 paths:
   /users:
     get:
+      summary: "List users"
       responses:
         '200':
           description: OK
@@ -18,6 +19,10 @@ paths:
                 $ref: '#/components/schemas/UsersDTO'
 
     post:
+      summary: "Create a user"
+      description: >
+        On success, sets the `UserId` cookie (see `UserIdCookie` security scheme) used by
+        Room/Game endpoints to identify the current user on subsequent requests.
       requestBody:
         content:
           application/json:
@@ -27,16 +32,28 @@ paths:
       responses:
         '200':
           description: OK
-          content: 
+          headers:
+            Set-Cookie:
+              description: "`UserId=<id>`"
+              schema:
+                type: string
+          content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserDTO'
-  
-  
+        '400':
+          description: User name already taken.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+
+
   /users/{id}:
     parameters:
       - $ref: '#/components/parameters/userId'
     get:
+      summary: "Get a user by id"
       responses:
         '200':
           description: OK
@@ -44,37 +61,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserDTO'
-    
-    
+        '404':
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+
     put:
+      summary: "Edit a user"
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/UserEditRequestBody'
-      
+
       responses:
         '200':
           description: OK
-    
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDTO'
+
     delete:
+      summary: "Delete a user"
       responses:
         '200':
-          description: OK
+          description: OK, no content.
 
 
 
 components:
   parameters:
     userId:
-      name: "userId"
+      name: "id"
       in: "path"
       schema:
         $ref: '#/components/schemas/UserID'
       required: true
-  
+
   schemas:
-    UserID: 
+    UserID:
         type: string
     UserDTO:
       type: object
@@ -83,31 +111,31 @@ components:
           type: string
         name:
           type: string
+      required:
+        - id
+        - name
     UsersDTO:
       allOf:
-        - $ref: '#/components/schemas/PaginatedResponse'
-        - properties:
+        - $ref: './Shared.yaml#/components/schemas/PaginatedResponse'
+        - type: object
+          properties:
             results:
               type: array
               items:
                 $ref: '#/components/schemas/UserDTO'
-    
+
     UserEditRequestBody:
       type: object
       properties:
         name:
           type: string
-    
+      required:
+        - name
+
     UserCreateRequestBody:
       type: object
       properties:
         name:
           type: string
-    
-    PaginatedResponse:
-      type: object
-      properties:
-        results:
-          type: array
-          items:
-            type: object
+      required:
+        - name

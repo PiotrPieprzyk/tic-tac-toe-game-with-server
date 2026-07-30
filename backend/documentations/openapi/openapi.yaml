@@ -1,0 +1,39 @@
+openapi: "3.0.0"
+info:
+  title: "Tic-Tac-Toe API"
+  version: "1.0.0"
+servers:
+  - url: "http://localhost:3000"
+    description: "Local server"
+
+security:
+  - UserIdCookie: []
+
+paths:
+  /users:
+    $ref: './UserAPIDocs.yaml#/paths/~1users'
+  /users/{id}:
+    $ref: './UserAPIDocs.yaml#/paths/~1users~1{id}'
+
+  /rooms:
+    $ref: './RoomAPIDocs.yaml#/paths/~1rooms'
+  /rooms/{roomId}:
+    $ref: './RoomAPIDocs.yaml#/paths/~1rooms~1{roomId}'
+  /rooms/{roomId}/join:
+    $ref: './RoomAPIDocs.yaml#/paths/~1rooms~1{roomId}~1join'
+  /rooms/{roomId}/leave:
+    $ref: './RoomAPIDocs.yaml#/paths/~1rooms~1{roomId}~1leave'
+
+  /games:
+    $ref: './GameAPIDocs.yaml#/paths/~1games'
+  /games/{gameId}:
+    $ref: './GameAPIDocs.yaml#/paths/~1games~1{gameId}'
+  /games/{gameId}/mark:
+    $ref: './GameAPIDocs.yaml#/paths/~1games~1{gameId}~1mark'
+  /games/{gameId}/leave:
+    $ref: './GameAPIDocs.yaml#/paths/~1games~1{gameId}~1leave'
+
+components:
+  securitySchemes:
+    UserIdCookie:
+      $ref: './Shared.yaml#/components/securitySchemes/UserIdCookie'

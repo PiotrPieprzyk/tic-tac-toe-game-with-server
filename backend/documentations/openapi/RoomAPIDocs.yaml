@@ -11,6 +11,7 @@ servers:
 paths:
   /rooms:
     get:
+      summary: "List rooms"
       parameters:
         - $ref: './Shared.yaml#/components/parameters/pageToken'
         - $ref: './Shared.yaml#/components/parameters/pageSize'
@@ -21,22 +22,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Rooms'
-    
+
     post:
+      summary: "Create a room, hosted by the current user"
+      description: >
+        The host is the requesting user (`UserId` cookie), not a request body field. Fails if
+        that user already hosts a room.
+      security:
+        - UserIdCookie: []
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/RoomCreateRequestBody'
-      
-      responses:
-        '200':
-          description: OK
-  /rooms/{roomId}:
-    parameters:
-      - $ref: '#/components/parameters/roomId'
-    
-    get:
+
       responses:
         '200':
           description: OK
@@ -44,33 +43,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Room'
-    
+        '400':
+          description: Validation error, e.g. the requesting user already hosts a room.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+
+  /rooms/{roomId}:
+    parameters:
+      - $ref: '#/components/parameters/roomId'
+
+    get:
+      summary: "Get a room by id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '404':
+          description: Room not found.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+
     put:
+      summary: "Edit a room (host only)"
+      description: >
+        Only the host (`UserId` cookie) may edit the room. `usersIds`, if provided, is a
+        filter: any current user id not included is removed from the room.
+      security:
+        - UserIdCookie: []
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/RoomEditRequestBody'
-      
-      responses:
-        '200':
-          description: OK
-    
-    delete:
-      responses:
-        '200':
-          description: OK
-  
-  /rooms/{roomId}/join:
-    parameters:
-      - $ref: '#/components/parameters/roomId'
-    
-    put:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RoomJoinRequestBody'
+
       responses:
         '200':
           description: OK
@@ -78,30 +90,96 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Room'
-  
-  
-  
+        '400':
+          description: Requesting user is not the host.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+        '404':
+          description: Room not found.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+
+    delete:
+      summary: "Delete a room (host only)"
+      security:
+        - UserIdCookie: []
+      responses:
+        '200':
+          description: OK, no content.
+        '400':
+          description: Requesting user is not the host.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+        '404':
+          description: Room not found.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+
+  /rooms/{roomId}/join:
+    parameters:
+      - $ref: '#/components/parameters/roomId'
+
+    put:
+      summary: "Join a room as the current user"
+      description: "The joining user is the requesting user (`UserId` cookie)."
+      security:
+        - UserIdCookie: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '400':
+          description: Requesting user does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+        '404':
+          description: Room not found.
+          content:
+            application/json:
+              schema:
+                $ref: './Shared.yaml#/components/schemas/Error'
+
   /rooms/{roomId}/leave:
     parameters:
       - $ref: '#/components/parameters/roomId'
 
     put:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RoomLeaveRequestBody'
+      summary: "Leave a room as the current user"
+      description: >
+        The leaving user is the requesting user (`UserId` cookie). If they were the only
+        remaining user, the room is deleted instead of updated.
+      security:
+        - UserIdCookie: []
       responses:
         '200':
-          description: OK
+          description: OK, no content.
+        '404':
+          description: Room not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Room'
+                $ref: './Shared.yaml#/components/schemas/Error'
 
 
 
 components:
+  securitySchemes:
+    UserIdCookie:
+      $ref: './Shared.yaml#/components/securitySchemes/UserIdCookie'
+
   parameters:
     roomId:
       name: "roomId"
@@ -120,7 +198,7 @@ components:
               type: "array"
               items:
                 $ref: "./RoomAPIDocs.yaml#/components/schemas/Room"
-    
+
     Room:
       type: "object"
       properties:
@@ -132,46 +210,37 @@ components:
           $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
         activeGameId:
           type: "string"
+          description: "Present only once a game has been created for this room."
         users:
           type: "array"
           items:
             $ref: "./UserAPIDocs.yaml#/components/schemas/UserDTO"
         status:
-          type: "string"
-    
+          $ref: "./GameAPIDocs.yaml#/components/schemas/GameStatus"
+          description: >
+            Status of the room's active game, or WAITING_FOR_PLAYERS if it has none.
+      required:
+        - id
+        - name
+        - hostId
+        - users
+
     RoomCreateRequestBody:
       type: "object"
       properties:
         name:
           type: "string"
-        hostId:
-          $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
-        usersIds:
-          type: "array"
-          items:
-            $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
-    
+      required:
+        - name
+
     RoomEditRequestBody:
       type: "object"
+      description: "All fields optional; only provided fields are changed."
       properties:
-        hostId:
-          $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
         name:
           type: "string"
         usersIds:
           type: "array"
+          description: "Filter: current room users not listed here are removed."
           items:
             $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
-    
-    RoomJoinRequestBody:
-      type: "object"
-      properties:
-        userId:
-          $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
-    
-    RoomLeaveRequestBody:
-      type: "object"
-      properties:
-        userId:
-          $ref: "./UserAPIDocs.yaml#/components/schemas/UserID"
-
