@@ -132,8 +132,30 @@ export class Room {
         });
     }
 
-    public assertHostCanDelete(rawHostId: string): void {
+    public assertHostCanDelete(rawHostId: string, gameInProgress: boolean): void {
         this.assertIsHost(rawHostId, 'Only the host can delete the room');
+
+        if (gameInProgress) {
+            throw new ValidationError('Cannot delete a room while a game is in progress');
+        }
+    }
+
+    public startGame(rawHostId: string, gameId: string, gameInProgress: boolean): Room {
+        this.assertIsHost(rawHostId, 'Only the host can start a game');
+
+        if (this.usersIds.values.length !== 2) {
+            throw new ValidationError('Room must have 2 players to start a game');
+        }
+
+        if (gameInProgress) {
+            throw new ValidationError('A game is already in progress');
+        }
+
+        return new Room({
+            ...this,
+            activeGameId: GameId.create(gameId),
+            updatedTimestamp: Timestamp.create()
+        });
     }
 
     private assertIsHost(rawHostId: string, message: string): void {

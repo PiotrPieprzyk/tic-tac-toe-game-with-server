@@ -8,11 +8,13 @@ import cookieParser from "cookie-parser";
 import {MockUserRepository} from "@/infrastructure/repositories/mock/MockUserRepository";
 import {MockRoomRepository} from "@/infrastructure/repositories/mock/MockRoomRepository";
 import {MockGameRepository} from "@/infrastructure/repositories/mock/MockGameRepository";
+import {WebsocketBroadcaster} from "@/infrastructure/realtime/WebsocketBroadcaster";
 
 const defaultRepositories = (): RouterRepositories => ({
     userRepository: MockUserRepository.create(),
     roomRepository: MockRoomRepository.create(),
     gameRepository: MockGameRepository.create(),
+    eventBroadcaster: WebsocketBroadcaster.create(),
 });
 
 export const getApp = (repositories: RouterRepositories = defaultRepositories()) => {

@@ -1,23 +1,32 @@
 import {Server} from "ws";
 import {IncomingMessage, ServerResponse} from "node:http";
 import * as http from "node:http";
+import {WebsocketBroadcaster} from "@/infrastructure/realtime/WebsocketBroadcaster";
 
 export class WebsocketServer {
     private wss: Server;
 
     constructor(server: http.Server<typeof IncomingMessage, typeof ServerResponse>) {
         this.wss = new Server({noServer: true, path: '/ws'});
+        const broadcaster = WebsocketBroadcaster.create();
 
         this.wss.on('connection', (ws) => {
-            console.log('New WebSocket connection established');
-
             ws.on('message', (message) => {
-                console.log(`Received message: ${message}`);
-                ws.send(`Server received: ${message}`);
+                try {
+                    const parsed = JSON.parse(message.toString());
+
+                    if (parsed.action === 'subscribeGame' && parsed.gameId) {
+                        broadcaster.subscribeToGame(ws, parsed.gameId);
+                    } else if (parsed.action === 'subscribeRooms') {
+                        broadcaster.subscribeToRooms(ws);
+                    }
+                } catch {
+                    // ignore malformed messages
+                }
             });
 
             ws.on('close', () => {
-                console.log('WebSocket connection closed');
+                broadcaster.unsubscribe(ws);
             });
         });
 

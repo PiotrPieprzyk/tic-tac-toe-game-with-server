@@ -10,12 +10,15 @@ import {UserId} from "@/domain/User/UserId";
 import {RoomRepository} from "@/domain/Room/RoomRepository";
 import {UserRepository} from "@/domain/User/UserRepository";
 import {GameRepository} from "@/domain/Game/GameRepository";
+import {GameStatusEnum} from "@/domain/Game/valueObject/GameStatus";
+import {EventBroadcaster} from "@/application/shared/EventBroadcaster";
 
 export class RoomRouter {
     constructor(
         private readonly roomRepository: RoomRepository,
         private readonly userRepository: UserRepository,
-        private readonly gameRepository: GameRepository
+        private readonly gameRepository: GameRepository,
+        private readonly eventBroadcaster: EventBroadcaster
     ) {}
 
     setup(app: express.Application) {
@@ -68,6 +71,7 @@ export class RoomRouter {
 
                 await this.roomRepository.save(room);
                 const roomDTO = await this.getRoomDTO(room);
+                this.eventBroadcaster.broadcastToRooms('roomAdded', roomDTO);
 
                 res.status(200).json(roomDTO);
             } catch (e) {
@@ -85,15 +89,23 @@ export class RoomRouter {
                 }
 
                 const userId = req.cookies.UserId as string;
-                const userExists = !!(await this.userRepository.find(UserId.create(userId)));
+                const userIdValueObject = UserId.create(userId);
+                const userExists = !!(await this.userRepository.find(userIdValueObject));
                 if (!userExists) {
                     next(new HTTPError(400, 'User does not exist'));
+                    return;
+                }
+
+                const existingMembership = await this.roomRepository.findRoomByUserId(userIdValueObject);
+                if (existingMembership && !existingMembership.id.exact(roomId)) {
+                    next(new HTTPError(400, 'User is already a member of another room'));
                     return;
                 }
 
                 const updatedRoom = room.userJoins(userId);
                 await this.roomRepository.save(updatedRoom);
                 const roomDTO = await this.getRoomDTO(updatedRoom);
+                this.eventBroadcaster.broadcastToRooms('roomEdited', roomDTO);
 
                 res.status(200).json(roomDTO);
             } catch (e) {
@@ -114,8 +126,11 @@ export class RoomRouter {
                 const updatedRoom = room.userLeaves(req.cookies.UserId);
                 if (updatedRoom) {
                     await this.roomRepository.save(updatedRoom);
+                    const roomDTO = await this.getRoomDTO(updatedRoom);
+                    this.eventBroadcaster.broadcastToRooms('roomEdited', roomDTO);
                 } else {
                     await this.roomRepository.delete(roomId);
+                    this.eventBroadcaster.broadcastToRooms('roomDeleted', {id: roomId.value});
                 }
 
                 res.status(200).json({});
@@ -141,6 +156,7 @@ export class RoomRouter {
 
                 await this.roomRepository.save(updatedRoom);
                 const roomDTO = await this.getRoomDTO(updatedRoom);
+                this.eventBroadcaster.broadcastToRooms('roomEdited', roomDTO);
 
                 res.status(200).json(roomDTO);
             } catch (e) {
@@ -158,8 +174,12 @@ export class RoomRouter {
                     return;
                 }
 
-                room.assertHostCanDelete(req.cookies.UserId);
+                const existingGame = room.activeGameId ? await this.gameRepository.find(room.activeGameId) : undefined;
+                const gameInProgress = !!existingGame && existingGame.status.value !== GameStatusEnum.ENDED;
+
+                room.assertHostCanDelete(req.cookies.UserId, gameInProgress);
                 await this.roomRepository.delete(roomId);
+                this.eventBroadcaster.broadcastToRooms('roomDeleted', {id: roomId.value});
 
                 res.status(200).send();
             } catch (e) {

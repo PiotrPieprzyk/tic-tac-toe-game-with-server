@@ -10,6 +10,7 @@ export type PlayerPersistence = {
 
 export type PlayerDTO = {
     id: string,
+    userId: string,
     userName: string,
     mark: string
 }
@@ -25,6 +26,7 @@ export class PlayerMap {
     static toDTO(player: Player, user: User): PlayerDTO {
         return {
             id: player.id.value,
+            userId: player.userId.value,
             userName: user.name.value,
             mark: player.mark.value
         };

@@ -43,6 +43,11 @@ export class MockRoomRepository implements RoomRepository {
         return persistence ? RoomPersistenceMap.toDomain(persistence) : undefined;
     }
 
+    async findRoomByUserId(userId: UserId): Promise<Room | undefined> {
+        const persistence: RoomPersistence | undefined = await this.database.findByUserId(userId.value);
+        return persistence ? RoomPersistenceMap.toDomain(persistence) : undefined;
+    }
+
     async delete(id: RoomId): Promise<void> {
         await this.database.delete(id.value)
     }

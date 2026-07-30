@@ -5,10 +5,10 @@ import {PlayerId} from "@/domain/Game/Player/PlayerId";
 import {Timestamp} from "@/shared/Timestamp";
 import {GameStatus, GameStatusEnum} from "@/domain/Game/valueObject/GameStatus";
 import {GameResult, GameResultEnum} from "@/domain/Game/valueObject/GameResult";
-import {Mark} from "@/domain/Game/Cell/valueObject/Mark";
+import {Mark, MarkTypes} from "@/domain/Game/Cell/valueObject/Mark";
 import {Cell, CellPropsRaw} from "@/domain/Game/Cell/Cell";
 import {Position} from "@/domain/Game/Cell/valueObject/Position";
-import {ValidationError, NotFoundError} from "@/shared/DomainError";
+import {ValidationError} from "@/shared/DomainError";
 
 
 export type GameProps = {
@@ -76,8 +76,7 @@ export class Game {
         });
     }
 
-    public playerMarksCell(playerId: string, cellPosition: number): Game {
-        const playerIdValueObject = PlayerId.create(playerId);
+    public playerMarksCell(userId: string, cellPosition: number): Game {
         const cellPositionValueObject = Position.create(cellPosition);
 
         if (this.status.value === GameStatusEnum.ENDED) {
@@ -88,11 +87,11 @@ export class Game {
             throw new ValidationError('Game is waiting for players');
         }
 
-        const player = this.players.find(player => player.id.exact(playerIdValueObject));
-        const secondPlayer = this.players.find(player => !player.id.exact(playerIdValueObject));
+        const player = this.players.find(player => player.userId.value === userId);
+        const secondPlayer = this.players.find(player => player.userId.value !== userId);
 
         if (!player) {
-            throw new NotFoundError('Player not found');
+            throw new ValidationError('User is not a player of this game');
         }
 
         if (!secondPlayer) {
@@ -182,12 +181,11 @@ export class Game {
     }
 
     /** Returns undefined when the game has no players left and should be deleted. */
-    public playerLeaves(playerId: string): Game | undefined {
-        const playerIdValueObject = PlayerId.create(playerId);
-        const player = this.players.find(player => player.id.exact(playerIdValueObject));
+    public playerLeaves(userId: string): Game | undefined {
+        const player = this.players.find(player => player.userId.value === userId);
 
         if (!player) {
-            throw new NotFoundError('Player not found');
+            throw new ValidationError('User is not a player of this game');
         }
 
         if (this.players.length === 1) {
@@ -196,10 +194,25 @@ export class Game {
 
         return new Game({
             ...this,
-            status: GameStatus.create(GameStatusEnum.WAITING_FOR_PLAYERS),
-            activePlayerId: !this.activePlayerId || this.activePlayerId.exact(playerIdValueObject) ?
-                undefined :
-                this.activePlayerId,
+            players: this.players.filter(p => !p.id.exact(player.id)),
+            status: GameStatus.create(GameStatusEnum.ENDED),
+            result: GameResult.create(GameResultEnum.PLAYER_LEFT_THE_GAME),
+            activePlayerId: undefined,
+            updatedTimestamp: Timestamp.create()
+        });
+    }
+
+    public static start(id: string, roomId: string, hostUserId: string, otherUserId: string): Game {
+        const hostPlayer = Player.create({userId: hostUserId, mark: MarkTypes.X});
+        const otherPlayer = Player.create({userId: otherUserId, mark: MarkTypes.O});
+
+        return new Game({
+            id: GameId.create(id),
+            roomId: RoomId.create(roomId),
+            players: [hostPlayer, otherPlayer],
+            cells: [],
+            status: GameStatus.create(GameStatusEnum.IN_PROGRESS),
+            activePlayerId: hostPlayer.id,
             updatedTimestamp: Timestamp.create()
         });
     }

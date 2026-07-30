@@ -6,11 +6,13 @@ import {GameRouter} from "@/application/Game/GameRouter";
 import {UserRepository} from "@/domain/User/UserRepository";
 import {RoomRepository} from "@/domain/Room/RoomRepository";
 import {GameRepository} from "@/domain/Game/GameRepository";
+import {EventBroadcaster} from "@/application/shared/EventBroadcaster";
 
 export interface RouterRepositories {
     userRepository: UserRepository;
     roomRepository: RoomRepository;
     gameRepository: GameRepository;
+    eventBroadcaster: EventBroadcaster;
 }
 
 export class Router {
@@ -19,10 +21,10 @@ export class Router {
             res.sendFile(path.join(__dirname, './public/index.html'));
         });
 
-        const {userRepository, roomRepository, gameRepository} = repositories;
+        const {userRepository, roomRepository, gameRepository, eventBroadcaster} = repositories;
 
         new UserRouter(userRepository).setup(app);
-        new RoomRouter(roomRepository, userRepository, gameRepository).setup(app);
-        new GameRouter(gameRepository, userRepository).setup(app);
+        new RoomRouter(roomRepository, userRepository, gameRepository, eventBroadcaster).setup(app);
+        new GameRouter(gameRepository, userRepository, roomRepository, eventBroadcaster).setup(app);
     }
 }

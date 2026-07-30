@@ -16,6 +16,7 @@ let wsPort: number;
 
 describe('The rooms list is updated automatically.', () => {
     let user: UserDTO;
+    let agent: ReturnType<typeof supertest.agent>;
     const createdRoomIds: string[] = [];
 
     beforeAll(async () => {
@@ -25,8 +26,9 @@ describe('The rooms list is updated automatically.', () => {
         await new Promise<void>((resolve) => server.listen(0, resolve));
         wsPort = (server.address() as { port: number }).port;
         request = supertest(server);
+        agent = supertest.agent(server);
 
-        const userRes = await request.post('/users').send({name: 'WsUser'});
+        const userRes = await agent.post('/users').send({name: 'WsUser'});
         user = userRes.body;
 
         wsClient = new WebSocket(`ws://localhost:${wsPort}/ws`);
@@ -48,11 +50,7 @@ describe('The rooms list is updated automatically.', () => {
     it('WHEN a new room is created SHOULD receive a RoomAddedEvent with the new room\'s data', async () => {
         const eventPromise = waitForEvent(wsClient, 'roomAdded');
 
-        const roomRes = await request.post('/rooms').send({
-            name: 'WS Room',
-            hostId: user.id,
-            usersIds: [user.id],
-        });
+        const roomRes = await agent.post('/rooms').send({name: 'WS Room'});
         const room: RoomDTO = roomRes.body;
         createdRoomIds.push(room.id);
 
@@ -68,7 +66,7 @@ describe('The rooms list is updated automatically.', () => {
         const roomId = createdRoomIds[createdRoomIds.length - 1];
         const eventPromise = waitForEvent(wsClient, 'roomEdited');
 
-        await request.put(`/rooms/${roomId}`).send({hostId: user.id, name: 'WS Room Renamed'});
+        await agent.put(`/rooms/${roomId}`).send({name: 'WS Room Renamed'});
 
         const event = await eventPromise as { eventType: string; dto: { id: string; name: string } };
 
@@ -79,38 +77,40 @@ describe('The rooms list is updated automatically.', () => {
 
     it('WHEN a player joins a room SHOULD receive a RoomEditedEvent with the updated players list', async () => {
         const roomId = createdRoomIds[createdRoomIds.length - 1];
-        const secondUserRes = await request.post('/users').send({name: 'WsUser2'});
+        const secondAgent = supertest.agent(server);
+        const secondUserRes = await secondAgent.post('/users').send({name: 'WsUser2'});
         const secondUser: UserDTO = secondUserRes.body;
 
         const eventPromise = waitForEvent(wsClient, 'roomEdited');
-        await request.put(`/rooms/${roomId}/join`).send({userId: secondUser.id});
+        await secondAgent.put(`/rooms/${roomId}/join`).send();
 
         const event = await eventPromise as { eventType: string; dto: { users: UserDTO[] } };
 
         expect(event.eventType).toBe('roomEdited');
         expect(event.dto.users.map(u => u.id)).toContain(secondUser.id);
 
-        await request.put(`/rooms/${roomId}/leave`).send({userId: secondUser.id});
+        await secondAgent.put(`/rooms/${roomId}/leave`).send();
         await request.delete(`/users/${secondUser.id}`);
     });
 
     it('WHEN a room\'s game status changes to IN_PROGRESS SHOULD receive a RoomEditedEvent with the updated status', async () => {
         const roomId = createdRoomIds[createdRoomIds.length - 1];
-        const secondUserRes = await request.post('/users').send({name: 'WsUser3'});
+        const secondAgent = supertest.agent(server);
+        const secondUserRes = await secondAgent.post('/users').send({name: 'WsUser3'});
         const secondUser: UserDTO = secondUserRes.body;
-        await request.put(`/rooms/${roomId}/join`).send({userId: secondUser.id});
+        await secondAgent.put(`/rooms/${roomId}/join`).send();
 
         const eventPromise = waitForEvent(wsClient, 'roomEdited');
-        const gameRes = await request.post('/games').send({roomId, hostId: user.id});
+        const gameRes = await agent.post('/games').send({roomId});
 
         const event = await eventPromise as { eventType: string; dto: { status: string } };
 
         expect(event.eventType).toBe('roomEdited');
         expect(event.dto.status).toBe('IN_PROGRESS');
 
-        await request.put('/games/leave').send({gameId: gameRes.body.id, userId: user.id});
-        await request.put('/games/leave').send({gameId: gameRes.body.id, userId: secondUser.id});
-        await request.put(`/rooms/${roomId}/leave`).send({userId: secondUser.id});
+        await agent.put('/games/leave').send({gameId: gameRes.body.id});
+        await secondAgent.put('/games/leave').send({gameId: gameRes.body.id});
+        await secondAgent.put(`/rooms/${roomId}/leave`).send();
         await request.delete(`/users/${secondUser.id}`);
     });
 
@@ -118,7 +118,7 @@ describe('The rooms list is updated automatically.', () => {
         const roomId = createdRoomIds[createdRoomIds.length - 1];
         const eventPromise = waitForEvent(wsClient, 'roomDeleted');
 
-        await request.delete(`/rooms/${roomId}`);
+        await agent.delete(`/rooms/${roomId}`);
         createdRoomIds.pop();
 
         const event = await eventPromise as { eventType: string; dto: { id: string } };
@@ -128,15 +128,11 @@ describe('The rooms list is updated automatically.', () => {
     });
 
     it('WHEN the last player leaves a room SHOULD receive a RoomDeletedEvent (room is auto-deleted)', async () => {
-        const roomRes = await request.post('/rooms').send({
-            name: 'WS Room Last Player',
-            hostId: user.id,
-            usersIds: [user.id],
-        });
+        const roomRes = await agent.post('/rooms').send({name: 'WS Room Last Player'});
         const room: RoomDTO = roomRes.body;
 
         const eventPromise = waitForEvent(wsClient, 'roomDeleted');
-        await request.put(`/rooms/${room.id}/leave`).send({userId: user.id});
+        await agent.put(`/rooms/${room.id}/leave`).send();
 
         const event = await eventPromise as { eventType: string; dto: { id: string } };
 

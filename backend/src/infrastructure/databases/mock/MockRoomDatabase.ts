@@ -49,4 +49,8 @@ export class MockRoomDatabase {
     async findByHostId(hostId: any): Promise<any> {
         return this.items.find(item => item.hostId === hostId);
     }
+
+    async findByUserId(userId: any): Promise<any> {
+        return this.items.find(item => item.usersIds.includes(userId));
+    }
 }
