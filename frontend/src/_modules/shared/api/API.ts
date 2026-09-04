@@ -30,19 +30,17 @@ export class API {
     static domain = 'http://localhost:3000';
 
     static async handleCommonError(response: Response): Promise<CommonError | null> {
-        if (!(response.status < 200 || 400 <= response.status)) {
+        if (response.status < 200 || 400 <= response.status) {
+            const json = await response.json();
+            const message = json?.error?.message;
+            const status = json?.error?.status;
+            if (message && status) {
+                return new CommonError(message, status);
+            }
+            return new CommonError('Server error. Please try again', 500);
+        } else {
             return null;
         }
-
-        const json = await response.json();
-        const message = json?.error?.message;
-        const status = json?.error?.status;
-
-        if (message && status) {
-            return new CommonError(message, status);
-        }
-
-        return new CommonError('Server error. Please try again', 500);
     }
 
     static async post<T>(url: string, body: unknown, options?: Options): Promise<SuccessResponse<T> | CommonError> {
@@ -67,10 +65,7 @@ export class API {
             return new SuccessResponse(json);
         } catch (e) {
             console.error(e);
-            return {
-                message: 'Something went wrong. Please try again later',
-                status: 500
-            }
+            return new CommonError('Server error. Please try again', 500);
         }
     }
 
@@ -96,10 +91,7 @@ export class API {
             return new SuccessResponse(json);
         } catch (e) {
             console.error(e);
-            return {
-                message: 'Something went wrong. Please try again later',
-                status: 500
-            }
+            return new CommonError('Server error. Please try again', 500);
         }
 
     }
@@ -126,10 +118,7 @@ export class API {
             return new SuccessResponse(json);
         } catch (e) {
             console.error(e);
-            return {
-                message: 'Something went wrong. Please try again later',
-                status: 500
-            }
+            return new CommonError('Server error. Please try again', 500);
         }
     }
 
@@ -154,10 +143,7 @@ export class API {
             return new SuccessResponse(json);
         } catch (e) {
             console.error(e);
-            return {
-                message: 'Something went wrong. Please try again later',
-                status: 500
-            }
+            return new CommonError('Server error. Please try again', 500);
         }
     }
 }
