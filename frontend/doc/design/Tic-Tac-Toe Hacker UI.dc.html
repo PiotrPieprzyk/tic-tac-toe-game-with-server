@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#0a0d0a;}
+  @keyframes pulseDot{0%,100%{opacity:1;box-shadow:0 0 4px 1px #00ff9c;}50%{opacity:.35;box-shadow:0 0 2px 0 #00ff9c;}}
+  @keyframes blinkCursor{0%,49%{opacity:1;}50%,100%{opacity:0;}}
+  @keyframes glowPulse{0%,100%{text-shadow:0 0 6px currentColor,0 0 14px currentColor;}50%{text-shadow:0 0 12px currentColor,0 0 26px currentColor;}}
+  @keyframes rowIn{from{opacity:0;transform:translateY(-6px);background:rgba(0,255,156,.14);}to{opacity:1;transform:translateY(0);background:transparent;}}
+  ::selection{background:#00ff9c;color:#04140c;}
+</style>
+</helmet>
+
+<div style="font-family:'JetBrains Mono',monospace;background:#0a0d0a;color:#d9ffe9;min-height:100vh;position:relative;padding-bottom:80px;" style-before="content:'';position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.5;mix-blend-mode:overlay;background:repeating-linear-gradient(0deg, rgba(0,255,156,0.04) 0px, rgba(0,255,156,0.04) 1px, transparent 1px, transparent 3px);">
+
+<header style="position:sticky;top:0;z-index:50;background:#0a0d0aee;backdrop-filter:blur(4px);border-bottom:1px solid rgba(0,255,156,.35);padding:14px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
+  <div style="font-size:15px;font-weight:700;color:#00ff9c;letter-spacing:.5px;">&gt;_ TIC_TAC_TOE <span style="color:rgba(217,255,233,.4);font-weight:400;">// UI_MOCKUPS</span></div>
+  <nav style="display:flex;gap:18px;flex-wrap:wrap;">
+    <a href="#page-login" style-hover="color:#00ff9c;" style="color:rgba(217,255,233,.7);text-decoration:none;font-size:12px;letter-spacing:.5px;">01_LOGIN</a>
+    <a href="#page-menu" style-hover="color:#00ff9c;" style="color:rgba(217,255,233,.7);text-decoration:none;font-size:12px;letter-spacing:.5px;">02_MENU</a>
+    <a href="#page-room" style-hover="color:#00ff9c;" style="color:rgba(217,255,233,.7);text-decoration:none;font-size:12px;letter-spacing:.5px;">03_ROOM</a>
+    <a href="#page-game" style-hover="color:#00ff9c;" style="color:rgba(217,255,233,.7);text-decoration:none;font-size:12px;letter-spacing:.5px;">04_GAME</a>
+    <a href="#page-system" style-hover="color:#00ff9c;" style="color:rgba(217,255,233,.7);text-decoration:none;font-size:12px;letter-spacing:.5px;">05_SYSTEM</a>
+  </nav>
+</header>
+
+<main style="max-width:1360px;margin:0 auto;padding:36px 24px 0;">
+
+<!-- ============ PAGE 1: LOGIN ============ -->
+<section id="page-login" style="margin-bottom:64px;">
+  <h2 style="font-size:13px;letter-spacing:2px;color:#00ff9c;margin:0 0 20px;">01 // LOGIN</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;">
+
+    <!-- Card 1a: default -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="height:28px;background:#0d1310;border-bottom:1px solid rgba(0,255,156,.3);display:flex;align-items:center;gap:6px;padding:0 10px;">
+        <span style="width:7px;height:7px;background:#00ff9c;"></span><span style="width:7px;height:7px;background:#ffb020;"></span><span style="width:7px;height:7px;background:#ff2d6b;"></span>
+        <span style="margin-left:8px;font-size:10px;color:rgba(217,255,233,.4);">guest_session.sh</span>
+      </div>
+      <div style="padding:32px 24px;">
+        <div style="font-size:11px;color:rgba(217,255,233,.4);margin-bottom:6px;">SYSTEM READY</div>
+        <div style="font-size:26px;font-weight:700;color:#00ff9c;letter-spacing:1px;margin-bottom:28px;">&gt;_ CONNECT</div>
+        <label style="display:block;font-size:12px;color:rgba(217,255,233,.7);margin-bottom:8px;">ENTER_HANDLE:</label>
+        <div style="display:flex;align-items:center;border:1px solid #00ff9c;background:#081109;padding:10px 12px;margin-bottom:8px;">
+          <span style="color:#00ff9c;">player_</span>
+          <span style="width:8px;height:16px;background:#00ff9c;margin-left:2px;animation:blinkCursor 1s steps(1) infinite;"></span>
+        </div>
+        <div style="font-size:10.5px;color:rgba(217,255,233,.4);margin-bottom:24px;">3&ndash;20 CHARS &middot; MUST BE UNIQUE</div>
+        <div style="text-align:center;padding:12px;border:1px solid #00ff9c;color:#00ff9c;font-weight:600;letter-spacing:1px;font-size:13px;cursor:pointer;" style-hover="background:#00ff9c;color:#04140c;box-shadow:0 0 20px rgba(0,255,156,.6);">[ CONNECT ]</div>
+      </div>
+    </div>
+
+    <!-- Card 1b: error too short -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="height:28px;background:#0d1310;border-bottom:1px solid rgba(0,255,156,.3);display:flex;align-items:center;gap:6px;padding:0 10px;">
+        <span style="width:7px;height:7px;background:#00ff9c;"></span><span style="width:7px;height:7px;background:#ffb020;"></span><span style="width:7px;height:7px;background:#ff2d6b;"></span>
+        <span style="margin-left:8px;font-size:10px;color:rgba(217,255,233,.4);">guest_session.sh</span>
+      </div>
+      <div style="padding:32px 24px;">
+        <div style="font-size:11px;color:rgba(217,255,233,.4);margin-bottom:6px;">SYSTEM READY</div>
+        <div style="font-size:26px;font-weight:700;color:#00ff9c;letter-spacing:1px;margin-bottom:28px;">&gt;_ CONNECT</div>
+        <label style="display:block;font-size:12px;color:rgba(217,255,233,.7);margin-bottom:8px;">ENTER_HANDLE:</label>
+        <div style="display:flex;align-items:center;border:1px solid #ff2d6b;background:#150609;padding:10px 12px;margin-bottom:8px;box-shadow:0 0 10px rgba(255,45,107,.25);">
+          <span style="color:#ff8fac;">ab</span>
+          <span style="width:8px;height:16px;background:#ff2d6b;margin-left:2px;animation:blinkCursor 1s steps(1) infinite;"></span>
+        </div>
+        <div style="font-size:11px;color:#ff2d6b;margin-bottom:24px;">ERR: HANDLE_TOO_SHORT (MIN 3 CHARS)</div>
+        <div style="text-align:center;padding:12px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.3);font-weight:600;letter-spacing:1px;font-size:13px;">[ CONNECT ]</div>
+      </div>
+    </div>
+
+    <!-- Card 1c: error taken -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="height:28px;background:#0d1310;border-bottom:1px solid rgba(0,255,156,.3);display:flex;align-items:center;gap:6px;padding:0 10px;">
+        <span style="width:7px;height:7px;background:#00ff9c;"></span><span style="width:7px;height:7px;background:#ffb020;"></span><span style="width:7px;height:7px;background:#ff2d6b;"></span>
+        <span style="margin-left:8px;font-size:10px;color:rgba(217,255,233,.4);">guest_session.sh</span>
+      </div>
+      <div style="padding:32px 24px;">
+        <div style="font-size:11px;color:rgba(217,255,233,.4);margin-bottom:6px;">SYSTEM READY</div>
+        <div style="font-size:26px;font-weight:700;color:#00ff9c;letter-spacing:1px;margin-bottom:28px;">&gt;_ CONNECT</div>
+        <label style="display:block;font-size:12px;color:rgba(217,255,233,.7);margin-bottom:8px;">ENTER_HANDLE:</label>
+        <div style="display:flex;align-items:center;border:1px solid #ff2d6b;background:#150609;padding:10px 12px;margin-bottom:8px;box-shadow:0 0 10px rgba(255,45,107,.25);">
+          <span style="color:#ff8fac;">neo</span>
+          <span style="width:8px;height:16px;background:#ff2d6b;margin-left:2px;animation:blinkCursor 1s steps(1) infinite;"></span>
+        </div>
+        <div style="font-size:11px;color:#ff2d6b;margin-bottom:24px;">ERR: HANDLE_TAKEN &mdash; TRY ANOTHER</div>
+        <div style="text-align:center;padding:12px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.3);font-weight:600;letter-spacing:1px;font-size:13px;">[ CONNECT ]</div>
+      </div>
+    </div>
+
+    <!-- Card 1d: loading / connecting -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="height:28px;background:#0d1310;border-bottom:1px solid rgba(0,255,156,.3);display:flex;align-items:center;gap:6px;padding:0 10px;">
+        <span style="width:7px;height:7px;background:#00ff9c;"></span><span style="width:7px;height:7px;background:#ffb020;"></span><span style="width:7px;height:7px;background:#ff2d6b;"></span>
+        <span style="margin-left:8px;font-size:10px;color:rgba(217,255,233,.4);">guest_session.sh</span>
+      </div>
+      <div style="padding:32px 24px;">
+        <div style="font-size:11px;color:rgba(217,255,233,.4);margin-bottom:6px;">SYSTEM READY</div>
+        <div style="font-size:26px;font-weight:700;color:#00ff9c;letter-spacing:1px;margin-bottom:28px;">&gt;_ CONNECT</div>
+        <label style="display:block;font-size:12px;color:rgba(217,255,233,.7);margin-bottom:8px;">ENTER_HANDLE:</label>
+        <div style="display:flex;align-items:center;border:1px solid rgba(0,255,156,.25);background:#081109;padding:10px 12px;margin-bottom:8px;opacity:.55;">
+          <span style="color:#00ff9c;">neo_7734</span>
+        </div>
+        <div style="font-size:10.5px;color:rgba(217,255,233,.4);margin-bottom:24px;">3&ndash;20 CHARS &middot; MUST BE UNIQUE</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:1px;padding:12px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.35);font-weight:600;letter-spacing:1px;font-size:13px;cursor:not-allowed;">
+          <span>[ CONNECTING</span>
+          <span style="animation:blinkCursor 1s steps(1) infinite;">...</span>
+          <span>&nbsp;]</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ PAGE 2: MENU ============ -->
+<section id="page-menu" style="margin-bottom:64px;">
+  <h2 style="font-size:13px;letter-spacing:2px;color:#00ff9c;margin:0 0 20px;">02 // MENU (ROOM_LIST)</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;">
+
+    <!-- Card 2a: populated -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="padding:16px 18px 12px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:13px;color:rgba(217,255,233,.8);">USER: <span style="color:#00ff9c;">NEO_7734</span></div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(217,255,233,.5);">
+            <span style="width:7px;height:7px;border-radius:50%;background:#00ff9c;animation:pulseDot 1.6s ease-in-out infinite;"></span>LIVE
+          </div>
+        </div>
+        <div style="text-align:center;padding:9px;border:1px solid #00ff9c;color:#00ff9c;font-size:12px;font-weight:600;letter-spacing:.5px;" style-hover="background:#00ff9c;color:#04140c;">[ CREATE_ROOM ]</div>
+      </div>
+      <div style="display:flex;flex-direction:column;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid rgba(0,255,156,.12);animation:rowIn .6s ease;">
+          <div>
+            <div style="font-size:12.5px;color:#d9ffe9;">ROOM_DEADBEEF <span style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;padding:1px 4px;margin-left:4px;">NEW</span></div>
+            <div style="font-size:10px;color:rgba(217,255,233,.4);">HOST: glitch &middot; 1/2</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;padding:2px 5px;">WAITING</span>
+            <span style="border:1px solid #00ff9c;color:#00ff9c;font-size:10.5px;padding:4px 8px;cursor:pointer;">[JOIN]</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid rgba(0,255,156,.12);">
+          <div>
+            <div style="font-size:12.5px;color:#d9ffe9;">ROOM_NULL_PTR</div>
+            <div style="font-size:10px;color:rgba(217,255,233,.4);">HOST: cipher &middot; 1/2</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;padding:2px 5px;">WAITING</span>
+            <span style="border:1px solid #00ff9c;color:#00ff9c;font-size:10.5px;padding:4px 8px;cursor:pointer;">[JOIN]</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid rgba(0,255,156,.12);opacity:.55;">
+          <div>
+            <div style="font-size:12.5px;color:#d9ffe9;">ROOM_KERNEL_PANIC</div>
+            <div style="font-size:10px;color:rgba(217,255,233,.4);">HOST: trace &middot; 2/2</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:9px;color:#ffb020;border:1px solid #ffb020;padding:2px 5px;">IN_PROGRESS</span>
+            <span style="border:1px solid rgba(217,255,233,.25);color:rgba(217,255,233,.3);font-size:10.5px;padding:4px 8px;">[JOIN]</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid rgba(0,255,156,.12);">
+          <div>
+            <div style="font-size:12.5px;color:#d9ffe9;">ROOM_0x1A2B</div>
+            <div style="font-size:10px;color:rgba(217,255,233,.4);">HOST: ghost &middot; 1/2</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;padding:2px 5px;">WAITING</span>
+            <span style="border:1px solid #00ff9c;color:#00ff9c;font-size:10.5px;padding:4px 8px;cursor:pointer;">[JOIN]</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;opacity:.4;">
+          <div>
+            <div style="font-size:12.5px;color:#d9ffe9;">ROOM_SEGFAULT</div>
+            <div style="font-size:10px;color:rgba(217,255,233,.4);">HOST: root &middot; 2/2</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:9px;color:#ff2d6b;border:1px solid #ff2d6b;padding:2px 5px;">ENDED</span>
+            <span style="border:1px solid rgba(217,255,233,.25);color:rgba(217,255,233,.3);font-size:10.5px;padding:4px 8px;">[JOIN]</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 18px;border-top:1px solid rgba(0,255,156,.25);font-size:11px;color:rgba(217,255,233,.5);">
+        <span style="cursor:pointer;">&lt; PREV</span><span>PAGE 1/3</span><span style="cursor:pointer;color:#00ff9c;">NEXT &gt;</span>
+      </div>
+    </div>
+
+    <!-- Card 2b: empty -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="padding:16px 18px 12px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:13px;color:rgba(217,255,233,.8);">USER: <span style="color:#00ff9c;">NEO_7734</span></div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(217,255,233,.5);">
+            <span style="width:7px;height:7px;border-radius:50%;background:#00ff9c;animation:pulseDot 1.6s ease-in-out infinite;"></span>LIVE
+          </div>
+        </div>
+      </div>
+      <div style="padding:60px 24px;text-align:center;">
+        <div style="font-size:13px;color:rgba(217,255,233,.5);margin-bottom:24px;">&gt; NO_ACTIVE_ROOMS_FOUND</div>
+        <div style="display:inline-block;padding:12px 22px;border:1px solid #00ff9c;color:#00ff9c;font-size:13px;font-weight:600;letter-spacing:.5px;" style-hover="background:#00ff9c;color:#04140c;">[ CREATE_ROOM ]</div>
+      </div>
+    </div>
+
+    <!-- Card 2b2: list loading -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="padding:16px 18px 12px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:13px;color:rgba(217,255,233,.8);">USER: <span style="color:#00ff9c;">NEO_7734</span></div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(217,255,233,.5);">
+            <span style="width:7px;height:7px;border-radius:50%;background:#00ff9c;animation:pulseDot 1.6s ease-in-out infinite;"></span>LIVE
+          </div>
+        </div>
+      </div>
+      <div style="padding:60px 24px;text-align:center;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:1px;font-size:13px;color:rgba(217,255,233,.5);margin-bottom:24px;">
+          <span>&gt; LOADING</span>
+          <span style="animation:blinkCursor 1s steps(1) infinite;">...</span>
+        </div>
+        <div style="display:inline-block;padding:12px 22px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.3);font-size:13px;font-weight:600;letter-spacing:.5px;">[ CREATE_ROOM ]</div>
+      </div>
+    </div>
+
+    <!-- Card 2b3: joining a room -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="padding:16px 18px 12px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:13px;color:rgba(217,255,233,.8);">USER: <span style="color:#00ff9c;">NEO_7734</span></div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(217,255,233,.5);">
+            <span style="width:7px;height:7px;border-radius:50%;background:#00ff9c;animation:pulseDot 1.6s ease-in-out infinite;"></span>LIVE
+          </div>
+        </div>
+        <div style="text-align:center;padding:9px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.3);font-size:12px;font-weight:600;letter-spacing:.5px;">[ CREATE_ROOM ]</div>
+      </div>
+      <div style="display:flex;flex-direction:column;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid rgba(0,255,156,.12);">
+          <div>
+            <div style="font-size:12.5px;color:#d9ffe9;">ROOM_DEADBEEF</div>
+            <div style="font-size:10px;color:rgba(217,255,233,.4);">HOST: glitch &middot; 1/2</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;padding:2px 5px;">WAITING</span>
+            <span style="display:flex;align-items:center;gap:1px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.35);font-size:10.5px;padding:4px 8px;cursor:not-allowed;">
+              <span>[JOINING</span><span style="animation:blinkCursor 1s steps(1) infinite;">...</span><span>]</span>
+            </span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;opacity:.45;">
+          <div>
+            <div style="font-size:12.5px;color:#d9ffe9;">ROOM_NULL_PTR</div>
+            <div style="font-size:10px;color:rgba(217,255,233,.4);">HOST: cipher &middot; 1/2</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:9px;color:#00ff9c;border:1px solid rgba(0,255,156,.5);padding:2px 5px;">WAITING</span>
+            <span style="border:1px solid rgba(217,255,233,.25);color:rgba(217,255,233,.3);font-size:10.5px;padding:4px 8px;">[JOIN]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2c: already in room -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="padding:16px 18px 12px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:13px;color:rgba(217,255,233,.8);">USER: <span style="color:#00ff9c;">NEO_7734</span></div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(217,255,233,.5);">
+            <span style="width:7px;height:7px;border-radius:50%;background:#00ff9c;animation:pulseDot 1.6s ease-in-out infinite;"></span>LIVE
+          </div>
+        </div>
+        <div style="text-align:center;padding:9px;border:1px solid #ffb020;color:#ffb020;font-size:12px;font-weight:600;letter-spacing:.5px;">[ RETURN_TO_ROOM ]</div>
+      </div>
+      <div style="padding:10px 18px 4px;font-size:10.5px;color:rgba(217,255,233,.4);">&diams; YOU MUST LEAVE YOUR CURRENT ROOM TO JOIN ANOTHER</div>
+      <div style="display:flex;flex-direction:column;opacity:.3;filter:grayscale(1);pointer-events:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid rgba(0,255,156,.12);">
+          <div>
+            <div style="font-size:12.5px;color:#d9ffe9;">ROOM_NULL_PTR</div>
+            <div style="font-size:10px;color:rgba(217,255,233,.4);">HOST: cipher &middot; 1/2</div>
+          </div>
+          <span style="border:1px solid rgba(217,255,233,.25);color:rgba(217,255,233,.3);font-size:10.5px;padding:4px 8px;">[JOIN]</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;">
+          <div>
+            <div style="font-size:12.5px;color:#d9ffe9;">ROOM_0x1A2B</div>
+            <div style="font-size:10px;color:rgba(217,255,233,.4);">HOST: ghost &middot; 1/2</div>
+          </div>
+          <span style="border:1px solid rgba(217,255,233,.25);color:rgba(217,255,233,.3);font-size:10.5px;padding:4px 8px;">[JOIN]</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ PAGE 3: ROOM ============ -->
+<section id="page-room" style="margin-bottom:64px;">
+  <h2 style="font-size:13px;letter-spacing:2px;color:#00ff9c;margin:0 0 20px;">03 // ROOM</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;">
+
+    <!-- Card 3z: set room name (login-style) -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="height:28px;background:#0d1310;border-bottom:1px solid rgba(0,255,156,.3);display:flex;align-items:center;gap:6px;padding:0 10px;">
+        <span style="width:7px;height:7px;background:#00ff9c;"></span><span style="width:7px;height:7px;background:#ffb020;"></span><span style="width:7px;height:7px;background:#ff2d6b;"></span>
+        <span style="margin-left:8px;font-size:10px;color:rgba(217,255,233,.4);">create_room.sh</span>
+      </div>
+      <div style="padding:32px 24px;">
+        <div style="font-size:11px;color:rgba(217,255,233,.4);margin-bottom:6px;">ALLOCATING SESSION</div>
+        <div style="font-size:26px;font-weight:700;color:#00ff9c;letter-spacing:1px;margin-bottom:28px;">&gt;_ NEW_ROOM</div>
+        <label style="display:block;font-size:12px;color:rgba(217,255,233,.7);margin-bottom:8px;">ENTER_ROOM_NAME:</label>
+        <div style="display:flex;align-items:center;border:1px solid #00ff9c;background:#081109;padding:10px 12px;margin-bottom:8px;">
+          <span style="color:#00ff9c;">room_null_ptr</span>
+          <span style="width:8px;height:16px;background:#00ff9c;margin-left:2px;animation:blinkCursor 1s steps(1) infinite;"></span>
+        </div>
+        <div style="font-size:10.5px;color:rgba(217,255,233,.4);margin-bottom:24px;">3&ndash;24 CHARS &middot; HOST: NEO_7734</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="text-align:center;padding:12px;border:1px solid #00ff9c;color:#00ff9c;font-weight:600;letter-spacing:1px;font-size:13px;cursor:pointer;" style-hover="background:#00ff9c;color:#04140c;box-shadow:0 0 20px rgba(0,255,156,.6);">[ CREATE ]</div>
+          <div style="text-align:center;padding:10px;border:1px solid rgba(217,255,233,.25);color:rgba(217,255,233,.5);font-size:12px;cursor:pointer;" style-hover="border-color:#d9ffe9;color:#d9ffe9;">[ CANCEL ]</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3z2: set room name, error -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="height:28px;background:#0d1310;border-bottom:1px solid rgba(0,255,156,.3);display:flex;align-items:center;gap:6px;padding:0 10px;">
+        <span style="width:7px;height:7px;background:#00ff9c;"></span><span style="width:7px;height:7px;background:#ffb020;"></span><span style="width:7px;height:7px;background:#ff2d6b;"></span>
+        <span style="margin-left:8px;font-size:10px;color:rgba(217,255,233,.4);">create_room.sh</span>
+      </div>
+      <div style="padding:32px 24px;">
+        <div style="font-size:11px;color:rgba(217,255,233,.4);margin-bottom:6px;">ALLOCATING SESSION</div>
+        <div style="font-size:26px;font-weight:700;color:#00ff9c;letter-spacing:1px;margin-bottom:28px;">&gt;_ NEW_ROOM</div>
+        <label style="display:block;font-size:12px;color:rgba(217,255,233,.7);margin-bottom:8px;">ENTER_ROOM_NAME:</label>
+        <div style="display:flex;align-items:center;border:1px solid #ff2d6b;background:#150609;padding:10px 12px;margin-bottom:8px;box-shadow:0 0 10px rgba(255,45,107,.25);">
+          <span style="color:#ff8fac;">room_segfault</span>
+          <span style="width:8px;height:16px;background:#ff2d6b;margin-left:2px;animation:blinkCursor 1s steps(1) infinite;"></span>
+        </div>
+        <div style="font-size:11px;color:#ff2d6b;margin-bottom:24px;">ERR: ROOM_NAME_TAKEN</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="text-align:center;padding:12px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.3);font-weight:600;letter-spacing:1px;font-size:13px;">[ CREATE ]</div>
+          <div style="text-align:center;padding:10px;border:1px solid rgba(217,255,233,.25);color:rgba(217,255,233,.5);font-size:12px;cursor:pointer;" style-hover="border-color:#d9ffe9;color:#d9ffe9;">[ CANCEL ]</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3z3: creating room -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="height:28px;background:#0d1310;border-bottom:1px solid rgba(0,255,156,.3);display:flex;align-items:center;gap:6px;padding:0 10px;">
+        <span style="width:7px;height:7px;background:#00ff9c;"></span><span style="width:7px;height:7px;background:#ffb020;"></span><span style="width:7px;height:7px;background:#ff2d6b;"></span>
+        <span style="margin-left:8px;font-size:10px;color:rgba(217,255,233,.4);">create_room.sh</span>
+      </div>
+      <div style="padding:32px 24px;">
+        <div style="font-size:11px;color:rgba(217,255,233,.4);margin-bottom:6px;">ALLOCATING SESSION</div>
+        <div style="font-size:26px;font-weight:700;color:#00ff9c;letter-spacing:1px;margin-bottom:28px;">&gt;_ NEW_ROOM</div>
+        <label style="display:block;font-size:12px;color:rgba(217,255,233,.7);margin-bottom:8px;">ENTER_ROOM_NAME:</label>
+        <div style="display:flex;align-items:center;border:1px solid rgba(0,255,156,.25);background:#081109;padding:10px 12px;margin-bottom:8px;opacity:.55;">
+          <span style="color:#00ff9c;">room_null_ptr</span>
+        </div>
+        <div style="font-size:10.5px;color:rgba(217,255,233,.4);margin-bottom:24px;">3&ndash;24 CHARS &middot; HOST: NEO_7734</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;justify-content:center;gap:1px;padding:12px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.35);font-weight:600;letter-spacing:1px;font-size:13px;cursor:not-allowed;">
+            <span>[ CREATING</span><span style="animation:blinkCursor 1s steps(1) infinite;">...</span><span>&nbsp;]</span>
+          </div>
+          <div style="text-align:center;padding:10px;border:1px solid rgba(217,255,233,.25);color:rgba(217,255,233,.5);font-size:12px;cursor:pointer;" style-hover="border-color:#d9ffe9;color:#d9ffe9;">[ CANCEL ]</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3a: waiting, host view -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="padding:16px 18px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="font-size:15px;font-weight:700;color:#00ff9c;">ROOM_NULL_PTR</div>
+          <span style="font-size:10px;color:rgba(217,255,233,.5);border:1px solid rgba(217,255,233,.3);padding:2px 5px;cursor:pointer;">[ RENAME ]</span>
+        </div>
+        <div style="font-size:10px;color:rgba(217,255,233,.4);margin-top:3px;">ID: #7F3A9C</div>
+      </div>
+      <div style="text-align:center;padding:8px;font-size:11px;letter-spacing:.5px;color:#ffb020;border-bottom:1px solid rgba(255,176,32,.3);background:rgba(255,176,32,.06);">STATUS: WAITING_FOR_PLAYERS</div>
+      <div style="display:flex;gap:14px;padding:20px 18px;">
+        <div style="flex:1;border:1px solid #00ff9c;padding:16px 10px;text-align:center;">
+          <div style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;display:inline-block;padding:1px 5px;margin-bottom:8px;">HOST</div>
+          <div style="font-size:13px;color:#d9ffe9;">NEO_7734</div>
+        </div>
+        <div style="flex:1;border:1px dashed rgba(217,255,233,.3);padding:16px 10px;text-align:center;">
+          <div style="font-size:11px;color:rgba(217,255,233,.4);">WAITING_FOR<br/>OPPONENT<span style="animation:blinkCursor 1s steps(1) infinite;">...</span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding:0 18px 20px;">
+        <div style="text-align:center;padding:10px;border:1px solid rgba(217,255,233,.25);color:rgba(217,255,233,.3);font-size:12px;">[ START_GAME ]</div>
+        <div style="text-align:center;padding:10px;border:1px solid #ff2d6b;color:#ff2d6b;font-size:12px;" style-hover="background:#ff2d6b;color:#0a0d0a;">[ DELETE_ROOM ]</div>
+      </div>
+    </div>
+
+    <!-- Card 3b: ready, host view -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="padding:16px 18px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="font-size:15px;font-weight:700;color:#00ff9c;">ROOM_NULL_PTR</div>
+          <span style="font-size:10px;color:rgba(217,255,233,.5);border:1px solid rgba(217,255,233,.3);padding:2px 5px;cursor:pointer;">[ RENAME ]</span>
+        </div>
+        <div style="font-size:10px;color:rgba(217,255,233,.4);margin-top:3px;">ID: #7F3A9C</div>
+      </div>
+      <div style="text-align:center;padding:8px;font-size:11px;letter-spacing:.5px;color:#00ff9c;border-bottom:1px solid rgba(0,255,156,.3);background:rgba(0,255,156,.06);">STATUS: READY &mdash; 2/2 PLAYERS</div>
+      <div style="display:flex;gap:14px;padding:20px 18px;">
+        <div style="flex:1;border:1px solid #00ff9c;padding:16px 10px;text-align:center;">
+          <div style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;display:inline-block;padding:1px 5px;margin-bottom:8px;">HOST</div>
+          <div style="font-size:13px;color:#d9ffe9;">NEO_7734</div>
+        </div>
+        <div style="flex:1;border:1px solid rgba(217,255,233,.3);padding:16px 10px;text-align:center;">
+          <div style="font-size:13px;color:#d9ffe9;margin-bottom:8px;">CIPHER_88</div>
+          <div style="font-size:9px;color:#ff2d6b;border:1px solid #ff2d6b;display:inline-block;padding:2px 6px;cursor:pointer;">[ REMOVE_PLAYER ]</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding:0 18px 20px;">
+        <div style="text-align:center;padding:10px;border:1px solid #00ff9c;color:#00ff9c;font-size:12px;font-weight:600;animation:glowPulse 2s ease-in-out infinite;" style-hover="background:#00ff9c;color:#04140c;">[ START_GAME ]</div>
+        <div style="text-align:center;padding:10px;border:1px solid #ff2d6b;color:#ff2d6b;font-size:12px;" style-hover="background:#ff2d6b;color:#0a0d0a;">[ DELETE_ROOM ]</div>
+      </div>
+    </div>
+
+    <!-- Card 3b3: host, starting game (loading) -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="padding:16px 18px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="font-size:15px;font-weight:700;color:#00ff9c;">ROOM_NULL_PTR</div>
+          <span style="font-size:10px;color:rgba(217,255,233,.3);border:1px solid rgba(217,255,233,.15);padding:2px 5px;">[ RENAME ]</span>
+        </div>
+        <div style="font-size:10px;color:rgba(217,255,233,.4);margin-top:3px;">ID: #7F3A9C</div>
+      </div>
+      <div style="text-align:center;padding:8px;font-size:11px;letter-spacing:.5px;color:#00ff9c;border-bottom:1px solid rgba(0,255,156,.3);background:rgba(0,255,156,.06);">STATUS: READY &mdash; 2/2 PLAYERS</div>
+      <div style="display:flex;gap:14px;padding:20px 18px;">
+        <div style="flex:1;border:1px solid rgba(0,255,156,.5);padding:16px 10px;text-align:center;">
+          <div style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;display:inline-block;padding:1px 5px;margin-bottom:8px;">HOST</div>
+          <div style="font-size:13px;color:#d9ffe9;">NEO_7734</div>
+        </div>
+        <div style="flex:1;border:1px solid rgba(217,255,233,.3);padding:16px 10px;text-align:center;">
+          <div style="font-size:13px;color:#d9ffe9;margin-bottom:8px;">CIPHER_88</div>
+          <div style="font-size:9px;color:rgba(255,45,107,.4);border:1px solid rgba(255,45,107,.3);display:inline-block;padding:2px 6px;">[ REMOVE_PLAYER ]</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding:0 18px 20px;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:1px;padding:10px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.35);font-size:12px;font-weight:600;cursor:not-allowed;">
+          <span>[ STARTING</span><span style="animation:blinkCursor 1s steps(1) infinite;">...</span><span>&nbsp;]</span>
+        </div>
+        <div style="text-align:center;padding:10px;border:1px solid #ff2d6b;color:#ff2d6b;font-size:12px;" style-hover="background:#ff2d6b;color:#0a0d0a;">[ DELETE_ROOM ]</div>
+      </div>
+    </div>
+
+    <!-- Card 3b2: non-host, 2 players, waiting for host to start -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="padding:16px 18px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="font-size:15px;font-weight:700;color:#00ff9c;">ROOM_NULL_PTR</div>
+        <div style="font-size:10px;color:rgba(217,255,233,.4);margin-top:3px;">ID: #7F3A9C</div>
+      </div>
+      <div style="text-align:center;padding:8px;font-size:11px;letter-spacing:.5px;color:#00ff9c;border-bottom:1px solid rgba(0,255,156,.3);background:rgba(0,255,156,.06);">STATUS: READY &mdash; 2/2 PLAYERS</div>
+      <div style="display:flex;gap:14px;padding:20px 18px;">
+        <div style="flex:1;border:1px solid rgba(0,255,156,.5);padding:16px 10px;text-align:center;">
+          <div style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;display:inline-block;padding:1px 5px;margin-bottom:8px;">HOST</div>
+          <div style="font-size:13px;color:#d9ffe9;">NEO_7734</div>
+        </div>
+        <div style="flex:1;border:1px solid rgba(217,255,233,.3);padding:16px 10px;text-align:center;">
+          <div style="font-size:13px;color:#00ff9c;margin-bottom:2px;">CIPHER_88</div>
+          <div style="font-size:9px;color:rgba(217,255,233,.4);">(YOU)</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding:0 18px 20px;">
+        <div style="text-align:center;padding:10px;font-size:11px;color:rgba(217,255,233,.5);border:1px dashed rgba(217,255,233,.25);">WAITING_FOR_HOST_TO_START<span style="animation:blinkCursor 1s steps(1) infinite;">...</span></div>
+        <div style="text-align:center;padding:10px;border:1px solid #ff2d6b;color:#ff2d6b;font-size:12px;" style-hover="background:#ff2d6b;color:#0a0d0a;">[ LEAVE_ROOM ]</div>
+      </div>
+    </div>
+
+    <!-- Card 3c: non-host, in progress -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="padding:16px 18px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="font-size:15px;font-weight:700;color:#00ff9c;">ROOM_NULL_PTR</div>
+        <div style="font-size:10px;color:rgba(217,255,233,.4);margin-top:3px;">ID: #7F3A9C</div>
+      </div>
+      <div style="text-align:center;padding:8px;font-size:11px;letter-spacing:.5px;color:#ffb020;border-bottom:1px solid rgba(255,176,32,.3);background:rgba(255,176,32,.06);">STATUS: GAME_IN_PROGRESS</div>
+      <div style="display:flex;gap:14px;padding:20px 18px;">
+        <div style="flex:1;border:1px solid #00ff9c;padding:16px 10px;text-align:center;box-shadow:0 0 12px rgba(0,255,156,.25);">
+          <div style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;display:inline-block;padding:1px 5px;margin-bottom:8px;">HOST</div>
+          <div style="font-size:13px;color:#d9ffe9;">NEO_7734</div>
+        </div>
+        <div style="flex:1;border:1px solid rgba(217,255,233,.3);padding:16px 10px;text-align:center;">
+          <div style="font-size:13px;color:#00ff9c;margin-bottom:2px;">CIPHER_88</div>
+          <div style="font-size:9px;color:rgba(217,255,233,.4);">(YOU)</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding:0 18px 20px;">
+        <div style="text-align:center;padding:10px;border:1px solid #00ff9c;color:#00ff9c;font-size:12px;font-weight:600;" style-hover="background:#00ff9c;color:#04140c;">[ ENTER_GAME ]</div>
+        <div style="text-align:center;padding:10px;border:1px solid #ff2d6b;color:#ff2d6b;font-size:12px;" style-hover="background:#ff2d6b;color:#0a0d0a;">[ LEAVE_ROOM ]</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ PAGE 4: GAME ============ -->
+<section id="page-game" style="margin-bottom:40px;">
+  <h2 style="font-size:13px;letter-spacing:2px;color:#00ff9c;margin:0 0 20px;">04 // GAME</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;">
+
+    <!-- Card 4a: mid-play -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="display:flex;justify-content:space-between;padding:16px 18px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="text-align:center;flex:1;">
+          <div style="font-size:12px;color:#d9ffe9;">NEO_7734</div>
+          <div style="font-size:20px;color:rgba(217,255,233,.35);font-weight:700;">X</div>
+        </div>
+        <div style="text-align:center;flex:1;">
+          <div style="font-size:12px;color:#00ff9c;animation:glowPulse 1.8s ease-in-out infinite;">CIPHER_88</div>
+          <div style="font-size:20px;color:#00ff9c;font-weight:700;animation:glowPulse 1.8s ease-in-out infinite;">O</div>
+        </div>
+      </div>
+      <div style="text-align:center;padding:10px;font-size:11px;color:#00ff9c;border-bottom:1px solid rgba(0,255,156,.2);">&gt; AWAITING_INPUT: CIPHER_88</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:20px;background:rgba(0,255,156,.25);">
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:rgba(217,255,233,.4);">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#00ff9c;text-shadow:0 0 12px #00ff9c;">O</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(217,255,233,.15);">_</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(217,255,233,.15);">_</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:rgba(217,255,233,.4);">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(217,255,233,.15);">_</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(217,255,233,.15);">_</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#00ff9c;text-shadow:0 0 12px #00ff9c;">O</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(217,255,233,.15);">_</div>
+      </div>
+      <div style="padding:0 18px 20px;">
+        <div style="text-align:center;padding:10px;border:1px solid #00ff9c;color:#00ff9c;font-size:12px;font-weight:600;" style-hover="background:#00ff9c;color:#04140c;">[ LEAVE_GAME ]</div>
+      </div>
+    </div>
+
+    <!-- Card 4b: win -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="display:flex;justify-content:space-between;padding:16px 18px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="text-align:center;flex:1;"><div style="font-size:12px;color:#00ff9c;">NEO_7734</div><div style="font-size:20px;color:#00ff9c;font-weight:700;">X</div></div>
+        <div style="text-align:center;flex:1;"><div style="font-size:12px;color:rgba(217,255,233,.35);">CIPHER_88</div><div style="font-size:20px;color:rgba(217,255,233,.35);font-weight:700;">O</div></div>
+      </div>
+      <div style="text-align:center;padding:10px;font-size:12px;font-weight:700;letter-spacing:.5px;color:#00ff9c;border-bottom:1px solid rgba(0,255,156,.3);background:rgba(0,255,156,.08);text-shadow:0 0 10px #00ff9c;">&gt; GAME_OVER: NEO_7734_WINS</div>
+      <div style="position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:20px;background:rgba(0,255,156,.25);">
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#00ff9c;text-shadow:0 0 14px #00ff9c;">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#00ff9c;text-shadow:0 0 14px #00ff9c;">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#00ff9c;text-shadow:0 0 14px #00ff9c;">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:rgba(217,255,233,.35);">O</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:rgba(217,255,233,.2);">O</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;"></div>
+        <div style="aspect-ratio:1;background:#0a0d0a;"></div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:rgba(217,255,233,.2);">O</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;"></div>
+        <div style="position:absolute;left:20px;right:20px;top:20px;height:calc((100% - 40px) / 3);display:flex;align-items:center;pointer-events:none;">
+          <div style="width:100%;height:2px;background:#00ff9c;box-shadow:0 0 10px 2px #00ff9c;"></div>
+        </div>
+      </div>
+      <div style="padding:0 18px 20px;">
+        <div style="text-align:center;padding:10px;border:1px solid #00ff9c;color:#00ff9c;font-size:12px;font-weight:600;" style-hover="background:#00ff9c;color:#04140c;">[ LEAVE_GAME ]</div>
+      </div>
+    </div>
+
+    <!-- Card 4c: draw -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="display:flex;justify-content:space-between;padding:16px 18px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="text-align:center;flex:1;"><div style="font-size:12px;color:rgba(217,255,233,.6);">NEO_7734</div><div style="font-size:20px;color:rgba(217,255,233,.5);font-weight:700;">X</div></div>
+        <div style="text-align:center;flex:1;"><div style="font-size:12px;color:rgba(217,255,233,.6);">CIPHER_88</div><div style="font-size:20px;color:rgba(217,255,233,.5);font-weight:700;">O</div></div>
+      </div>
+      <div style="text-align:center;padding:10px;font-size:12px;font-weight:700;letter-spacing:.5px;color:#ffb020;border-bottom:1px solid rgba(255,176,32,.3);background:rgba(255,176,32,.07);">&gt; GAME_OVER: DRAW</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:20px;background:rgba(0,255,156,.25);">
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:rgba(217,255,233,.5);">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:rgba(217,255,233,.5);">O</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:rgba(217,255,233,.5);">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:rgba(217,255,233,.5);">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:rgba(217,255,233,.5);">O</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:rgba(217,255,233,.5);">O</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:rgba(217,255,233,.5);">O</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:rgba(217,255,233,.5);">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:rgba(217,255,233,.5);">X</div>
+      </div>
+      <div style="padding:0 18px 20px;">
+        <div style="text-align:center;padding:10px;border:1px solid #00ff9c;color:#00ff9c;font-size:12px;font-weight:600;" style-hover="background:#00ff9c;color:#04140c;">[ LEAVE_GAME ]</div>
+      </div>
+    </div>
+
+    <!-- Card 4d: disconnect -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="display:flex;justify-content:space-between;padding:16px 18px;border-bottom:1px solid rgba(0,255,156,.25);">
+        <div style="text-align:center;flex:1;"><div style="font-size:12px;color:rgba(217,255,233,.6);">NEO_7734</div><div style="font-size:20px;color:rgba(217,255,233,.5);font-weight:700;">X</div></div>
+        <div style="text-align:center;flex:1;"><div style="font-size:12px;color:#ff2d6b;text-decoration:line-through;opacity:.7;">CIPHER_88</div><div style="font-size:20px;color:rgba(217,255,233,.25);font-weight:700;">O</div></div>
+      </div>
+      <div style="text-align:center;padding:10px;font-size:11.5px;font-weight:700;letter-spacing:.5px;color:#ff2d6b;border-bottom:1px solid rgba(255,45,107,.35);background:rgba(255,45,107,.08);text-shadow:0 0 10px rgba(255,45,107,.6);">&gt; GAME_OVER: OPPONENT_DISCONNECTED</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:20px;background:rgba(255,45,107,.2);opacity:.6;">
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:rgba(217,255,233,.4);">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;"></div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:rgba(217,255,233,.25);">O</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;"></div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:rgba(217,255,233,.4);">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;"></div>
+        <div style="aspect-ratio:1;background:#0a0d0a;"></div>
+        <div style="aspect-ratio:1;background:#0a0d0a;"></div>
+        <div style="aspect-ratio:1;background:#0a0d0a;"></div>
+      </div>
+      <div style="padding:0 18px 20px;">
+        <div style="text-align:center;padding:10px;border:1px solid #00ff9c;color:#00ff9c;font-size:12px;font-weight:600;" style-hover="background:#00ff9c;color:#04140c;">[ LEAVE_GAME ]</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ DESIGN SYSTEM ============ -->
+<section id="page-system" style="margin-bottom:40px;border-top:1px solid rgba(0,255,156,.35);padding-top:36px;">
+  <h2 style="font-size:13px;letter-spacing:2px;color:#00ff9c;margin:0 0 6px;">05 // DESIGN_SYSTEM</h2>
+  <div style="font-size:11px;color:rgba(217,255,233,.45);margin:0 0 28px;">COMPONENT INVENTORY &mdash; EVERYTHING THAT NEEDS TO BE BUILT</div>
+
+  <!-- tokens -->
+  <div style="display:flex;flex-wrap:wrap;gap:28px;margin-bottom:32px;">
+    <div style="flex:1 1 300px;border:1px solid rgba(0,255,156,.25);padding:18px;">
+      <div style="font-size:11px;letter-spacing:1px;color:#00ff9c;margin-bottom:14px;">COLOR</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;">
+        <div><div style="height:38px;background:#0a0d0a;border:1px solid rgba(0,255,156,.3);"></div><div style="font-size:9.5px;color:rgba(217,255,233,.55);margin-top:4px;">bg #0A0D0A</div></div>
+        <div><div style="height:38px;background:#0e1410;border:1px solid rgba(0,255,156,.3);"></div><div style="font-size:9.5px;color:rgba(217,255,233,.55);margin-top:4px;">surface #0E1410</div></div>
+        <div><div style="height:38px;background:#00ff9c;"></div><div style="font-size:9.5px;color:rgba(217,255,233,.55);margin-top:4px;">accent #00FF9C</div></div>
+        <div><div style="height:38px;background:#ffb020;"></div><div style="font-size:9.5px;color:rgba(217,255,233,.55);margin-top:4px;">warn #FFB020</div></div>
+        <div><div style="height:38px;background:#ff2d6b;"></div><div style="font-size:9.5px;color:rgba(217,255,233,.55);margin-top:4px;">danger #FF2D6B</div></div>
+        <div><div style="height:38px;background:#d9ffe9;"></div><div style="font-size:9.5px;color:rgba(217,255,233,.55);margin-top:4px;">text #D9FFE9</div></div>
+      </div>
+    </div>
+    <div style="flex:1 1 300px;border:1px solid rgba(0,255,156,.25);padding:18px;">
+      <div style="font-size:11px;letter-spacing:1px;color:#00ff9c;margin-bottom:14px;">TYPE &mdash; JETBRAINS MONO</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div><div style="font-size:26px;font-weight:700;color:#00ff9c;">&gt;_ DISPLAY / 26 / 700</div></div>
+        <div><div style="font-size:15px;font-weight:700;color:#d9ffe9;">TITLE / 15 / 700</div></div>
+        <div><div style="font-size:12.5px;color:#d9ffe9;">BODY / 12.5 / 400</div></div>
+        <div><div style="font-size:11px;color:rgba(217,255,233,.5);">META / 11 / 400 / 50% OPACITY</div></div>
+        <div><div style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;display:inline-block;padding:1px 5px;">TAG / 9 / UPPER</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- components -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;">
+
+    <div style="border:1px solid rgba(0,255,156,.25);padding:18px;">
+      <div style="font-size:11px;letter-spacing:1px;color:#00ff9c;margin-bottom:6px;">Button</div>
+      <div style="font-size:10px;color:rgba(217,255,233,.4);margin-bottom:14px;">variant: primary | danger | ghost &middot; state: default / hover / disabled / loading</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="text-align:center;padding:10px;border:1px solid #00ff9c;color:#00ff9c;font-size:12px;font-weight:600;">[ PRIMARY ]</div>
+        <div style="text-align:center;padding:10px;border:1px solid #00ff9c;background:#00ff9c;color:#04140c;font-size:12px;font-weight:600;box-shadow:0 0 18px rgba(0,255,156,.5);">[ PRIMARY:HOVER ]</div>
+        <div style="text-align:center;padding:10px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.3);font-size:12px;font-weight:600;">[ DISABLED ]</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:1px;padding:10px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.35);font-size:12px;font-weight:600;cursor:not-allowed;">
+          <span>[ LOADING</span><span style="animation:blinkCursor 1s steps(1) infinite;">...</span><span>&nbsp;]</span>
+        </div>
+        <div style="font-size:9.5px;color:rgba(217,255,233,.35);line-height:1.5;">LOADING = DISABLED + PRESENT-TENSE VERB + BLINKING DOTS. USED FOR: CONNECT, CREATE, JOIN, START_GAME. NOT USED FOR DELETE / CANCEL / LEAVE (OPTIMISTIC).</div>
+        <div style="text-align:center;padding:10px;border:1px solid #ff2d6b;color:#ff2d6b;font-size:12px;">[ DANGER ]</div>
+        <div style="text-align:center;padding:10px;border:1px solid rgba(217,255,233,.25);color:rgba(217,255,233,.5);font-size:12px;">[ GHOST ]</div>
+      </div>
+    </div>
+
+    <div style="border:1px solid rgba(0,255,156,.25);padding:18px;">
+      <div style="font-size:11px;letter-spacing:1px;color:#00ff9c;margin-bottom:6px;">TextField</div>
+      <div style="font-size:10px;color:rgba(217,255,233,.4);margin-bottom:14px;">state: idle / focus+caret / error &middot; with hint + error slot</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="border:1px solid rgba(0,255,156,.3);background:#081109;padding:10px 12px;font-size:12px;color:rgba(217,255,233,.35);">enter_value</div>
+        <div style="display:flex;align-items:center;border:1px solid #00ff9c;background:#081109;padding:10px 12px;">
+          <span style="color:#00ff9c;font-size:12px;">typed_input</span><span style="width:8px;height:14px;background:#00ff9c;margin-left:2px;animation:blinkCursor 1s steps(1) infinite;"></span>
+        </div>
+        <div>
+          <div style="border:1px solid #ff2d6b;background:#150609;padding:10px 12px;font-size:12px;color:#ff8fac;box-shadow:0 0 10px rgba(255,45,107,.25);">ab</div>
+          <div style="font-size:11px;color:#ff2d6b;margin-top:6px;">ERR: VALIDATION_MESSAGE</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="border:1px solid rgba(0,255,156,.25);padding:18px;">
+      <div style="font-size:11px;letter-spacing:1px;color:#00ff9c;margin-bottom:6px;">StatusBadge</div>
+      <div style="font-size:10px;color:rgba(217,255,233,.4);margin-bottom:14px;">waiting | in_progress | ended | new | host | you</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <span style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;padding:2px 5px;">WAITING</span>
+        <span style="font-size:9px;color:#ffb020;border:1px solid #ffb020;padding:2px 5px;">IN_PROGRESS</span>
+        <span style="font-size:9px;color:#ff2d6b;border:1px solid #ff2d6b;padding:2px 5px;">ENDED</span>
+        <span style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;padding:2px 5px;">NEW</span>
+        <span style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;padding:2px 5px;">HOST</span>
+        <span style="font-size:9px;color:rgba(217,255,233,.5);border:1px solid rgba(217,255,233,.3);padding:2px 5px;">YOU</span>
+      </div>
+      <div style="font-size:11px;letter-spacing:1px;color:#00ff9c;margin:18px 0 10px;">LiveIndicator</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(217,255,233,.5);">
+        <span style="width:7px;height:7px;border-radius:50%;background:#00ff9c;animation:pulseDot 1.6s ease-in-out infinite;"></span>LIVE
+      </div>
+    </div>
+
+    <div style="border:1px solid rgba(0,255,156,.25);padding:18px;">
+      <div style="font-size:11px;letter-spacing:1px;color:#00ff9c;margin-bottom:6px;">StatusBar</div>
+      <div style="font-size:10px;color:rgba(217,255,233,.4);margin-bottom:14px;">tone: neutral | success | warn | danger</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="text-align:center;padding:8px;font-size:11px;color:#00ff9c;border:1px solid rgba(0,255,156,.3);background:rgba(0,255,156,.06);">STATUS: READY &mdash; 2/2 PLAYERS</div>
+        <div style="text-align:center;padding:8px;font-size:11px;color:#ffb020;border:1px solid rgba(255,176,32,.3);background:rgba(255,176,32,.06);">STATUS: WAITING_FOR_PLAYERS</div>
+        <div style="text-align:center;padding:8px;font-size:11px;color:#ff2d6b;border:1px solid rgba(255,45,107,.35);background:rgba(255,45,107,.08);">GAME_OVER: OPPONENT_DISCONNECTED</div>
+      </div>
+    </div>
+
+    <div style="border:1px solid rgba(0,255,156,.25);padding:18px;">
+      <div style="font-size:11px;letter-spacing:1px;color:#00ff9c;margin-bottom:6px;">RoomListItem</div>
+      <div style="font-size:10px;color:rgba(217,255,233,.4);margin-bottom:14px;">joinable / full / ended &middot; enter animation on new room</div>
+      <div style="display:flex;flex-direction:column;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,255,156,.12);">
+          <div>
+            <div style="font-size:12.5px;color:#d9ffe9;">ROOM_DEADBEEF</div>
+            <div style="font-size:10px;color:rgba(217,255,233,.4);">HOST: glitch &middot; 1/2</div>
+          </div>
+          <span style="border:1px solid #00ff9c;color:#00ff9c;font-size:10.5px;padding:4px 8px;">[JOIN]</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;opacity:.45;">
+          <div>
+            <div style="font-size:12.5px;color:#d9ffe9;">ROOM_SEGFAULT</div>
+            <div style="font-size:10px;color:rgba(217,255,233,.4);">HOST: root &middot; 2/2</div>
+          </div>
+          <span style="border:1px solid rgba(217,255,233,.25);color:rgba(217,255,233,.3);font-size:10.5px;padding:4px 8px;">[JOIN]</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="border:1px solid rgba(0,255,156,.25);padding:18px;">
+      <div style="font-size:11px;letter-spacing:1px;color:#00ff9c;margin-bottom:6px;">PlayerSlot</div>
+      <div style="font-size:10px;color:rgba(217,255,233,.4);margin-bottom:14px;">filled / filled+host / empty / active-turn</div>
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;border:1px solid #00ff9c;padding:14px 8px;text-align:center;">
+          <div style="font-size:9px;color:#00ff9c;border:1px solid #00ff9c;display:inline-block;padding:1px 5px;margin-bottom:6px;">HOST</div>
+          <div style="font-size:12px;color:#d9ffe9;">NEO_7734</div>
+        </div>
+        <div style="flex:1;border:1px dashed rgba(217,255,233,.3);padding:14px 8px;text-align:center;">
+          <div style="font-size:11px;color:rgba(217,255,233,.4);">EMPTY</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="border:1px solid rgba(0,255,156,.25);padding:18px;">
+      <div style="font-size:11px;letter-spacing:1px;color:#00ff9c;margin-bottom:6px;">BoardCell + Board</div>
+      <div style="font-size:10px;color:rgba(217,255,233,.4);margin-bottom:14px;">empty / x / o / winning &middot; 3&times;3 grid + win line overlay</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(0,255,156,.25);max-width:190px;">
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(217,255,233,.15);">_</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:rgba(217,255,233,.4);">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#00ff9c;text-shadow:0 0 12px #00ff9c;">O</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#00ff9c;text-shadow:0 0 14px #00ff9c;">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#00ff9c;text-shadow:0 0 14px #00ff9c;">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#00ff9c;text-shadow:0 0 14px #00ff9c;">X</div>
+        <div style="aspect-ratio:1;background:#0a0d0a;"></div>
+        <div style="aspect-ratio:1;background:#0a0d0a;"></div>
+        <div style="aspect-ratio:1;background:#0a0d0a;"></div>
+      </div>
+    </div>
+
+    <div style="border:1px solid rgba(0,255,156,.25);padding:18px;">
+      <div style="font-size:11px;letter-spacing:1px;color:#00ff9c;margin-bottom:6px;">TerminalCard + TitleBar</div>
+      <div style="font-size:10px;color:rgba(217,255,233,.4);margin-bottom:14px;">shell for login / create-room / room / game</div>
+      <div style="border:1px solid rgba(0,255,156,.35);">
+        <div style="height:26px;background:#0d1310;border-bottom:1px solid rgba(0,255,156,.3);display:flex;align-items:center;gap:6px;padding:0 10px;">
+          <span style="width:7px;height:7px;background:#00ff9c;"></span><span style="width:7px;height:7px;background:#ffb020;"></span><span style="width:7px;height:7px;background:#ff2d6b;"></span>
+          <span style="margin-left:8px;font-size:10px;color:rgba(217,255,233,.4);">filename.sh</span>
+        </div>
+        <div style="padding:20px 12px;font-size:11px;color:rgba(217,255,233,.35);text-align:center;">SLOT</div>
+      </div>
+    </div>
+
+    <div style="border:1px solid rgba(0,255,156,.25);padding:18px;">
+      <div style="font-size:11px;letter-spacing:1px;color:#00ff9c;margin-bottom:6px;">EmptyState / Pagination / Notice</div>
+      <div style="font-size:10px;color:rgba(217,255,233,.4);margin-bottom:14px;">list utilities</div>
+      <div style="padding:14px 0;text-align:center;font-size:12px;color:rgba(217,255,233,.5);">&gt; NO_ACTIVE_ROOMS_FOUND</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:1px;padding:0 0 14px;font-size:12px;color:rgba(217,255,233,.5);">
+        <span>&gt; LOADING</span><span style="animation:blinkCursor 1s steps(1) infinite;">...</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(217,255,233,.5);border-top:1px solid rgba(0,255,156,.2);padding-top:10px;">
+        <span>&lt; PREV</span><span>PAGE 1/3</span><span style="color:#00ff9c;">NEXT &gt;</span>
+      </div>
+      <div style="font-size:10.5px;color:rgba(217,255,233,.4);margin-top:14px;">&diams; INLINE_NOTICE_TEXT</div>
+    </div>
+
+    <div style="border:1px solid rgba(0,255,156,.25);padding:18px;">
+      <div style="font-size:11px;letter-spacing:1px;color:#00ff9c;margin-bottom:6px;">Motion</div>
+      <div style="font-size:10px;color:rgba(217,255,233,.4);margin-bottom:14px;">4 named animations only</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:11px;color:rgba(217,255,233,.6);">
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:7px;height:7px;border-radius:50%;background:#00ff9c;animation:pulseDot 1.6s ease-in-out infinite;"></span>pulseDot &mdash; live/connection</div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:7px;height:14px;background:#00ff9c;animation:blinkCursor 1s steps(1) infinite;"></span>blinkCursor &mdash; caret, waiting + loading dots</div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="color:#00ff9c;animation:glowPulse 2s ease-in-out infinite;">GLOW</span>glowPulse &mdash; active turn, CTA</div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="color:rgba(217,255,233,.6);">rowIn</span>&mdash; new room appears in list</div>
+        <div style="color:rgba(217,255,233,.4);">+ global scanline overlay (3px, 4% alpha)</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+</div>
+
+</x-dc>
+</body>
+</html>
