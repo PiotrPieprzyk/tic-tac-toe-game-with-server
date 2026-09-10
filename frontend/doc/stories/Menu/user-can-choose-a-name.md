@@ -22,11 +22,22 @@ Error messages:
 - ERR: PLAYER_NAME_TOO_SHORT — (MIN 3 CHARS)
 - ERR: PLAYER_NAME_TAKEN — TRY ANOTHER
 
+
+See `frontend/doc/design/Tic-Tac-Toe Hacker UI.dc.html` (01_LOGIN section) for all UI states, including first-render (input auto-focused, connect disabled).
+
+Color/font constants used by tests are centralized in `frontend/doc/stories/testUtils.ts`.
+
 ### Tests
 
 Test cycle prerequisites:
 
 - Mock Router
+
+#### WHEN UserForm is first rendered, connect button SHOULD show default "[ CONNECT ]" label styled grayed out and be disabled, and input SHOULD be focused with the accent color
+
+Prerequisites:
+
+- Render UserForm
 
 #### WHEN user type userName "ValidName", connect button SHOULD be clickable and when clicked SHOULD show loading state for submit button until redirected to #/rooms
 

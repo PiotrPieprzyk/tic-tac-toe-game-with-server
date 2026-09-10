@@ -40,7 +40,7 @@
   <h2 style="font-size:13px;letter-spacing:2px;color:#00ff9c;margin:0 0 20px;">01 // LOGIN</h2>
   <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;">
 
-    <!-- Card 1a: default -->
+    <!-- Card 1a: default / empty (connect disabled but accent-colored) -->
     <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
       <div style="height:28px;background:#0d1310;border-bottom:1px solid rgba(0,255,156,.3);display:flex;align-items:center;gap:6px;padding:0 10px;">
         <span style="width:7px;height:7px;background:#00ff9c;"></span><span style="width:7px;height:7px;background:#ffb020;"></span><span style="width:7px;height:7px;background:#ff2d6b;"></span>
@@ -51,12 +51,32 @@
         <div style="font-size:26px;font-weight:700;color:#00ff9c;letter-spacing:1px;margin-bottom:28px;">&gt;_ CONNECT</div>
         <label style="display:block;font-size:12px;color:rgba(217,255,233,.7);margin-bottom:8px;">ENTER_HANDLE:</label>
         <div style="display:flex;align-items:center;border:1px solid #00ff9c;background:#081109;padding:10px 12px;margin-bottom:8px;">
-          <span style="color:#00ff9c;">player_</span>
+          <span style="width:8px;height:16px;background:#00ff9c;animation:blinkCursor 1s steps(1) infinite;"></span>
+        </div>
+        <div style="font-size:10.5px;color:rgba(217,255,233,.4);margin-bottom:24px;">3&ndash;20 CHARS &middot; MUST BE UNIQUE</div>
+        <div style="text-align:center;padding:12px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.3);font-weight:600;letter-spacing:1px;font-size:13px;cursor:not-allowed;">[ CONNECT ]</div>
+      </div>
+      <div style="padding:0 24px 14px;font-size:9.5px;color:rgba(217,255,233,.3);">STATE: EMPTY &middot; CONNECT DISABLED</div>
+    </div>
+
+    <!-- Card 1a2: valid input, connect enabled -->
+    <div style="width:390px;background:#0e1410;border:1px solid rgba(0,255,156,.35);box-shadow:0 0 18px rgba(0,255,156,.10);">
+      <div style="height:28px;background:#0d1310;border-bottom:1px solid rgba(0,255,156,.3);display:flex;align-items:center;gap:6px;padding:0 10px;">
+        <span style="width:7px;height:7px;background:#00ff9c;"></span><span style="width:7px;height:7px;background:#ffb020;"></span><span style="width:7px;height:7px;background:#ff2d6b;"></span>
+        <span style="margin-left:8px;font-size:10px;color:rgba(217,255,233,.4);">guest_session.sh</span>
+      </div>
+      <div style="padding:32px 24px;">
+        <div style="font-size:11px;color:rgba(217,255,233,.4);margin-bottom:6px;">SYSTEM READY</div>
+        <div style="font-size:26px;font-weight:700;color:#00ff9c;letter-spacing:1px;margin-bottom:28px;">&gt;_ CONNECT</div>
+        <label style="display:block;font-size:12px;color:rgba(217,255,233,.7);margin-bottom:8px;">ENTER_HANDLE:</label>
+        <div style="display:flex;align-items:center;border:1px solid #00ff9c;background:#081109;padding:10px 12px;margin-bottom:8px;">
+          <span style="color:#00ff9c;">ValidName</span>
           <span style="width:8px;height:16px;background:#00ff9c;margin-left:2px;animation:blinkCursor 1s steps(1) infinite;"></span>
         </div>
         <div style="font-size:10.5px;color:rgba(217,255,233,.4);margin-bottom:24px;">3&ndash;20 CHARS &middot; MUST BE UNIQUE</div>
         <div style="text-align:center;padding:12px;border:1px solid #00ff9c;color:#00ff9c;font-weight:600;letter-spacing:1px;font-size:13px;cursor:pointer;" style-hover="background:#00ff9c;color:#04140c;box-shadow:0 0 20px rgba(0,255,156,.6);">[ CONNECT ]</div>
       </div>
+      <div style="padding:0 24px 14px;font-size:9.5px;color:rgba(217,255,233,.3);">STATE: VALID &middot; CONNECT ENABLED</div>
     </div>
 
     <!-- Card 1b: error too short -->
@@ -70,12 +90,13 @@
         <div style="font-size:26px;font-weight:700;color:#00ff9c;letter-spacing:1px;margin-bottom:28px;">&gt;_ CONNECT</div>
         <label style="display:block;font-size:12px;color:rgba(217,255,233,.7);margin-bottom:8px;">ENTER_HANDLE:</label>
         <div style="display:flex;align-items:center;border:1px solid #ff2d6b;background:#150609;padding:10px 12px;margin-bottom:8px;box-shadow:0 0 10px rgba(255,45,107,.25);">
-          <span style="color:#ff8fac;">ab</span>
+          <span style="color:#ff8fac;">Sh</span>
           <span style="width:8px;height:16px;background:#ff2d6b;margin-left:2px;animation:blinkCursor 1s steps(1) infinite;"></span>
         </div>
-        <div style="font-size:11px;color:#ff2d6b;margin-bottom:24px;">ERR: HANDLE_TOO_SHORT (MIN 3 CHARS)</div>
-        <div style="text-align:center;padding:12px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.3);font-weight:600;letter-spacing:1px;font-size:13px;">[ CONNECT ]</div>
+        <div style="font-size:11px;color:#ff2d6b;margin-bottom:24px;">ERR: PLAYER_NAME_TOO_SHORT &mdash; (MIN 3 CHARS)</div>
+        <div style="text-align:center;padding:12px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.3);font-weight:600;letter-spacing:1px;font-size:13px;cursor:not-allowed;">[ CONNECT ]</div>
       </div>
+      <div style="padding:0 24px 14px;font-size:9.5px;color:rgba(217,255,233,.3);">STATE: ERROR (TOO SHORT) &middot; CONNECT DISABLED</div>
     </div>
 
     <!-- Card 1c: error taken -->
@@ -89,12 +110,13 @@
         <div style="font-size:26px;font-weight:700;color:#00ff9c;letter-spacing:1px;margin-bottom:28px;">&gt;_ CONNECT</div>
         <label style="display:block;font-size:12px;color:rgba(217,255,233,.7);margin-bottom:8px;">ENTER_HANDLE:</label>
         <div style="display:flex;align-items:center;border:1px solid #ff2d6b;background:#150609;padding:10px 12px;margin-bottom:8px;box-shadow:0 0 10px rgba(255,45,107,.25);">
-          <span style="color:#ff8fac;">neo</span>
+          <span style="color:#ff8fac;">TakenName</span>
           <span style="width:8px;height:16px;background:#ff2d6b;margin-left:2px;animation:blinkCursor 1s steps(1) infinite;"></span>
         </div>
-        <div style="font-size:11px;color:#ff2d6b;margin-bottom:24px;">ERR: HANDLE_TAKEN &mdash; TRY ANOTHER</div>
-        <div style="text-align:center;padding:12px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.3);font-weight:600;letter-spacing:1px;font-size:13px;">[ CONNECT ]</div>
+        <div style="font-size:11px;color:#ff2d6b;margin-bottom:24px;">ERR: PLAYER_NAME_TAKEN &mdash; TRY ANOTHER</div>
+        <div style="text-align:center;padding:12px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.3);font-weight:600;letter-spacing:1px;font-size:13px;cursor:not-allowed;">[ CONNECT ]</div>
       </div>
+      <div style="padding:0 24px 14px;font-size:9.5px;color:rgba(217,255,233,.3);">STATE: ERROR (TAKEN) &middot; CONNECT DISABLED</div>
     </div>
 
     <!-- Card 1d: loading / connecting -->
@@ -108,15 +130,16 @@
         <div style="font-size:26px;font-weight:700;color:#00ff9c;letter-spacing:1px;margin-bottom:28px;">&gt;_ CONNECT</div>
         <label style="display:block;font-size:12px;color:rgba(217,255,233,.7);margin-bottom:8px;">ENTER_HANDLE:</label>
         <div style="display:flex;align-items:center;border:1px solid rgba(0,255,156,.25);background:#081109;padding:10px 12px;margin-bottom:8px;opacity:.55;">
-          <span style="color:#00ff9c;">neo_7734</span>
+          <span style="color:#00ff9c;">ValidName</span>
         </div>
         <div style="font-size:10.5px;color:rgba(217,255,233,.4);margin-bottom:24px;">3&ndash;20 CHARS &middot; MUST BE UNIQUE</div>
-        <div style="display:flex;align-items:center;justify-content:center;gap:1px;padding:12px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.35);font-weight:600;letter-spacing:1px;font-size:13px;cursor:not-allowed;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:1px;padding:12px;border:1px solid rgba(0,255,156,.3);color:rgba(217,255,233,.35);font-weight:600;letter-spacing:1px;font-size:13px;cursor:not-allowed;" aria-busy="true">
           <span>[ CONNECTING</span>
           <span style="animation:blinkCursor 1s steps(1) infinite;">...</span>
           <span>&nbsp;]</span>
         </div>
       </div>
+      <div style="padding:0 24px 14px;font-size:9.5px;color:rgba(217,255,233,.3);">STATE: SUBMITTING &middot; CONNECT DISABLED, AWAITING REDIRECT</div>
     </div>
 
   </div>
