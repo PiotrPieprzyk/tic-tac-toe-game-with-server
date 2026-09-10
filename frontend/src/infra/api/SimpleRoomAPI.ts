@@ -1,7 +1,9 @@
 import type {
     RoomAPI,
+    RoomAPIGetRoomsOptions,
     RoomAPIJoinRequest,
     RoomAPILeaveRequest,
+    RoomAPIListResponseRaw,
     RoomAPIResponseRaw,
     RoomAPIUpdateRequest
 } from "../../domain/shared/api/RoomAPI.ts";
@@ -17,6 +19,17 @@ export class SimpleRoomAPI implements RoomAPI {
 
     async getRoom(id: RoomId) {
         return await API.get<RoomAPIResponseRaw>(`${SimpleRoomAPI.path}/${id}`);
+    }
+
+    async getRooms(options?: RoomAPIGetRoomsOptions) {
+        const queries: string[] = [];
+        if (options?.pageToken) {
+            queries.push(`pageToken=${options.pageToken}`);
+        }
+        if (options?.userId) {
+            queries.push(`userId=${options.userId.value}`);
+        }
+        return await API.get<RoomAPIListResponseRaw>(`${SimpleRoomAPI.path}`, {queries});
     }
 
     async updateRoom(id: RoomId, body: RoomAPIUpdateRequest) {

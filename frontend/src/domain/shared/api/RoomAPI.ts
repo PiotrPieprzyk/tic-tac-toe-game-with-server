@@ -37,10 +37,24 @@ export type RoomAPILeaveRequest = {
 
 export type RoomAPIDeletedResponse = SuccessResponse<undefined>;
 
+export type RoomAPIListResponseRaw = {
+    rooms: RoomAPIResponseRaw[];
+    nextPageToken: string | null;
+}
+
+export type RoomAPIListResponse = SuccessResponse<RoomAPIListResponseRaw>
+
+export type RoomAPIGetRoomsOptions = {
+    pageToken?: string;
+    userId?: UserId;
+}
+
 export interface RoomAPI {
     addRoom(body: RoomAPIAddRequest): Promise<RoomAPIResponse | CommonError>;
 
     getRoom(roomId: RoomId): Promise<RoomAPIResponse | CommonError>;
+
+    getRooms(options?: RoomAPIGetRoomsOptions): Promise<RoomAPIListResponse | CommonError>;
 
     updateRoom(roomId: RoomId, body: RoomAPIUpdateRequest): Promise<RoomAPIResponse | CommonError>;
 
