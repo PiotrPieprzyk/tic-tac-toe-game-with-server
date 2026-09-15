@@ -26,7 +26,8 @@ const meta = {
       control: { type: 'text' },
       description: 'Story-only control: CSS width applied to the button (e.g. "auto", "240px", "100%").',
     },
-    loading: { control: { type: 'boolean' } }
+    loading: { control: { type: 'boolean' } },
+    disabled: { control: { type: 'boolean' } },
   },
   tags: ['ai-generated'],
 } satisfies Meta<typeof ButtonWithWidth>
