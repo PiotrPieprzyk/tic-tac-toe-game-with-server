@@ -8,7 +8,9 @@ import {Button} from "@/comp/Button/Button.tsx";
 const MIN_NAME_LENGTH = 3;
 
 const TOO_SHORT_ERROR = "ERR: PLAYER_NAME_TOO_SHORT — (MIN 3 CHARS)";
+const NAME_TAKEN_SERVER_MESSAGE = "User name already taken";
 const TAKEN_ERROR = "ERR: PLAYER_NAME_TAKEN — TRY ANOTHER";
+const GENERIC_SERVER_ERROR = "SERVER ERR: PLEASE TRY AGAIN";
 
 export function UserForm(): ReactElement {
     const userAPI = useUserAPI();
@@ -20,7 +22,10 @@ export function UserForm(): ReactElement {
 
     const tooShort = userName.length > 0 && userName.length < MIN_NAME_LENGTH;
     const errorMessage = tooShort ? TOO_SHORT_ERROR : serverError;
-    const canSubmit = userName.length >= MIN_NAME_LENGTH && !errorMessage && !isSubmitting;
+    const canSubmit =
+        userName.length >= MIN_NAME_LENGTH &&
+        !isSubmitting &&
+        (!errorMessage || errorMessage === GENERIC_SERVER_ERROR);
 
     function handleChange(event: ChangeEvent<HTMLInputElement>) {
         setServerError(null);
@@ -36,7 +41,7 @@ export function UserForm(): ReactElement {
         const response = await userAPI.addUser({name: userName});
 
         if (response instanceof CommonError) {
-            setServerError(TAKEN_ERROR);
+            setServerError(response.message === NAME_TAKEN_SERVER_MESSAGE ? TAKEN_ERROR : GENERIC_SERVER_ERROR);
             setIsSubmitting(false);
             return;
         }
