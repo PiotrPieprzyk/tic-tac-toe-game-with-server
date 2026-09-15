@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Surfaces */
+  --color-page-background: #0a0d0a;
+  --color-panel-background: #0e1410;
+  --color-panel-border: rgb(0 255 156 / 0.35);
+  --color-panel-border-subtle: rgb(0 255 156 / 0.25);
+  --color-panel-border-faint: rgb(0 255 156 / 0.12);
+  --color-titlebar-background: #0d1310;
+  --color-input-background: #081109;
+
+  /* Text */
+  --color-text-primary: #d9ffe9;
+  --color-text-muted: rgb(217 255 233 / 0.5);
+  --color-text-faint: rgb(217 255 233 / 0.35);
+
+  /* Primary (calls to action, links, focus) */
+  --color-primary: #00ff9c;
+  --color-primary-border: rgb(0 255 156 / 0.3);
+  --color-primary-text-on-fill: #04140c;
+
+  /* Success (status: ready/live/waiting-ok) */
+  --color-success: #00ff9c;
+  --color-success-background: rgb(0 255 156 / 0.06);
+  --color-success-border: rgb(0 255 156 / 0.3);
+
+  /* Warning (status: in-progress/draw) */
+  --color-warning: #ffb020;
+  --color-warning-background: rgb(255 176 32 / 0.06);
+  --color-warning-border: rgb(255 176 32 / 0.3);
+
+  /* Danger (errors, destructive actions, disconnects) */
+  --color-danger: #ff2d6b;
+  --color-danger-text: #ff8fac;
+  --color-danger-background: #150609;
+  --color-danger-surface: rgb(255 45 107 / 0.08);
+  --color-danger-border: rgb(255 45 107 / 0.3);
+  --color-danger-text-on-fill: #0a0d0a;
+}
+
+body {
+  background: var(--color-page-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+}
+
+::selection {
+  background: var(--color-primary);
+  color: var(--color-primary-text-on-fill);
+}

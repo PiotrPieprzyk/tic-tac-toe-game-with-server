@@ -16,3 +16,4 @@ Concrete `infra` implementations are wired into `domain` context providers only 
 
 - Relative imports are disallowed everywhere — use the `@/` (src) or `@doc/` (doc) alias.
 - Frontend story specs live in `doc/stories/**`; see `frontend/.claude/skills/component-tests` when adding/updating them.
+- Styling uses Tailwind CSS v4. Theme tokens are defined in `src/index.css` via `@theme`, named by function (e.g. `panel-background`, `primary-border`, `text-muted`) rather than generic accent numbers — use these tokens instead of raw colors/hex values.
