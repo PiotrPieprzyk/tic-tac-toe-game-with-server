@@ -4,6 +4,23 @@
   --font-mono: "JetBrains Mono", monospace;
   --animate-blink-cursor: blinkCursor 1s steps(1) infinite;
 
+  /* Type scale — see doc/design TYPE inventory (JetBrains Mono) */
+  --text-display: 26px;
+  --text-display--font-weight: 700;
+  --text-title: 16px;
+  --text-title--font-weight: 700;
+  --text-button: 13px;
+  --text-button--line-height: 17px;
+  --text-button--font-weight: 600;
+  --tracking-button: 1px;
+  --text-body: 12px;
+  --text-body--font-weight: 400;
+  --text-meta: 11px;
+  --text-meta--font-weight: 400;
+  --text-tag: 9px;
+  --text-tag--font-weight: 600;
+  --tracking-tag: 0.05em;
+
   /* Surfaces */
   --color-page-background: #0a0d0a;
   --color-panel-background: #0e1410;

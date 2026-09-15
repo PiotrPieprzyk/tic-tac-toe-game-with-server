@@ -33,7 +33,7 @@ export function Button({
       aria-busy={loading || undefined}
       disabled={isDisabled}
       className={[
-        'inline-flex items-center justify-center gap-1 border px-4 py-2.5 font-mono text-xs font-semibold tracking-wide transition-colors',
+        'inline-flex items-center justify-center gap-1 border p-3 font-mono text-button tracking-button',
         'disabled:cursor-not-allowed disabled:border-primary-border disabled:text-text-faint disabled:hover:bg-transparent disabled:hover:text-text-faint disabled:hover:shadow-none',
         variantClasses[variant],
         className,
