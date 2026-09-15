@@ -1,4 +1,4 @@
-import type {Router} from "../../domain/shared/service/Router.ts";
+import type {Router} from "@/domain/shared/service/Router.ts";
 
 export class ReactRouter implements Router {
     push(route: string): void {

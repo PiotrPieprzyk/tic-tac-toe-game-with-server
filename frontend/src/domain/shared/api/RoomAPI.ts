@@ -1,8 +1,8 @@
-import {CommonError, type SuccessResponse} from "./APICommon.ts";
-import type {UserRaw} from "../../User/User.ts";
-import type {GameStatusEnum} from "../../Game/GameStatus.ts";
-import type {RoomId} from "../../Room/RoomId.ts";
-import type {UserId} from "../../User/UserId.ts";
+import {CommonError, type SuccessResponse} from "@/domain/shared/api/APICommon.ts";
+import type {UserRaw} from "@/domain/User/User.ts";
+import type {GameStatusEnum} from "@/domain/Game/GameStatus.ts";
+import type {RoomId} from "@/domain/Room/RoomId.ts";
+import type {UserId} from "@/domain/User/UserId.ts";
 
 export type RoomAPIResponseRaw = {
     id: string,

@@ -1,8 +1,8 @@
-import './App.css'
-import {UserAPIProvider} from "./infra/api/UserAPIContext.tsx";
-import {RouterProvider} from "./infra/service/RouterContext.tsx";
-import {SimpleUserAPI} from "./infra/api/SimpleUserAPI.ts";
-import {ReactRouter} from "./infra/service/ReactRouter.ts";
+import '@/App.css'
+import {UserAPIProvider} from "@/infra/api/UserAPIContext.tsx";
+import {RouterProvider} from "@/infra/service/RouterContext.tsx";
+import {SimpleUserAPI} from "@/infra/api/SimpleUserAPI.ts";
+import {ReactRouter} from "@/infra/service/ReactRouter.ts";
 
 const userAPI = new SimpleUserAPI();
 const router = new ReactRouter();

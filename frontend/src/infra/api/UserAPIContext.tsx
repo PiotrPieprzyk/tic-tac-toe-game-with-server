@@ -1,5 +1,5 @@
 import {createContext, useContext, type ReactElement, type ReactNode} from "react";
-import type {UserAPI} from "../../domain/shared/api/UserAPI.ts";
+import type {UserAPI} from "@/domain/shared/api/UserAPI.ts";
 
 const UserAPIContext = createContext<UserAPI | null>(null);
 

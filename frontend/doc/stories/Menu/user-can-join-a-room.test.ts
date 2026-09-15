@@ -2,17 +2,17 @@ import {describe, expect, it, vi} from 'vitest';
 import {createElement} from 'react';
 import {render, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {RoomList} from '../../../src/app/Menu/RoomList';
-import type {Router} from '../../../src/domain/shared/service/Router';
-import type {RoomAPI, RoomAPIJoinRequest, RoomAPIResponse} from '../../../src/domain/shared/api/RoomAPI';
-import {CommonError, SuccessResponse} from '../../../src/domain/shared/api/APICommon';
-import {RoomAPIProvider} from '../../../src/infra/api/RoomAPIContext';
-import {RouterProvider} from '../../../src/infra/service/RouterContext';
-import {GameStatusEnum} from '../../../src/domain/Game/GameStatus';
-import {DESIGN_COLORS} from '../testUtils';
-import {createMockRouter, createMockRoomAPI} from './shared/mocks';
-import {buildRoom} from './shared/builders';
-import {getErrorMessage, getJoinRoom, getRoomStatus} from "./shared/get/roomList.ts";
+import {RoomList} from '@/app/Menu/RoomList';
+import type {Router} from '@/domain/shared/service/Router';
+import type {RoomAPI, RoomAPIJoinRequest, RoomAPIResponse} from '@/domain/shared/api/RoomAPI';
+import {CommonError, SuccessResponse} from '@/domain/shared/api/APICommon';
+import {RoomAPIProvider} from '@/infra/api/RoomAPIContext';
+import {RouterProvider} from '@/infra/service/RouterContext';
+import {GameStatusEnum} from '@/domain/Game/GameStatus';
+import {DESIGN_COLORS} from '@doc/stories/testUtils';
+import {createMockRouter, createMockRoomAPI} from '@doc/stories/Menu/shared/mocks';
+import {buildRoom} from '@doc/stories/Menu/shared/builders';
+import {getErrorMessage, getJoinRoom, getRoomStatus} from "@doc/stories/Menu/shared/get/roomList.ts";
 
 function renderRoomList(roomAPI: RoomAPI, router: Router) {
     return render(

@@ -1,5 +1,5 @@
-import {UIError} from "../shared/models/UIError.ts";
-import {ValueObject} from "../shared/models/ValueObject.ts";
+import {UIError} from "@/domain/shared/models/UIError.ts";
+import {ValueObject} from "@/domain/shared/models/ValueObject.ts";
 
 export class UserName extends ValueObject<string> {
     private constructor(value: string) {

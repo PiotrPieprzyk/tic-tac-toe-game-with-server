@@ -1,4 +1,4 @@
-import {CommonError, type Options, SuccessResponse} from "../../domain/shared/api/APICommon.ts";
+import {CommonError, type Options, SuccessResponse} from "@/domain/shared/api/APICommon.ts";
 
 export class API {
 

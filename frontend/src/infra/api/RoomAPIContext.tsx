@@ -1,5 +1,5 @@
 import {createContext, useContext, type ReactElement, type ReactNode} from "react";
-import type {RoomAPI} from "../../domain/shared/api/RoomAPI.ts";
+import type {RoomAPI} from "@/domain/shared/api/RoomAPI.ts";
 
 const RoomAPIContext = createContext<RoomAPI | null>(null);
 

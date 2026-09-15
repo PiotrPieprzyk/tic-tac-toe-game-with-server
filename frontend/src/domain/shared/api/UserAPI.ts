@@ -1,4 +1,4 @@
-import type {CommonError, SuccessResponse} from "./APICommon.ts";
+import type {CommonError, SuccessResponse} from "@/domain/shared/api/APICommon.ts";
 
 export type UserAPIResponseRaw = {
     id: string,

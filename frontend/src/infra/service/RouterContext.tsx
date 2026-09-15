@@ -1,5 +1,5 @@
 import {createContext, useContext, type ReactElement, type ReactNode} from "react";
-import type {Router} from "../../domain/shared/service/Router.ts";
+import type {Router} from "@/domain/shared/service/Router.ts";
 
 const RouterContext = createContext<Router | null>(null);
 

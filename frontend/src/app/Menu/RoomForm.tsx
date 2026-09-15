@@ -1,6 +1,6 @@
 import type {ReactElement} from "react";
-import {useRoomAPI} from "../../infra/api/RoomAPIContext.tsx";
-import {useRouter} from "../../infra/service/RouterContext.tsx";
+import {useRoomAPI} from "@/infra/api/RoomAPIContext.tsx";
+import {useRouter} from "@/infra/service/RouterContext.tsx";
 
 export function RoomForm(): ReactElement {
     useRoomAPI();

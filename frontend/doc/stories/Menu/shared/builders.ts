@@ -1,5 +1,5 @@
-import type {RoomAPIResponseRaw} from '../../../../src/domain/shared/api/RoomAPI';
-import {GameStatusEnum} from '../../../../src/domain/Game/GameStatus';
+import type {RoomAPIResponseRaw} from '@/domain/shared/api/RoomAPI';
+import {GameStatusEnum} from '@/domain/Game/GameStatus';
 
 export function buildRoom(overrides: Partial<RoomAPIResponseRaw> = {}): RoomAPIResponseRaw {
     return {

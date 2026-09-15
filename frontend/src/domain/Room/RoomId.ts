@@ -1,5 +1,5 @@
-import {ValueObject} from "../shared/models/ValueObject.ts";
-import {Guid} from "../shared/models/GUID.ts";
+import {ValueObject} from "@/domain/shared/models/ValueObject.ts";
+import {Guid} from "@/domain/shared/models/GUID.ts";
 
 export class RoomId extends ValueObject<string> {
     private constructor(value: string) {

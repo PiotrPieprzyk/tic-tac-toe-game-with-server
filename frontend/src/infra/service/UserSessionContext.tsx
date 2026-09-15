@@ -1,5 +1,5 @@
 import {createContext, useContext, type ReactElement, type ReactNode} from "react";
-import type {UserId} from "../../domain/User/UserId.ts";
+import type {UserId} from "@/domain/User/UserId.ts";
 
 const UserSessionContext = createContext<UserId | null>(null);
 

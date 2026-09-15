@@ -1,5 +1,5 @@
-import {ValueObject} from "../shared/models/ValueObject.ts";
-import {UIError} from "../shared/models/UIError.ts";
+import {ValueObject} from "@/domain/shared/models/ValueObject.ts";
+import {UIError} from "@/domain/shared/models/UIError.ts";
 
 export enum GameStatusEnum {
     IN_PROGRESS = 'IN_PROGRESS',

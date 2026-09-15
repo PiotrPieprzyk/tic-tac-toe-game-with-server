@@ -6,9 +6,9 @@ import type {
     RoomAPIListResponseRaw,
     RoomAPIResponseRaw,
     RoomAPIUpdateRequest
-} from "../../domain/shared/api/RoomAPI.ts";
-import {API} from "./API.ts";
-import type {RoomId} from "../../domain/Room/RoomId.ts";
+} from "@/domain/shared/api/RoomAPI.ts";
+import {API} from "@/infra/api/API.ts";
+import type {RoomId} from "@/domain/Room/RoomId.ts";
 
 export class SimpleRoomAPI implements RoomAPI {
     static path = '/rooms';

@@ -2,16 +2,16 @@ import {describe, expect, it, vi} from 'vitest';
 import {createElement} from 'react';
 import {render, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {MenuRoomList} from '../../../src/app/Menu/MenuRoomList';
-import type {Router} from '../../../src/domain/shared/service/Router';
-import type {RoomAPI, RoomAPIListResponse} from '../../../src/domain/shared/api/RoomAPI';
-import {SuccessResponse} from '../../../src/domain/shared/api/APICommon';
-import {RoomAPIProvider} from '../../../src/infra/api/RoomAPIContext';
-import {RouterProvider} from '../../../src/infra/service/RouterContext';
-import {GameStatusEnum} from '../../../src/domain/Game/GameStatus';
-import {createMockRouter, createMockRoomAPI} from './shared/mocks';
+import {MenuRoomList} from '@/app/Menu/MenuRoomList';
+import type {Router} from '@/domain/shared/service/Router';
+import type {RoomAPI, RoomAPIListResponse} from '@/domain/shared/api/RoomAPI';
+import {SuccessResponse} from '@/domain/shared/api/APICommon';
+import {RoomAPIProvider} from '@/infra/api/RoomAPIContext';
+import {RouterProvider} from '@/infra/service/RouterContext';
+import {GameStatusEnum} from '@/domain/Game/GameStatus';
+import {createMockRouter, createMockRoomAPI} from '@doc/stories/Menu/shared/mocks';
 
-import {getCreateRoom} from "./shared/get/roomList.ts";
+import {getCreateRoom} from "@doc/stories/Menu/shared/get/roomList.ts";
 
 function renderMenuRoomList(roomAPI: RoomAPI, router: Router) {
     return render(

@@ -1,5 +1,5 @@
 import {createContext, useContext, type ReactElement, type ReactNode} from "react";
-import type {RoomEventsSocket} from "../../domain/shared/service/RoomEventsSocket.ts";
+import type {RoomEventsSocket} from "@/domain/shared/service/RoomEventsSocket.ts";
 
 const RoomEventsSocketContext = createContext<RoomEventsSocket | null>(null);
 

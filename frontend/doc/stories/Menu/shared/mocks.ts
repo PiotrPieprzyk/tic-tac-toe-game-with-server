@@ -1,7 +1,7 @@
 import {vi} from 'vitest';
-import type {Router} from '../../../../src/domain/shared/service/Router';
-import type {RoomAPI} from '../../../../src/domain/shared/api/RoomAPI';
-import type {RoomEventsHandlers, RoomEventsSocket} from '../../../../src/domain/shared/service/RoomEventsSocket';
+import type {Router} from '@/domain/shared/service/Router';
+import type {RoomAPI} from '@/domain/shared/api/RoomAPI';
+import type {RoomEventsHandlers, RoomEventsSocket} from '@/domain/shared/service/RoomEventsSocket';
 
 export function createMockRouter(): Router {
     return {

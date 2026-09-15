@@ -1,4 +1,4 @@
-import {UserName} from "./UserName";
+import {UserName} from "@/domain/User/UserName";
 
 export type UserRaw = {
     id: string;

@@ -2,25 +2,25 @@ import {describe, expect, it, vi} from 'vitest';
 import {createElement} from 'react';
 import {render, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {RoomList} from '../../../src/app/Menu/RoomList';
-import type {Router} from '../../../src/domain/shared/service/Router';
-import type {RoomAPI, RoomAPIGetRoomsOptions} from '../../../src/domain/shared/api/RoomAPI';
-import {SuccessResponse} from '../../../src/domain/shared/api/APICommon';
-import {RoomAPIProvider} from '../../../src/infra/api/RoomAPIContext';
-import {RouterProvider} from '../../../src/infra/service/RouterContext';
-import {UserSessionProvider} from '../../../src/infra/service/UserSessionContext';
-import {UserId} from '../../../src/domain/User/UserId';
-import {GameStatusEnum} from '../../../src/domain/Game/GameStatus';
-import {DESIGN_COLORS} from '../testUtils';
-import {createMockRouter, createMockRoomAPI} from './shared/mocks';
-import {buildRoom} from './shared/builders';
+import {RoomList} from '@/app/Menu/RoomList';
+import type {Router} from '@/domain/shared/service/Router';
+import type {RoomAPI, RoomAPIGetRoomsOptions} from '@/domain/shared/api/RoomAPI';
+import {SuccessResponse} from '@/domain/shared/api/APICommon';
+import {RoomAPIProvider} from '@/infra/api/RoomAPIContext';
+import {RouterProvider} from '@/infra/service/RouterContext';
+import {UserSessionProvider} from '@/infra/service/UserSessionContext';
+import {UserId} from '@/domain/User/UserId';
+import {GameStatusEnum} from '@/domain/Game/GameStatus';
+import {DESIGN_COLORS} from '@doc/stories/testUtils';
+import {createMockRouter, createMockRoomAPI} from '@doc/stories/Menu/shared/mocks';
+import {buildRoom} from '@doc/stories/Menu/shared/builders';
 import {
     getAlreadyInRoomMessage, getCreateRoom,
     getJoinRoom,
     getReturnToRoom,
     getRoomListItems,
     getRoomStatus, roomList
-} from "./shared/get/roomList.ts";
+} from "@doc/stories/Menu/shared/get/roomList.ts";
 
 const CURRENT_USER_ID = UserId.create();
 

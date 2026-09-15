@@ -2,15 +2,15 @@ import {describe, expect, it, vi} from 'vitest';
 import {createElement} from 'react';
 import {render, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {UserForm} from '../../../src/app/Menu/UserForm';
-import type {Router} from '../../../src/domain/shared/service/Router';
-import type {UserAPI, UserAPIAddRequest, UserAPIResponse} from '../../../src/domain/shared/api/UserAPI';
-import {CommonError, SuccessResponse} from '../../../src/domain/shared/api/APICommon';
-import {UserAPIProvider} from '../../../src/infra/api/UserAPIContext';
-import {RouterProvider} from '../../../src/infra/service/RouterContext';
-import {DESIGN_COLORS} from '../testUtils';
-import {createMockRouter} from './shared/mocks';
-import {getConnect, getUserNameErrorMessage, getUserNameInput, getUserNameTextField} from "./shared/get/userForm.ts";
+import {UserForm} from '@/app/Menu/UserForm';
+import type {Router} from '@/domain/shared/service/Router';
+import type {UserAPI, UserAPIAddRequest, UserAPIResponse} from '@/domain/shared/api/UserAPI';
+import {CommonError, SuccessResponse} from '@/domain/shared/api/APICommon';
+import {UserAPIProvider} from '@/infra/api/UserAPIContext';
+import {RouterProvider} from '@/infra/service/RouterContext';
+import {DESIGN_COLORS} from '@doc/stories/testUtils';
+import {createMockRouter} from '@doc/stories/Menu/shared/mocks';
+import {getConnect, getUserNameErrorMessage, getUserNameInput, getUserNameTextField} from "@doc/stories/Menu/shared/get/userForm.ts";
 
 function renderUserForm(userAPI: UserAPI, router: Router) {
     return render(

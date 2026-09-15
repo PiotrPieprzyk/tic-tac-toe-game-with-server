@@ -1,4 +1,4 @@
-import type {RoomAPIResponseRaw} from "../api/RoomAPI.ts";
+import type {RoomAPIResponseRaw} from "@/domain/shared/api/RoomAPI.ts";
 
 export type RoomEventsHandlers = {
     onConnect?: () => void;
