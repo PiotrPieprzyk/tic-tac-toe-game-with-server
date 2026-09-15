@@ -11,6 +11,7 @@ import {RouterProvider} from '../../../src/infra/service/RouterContext';
 import {UserSessionProvider} from '../../../src/infra/service/UserSessionContext';
 import {UserId} from '../../../src/domain/User/UserId';
 import {GameStatusEnum} from '../../../src/domain/Game/GameStatus';
+import {DESIGN_COLORS} from '../testUtils';
 
 const CURRENT_USER_ID = UserId.create();
 
@@ -85,6 +86,10 @@ function getJoinRoom(index: number) {
     return within(getRoomListItems()[index]).getByTestId('joinRoom');
 }
 
+function getRoomStatus(index: number) {
+    return within(getRoomListItems()[index]).getByTestId('roomStatus');
+}
+
 describe('User can return to the room they are already in', () => {
     it('WHEN user is a member of one of the listed rooms SHOULD show returnToRoom instead of createRoom, and SHOULD show alreadyInRoomMessage', async () => {
         const router = createMockRouter();
@@ -127,6 +132,8 @@ describe('User can return to the room they are already in', () => {
             expect(getRoomListItems()).toHaveLength(1);
         });
         expect(getJoinRoom(0)).toBeDisabled();
+        expect(getJoinRoom(0)).toHaveStyle({color: DESIGN_COLORS.dimmedText, borderColor: DESIGN_COLORS.dimmedBorder});
+        expect(getRoomStatus(0)).toHaveStyle({color: DESIGN_COLORS.accentGreen, borderColor: DESIGN_COLORS.accentGreen});
     });
 
     it('WHEN user clicks returnToRoom SHOULD redirect to #/rooms/{roomId} without calling the join API', async () => {

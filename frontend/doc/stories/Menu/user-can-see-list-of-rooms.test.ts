@@ -194,15 +194,22 @@ describe('User can see the list of rooms and players in each room', () => {
         const getRooms = vi.fn();
         getRooms.mockImplementationOnce(async () => new SuccessResponse({
             rooms: [buildRoom({id: 'room-1', name: 'PAGE_ONE_ROOM'})],
+            prevPageToken: null,
             nextPageToken: 'page-2-token',
         }));
         getRooms.mockImplementationOnce(async (options?: {pageToken?: string}) => {
             expect(options?.pageToken).toBe('page-2-token');
             return new SuccessResponse({
                 rooms: [buildRoom({id: 'room-2', name: 'PAGE_TWO_ROOM'})],
+                prevPageToken: 'page-1-token',
                 nextPageToken: null,
             });
         });
+        getRooms.mockImplementationOnce(async () => new SuccessResponse({
+            rooms: [buildRoom({id: 'room-1', name: 'PAGE_ONE_ROOM'})],
+            prevPageToken: null,
+            nextPageToken: 'page-2-token',
+        }));
         const roomAPI = createMockRoomAPI({getRooms});
 
         renderRoomList(roomAPI, router);
@@ -211,12 +218,24 @@ describe('User can see the list of rooms and players in each room', () => {
             expect(getRoomName(0)).toHaveTextContent('PAGE_ONE_ROOM');
         });
 
+        expect(getPrevPage()).toBeDisabled();
+        expect(getNextPage()).toBeEnabled();
         await user.click(getNextPage());
 
         await waitFor(() => {
             expect(getRoomName(0)).toHaveTextContent('PAGE_TWO_ROOM');
         });
+
         expect(getPrevPage()).toBeEnabled();
+        expect(getNextPage()).toBeDisabled();
+
+        await user.click(getPrevPage());
+        await waitFor(() => {
+            expect(getRoomName(0)).toHaveTextContent('PAGE_ONE_ROOM');
+        });
+
+        expect(getPrevPage()).toBeDisabled();
+        expect(getNextPage()).toBeEnabled();
     });
 
     it('WHEN on the last page SHOULD show nextPage disabled', async () => {

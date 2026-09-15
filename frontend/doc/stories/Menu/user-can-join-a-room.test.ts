@@ -9,6 +9,7 @@ import {CommonError, SuccessResponse} from '../../../src/domain/shared/api/APICo
 import {RoomAPIProvider} from '../../../src/infra/api/RoomAPIContext';
 import {RouterProvider} from '../../../src/infra/service/RouterContext';
 import {GameStatusEnum} from '../../../src/domain/Game/GameStatus';
+import {DESIGN_COLORS} from '../testUtils';
 
 function createMockRouter(): Router {
     return {
@@ -66,6 +67,10 @@ function getJoinRoom() {
     return getRoomListItem().getByTestId('joinRoom');
 }
 
+function getRoomStatus() {
+    return getRoomListItem().getByTestId('roomStatus');
+}
+
 function getErrorMessage() {
     return roomList().getByTestId('errorMessage');
 }
@@ -117,6 +122,8 @@ describe('User can join a room from the rooms list', () => {
         await waitFor(() => {
             expect(getJoinRoom()).toBeDisabled();
         });
+        expect(getJoinRoom()).toHaveStyle({color: DESIGN_COLORS.dimmedText, borderColor: DESIGN_COLORS.dimmedBorder});
+        expect(getRoomStatus()).toHaveStyle({color: DESIGN_COLORS.statusInProgress, borderColor: DESIGN_COLORS.statusInProgress});
     });
 
     it('WHEN room status is ENDED, joinRoom SHOULD NOT be clickable', async () => {
@@ -133,6 +140,8 @@ describe('User can join a room from the rooms list', () => {
         await waitFor(() => {
             expect(getJoinRoom()).toBeDisabled();
         });
+        expect(getJoinRoom()).toHaveStyle({color: DESIGN_COLORS.dimmedText, borderColor: DESIGN_COLORS.dimmedBorder});
+        expect(getRoomStatus()).toHaveStyle({color: DESIGN_COLORS.errorRed, borderColor: DESIGN_COLORS.errorRed});
     });
 
     it('WHEN room is full (2/2 players), joinRoom SHOULD NOT be clickable', async () => {
@@ -149,6 +158,8 @@ describe('User can join a room from the rooms list', () => {
         await waitFor(() => {
             expect(getJoinRoom()).toBeDisabled();
         });
+        expect(getJoinRoom()).toHaveStyle({color: DESIGN_COLORS.dimmedText, borderColor: DESIGN_COLORS.dimmedBorder});
+        expect(getRoomStatus()).toHaveStyle({color: DESIGN_COLORS.accentGreen, borderColor: DESIGN_COLORS.accentGreen});
     });
 
     it('WHEN user clicks joinRoom and the request fails SHOULD show errorMessage and joinRoom SHOULD return to its default clickable state', async () => {

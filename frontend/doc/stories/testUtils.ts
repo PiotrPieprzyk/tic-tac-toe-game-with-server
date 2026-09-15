@@ -7,6 +7,7 @@ export const DESIGN_COLORS = {
     errorRed: '#ff2d6b',
     dimmedText: 'rgba(217, 255, 233, 0.3)',
     dimmedTextLoading: 'rgba(217, 255, 233, 0.35)',
+    dimmedBorder: 'rgba(217, 255, 233, 0.25)',
     statusInProgress: '#ffb020',
 } as const;
 
