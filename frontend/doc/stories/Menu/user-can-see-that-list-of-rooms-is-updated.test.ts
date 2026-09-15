@@ -1,59 +1,18 @@
 import {describe, expect, it, vi} from 'vitest';
 import {createElement} from 'react';
-import {render, screen, waitFor, within} from '@testing-library/react';
+import {render, waitFor, within} from '@testing-library/react';
 import {RoomList} from '../../../src/app/Menu/RoomList';
 import type {Router} from '../../../src/domain/shared/service/Router';
-import type {RoomAPI, RoomAPIResponseRaw} from '../../../src/domain/shared/api/RoomAPI';
+import type {RoomAPI} from '../../../src/domain/shared/api/RoomAPI';
 import {SuccessResponse} from '../../../src/domain/shared/api/APICommon';
 import {RoomAPIProvider} from '../../../src/infra/api/RoomAPIContext';
 import {RouterProvider} from '../../../src/infra/service/RouterContext';
 import {RoomEventsSocketProvider} from '../../../src/infra/service/RoomEventsSocketContext';
-import type {RoomEventsHandlers, RoomEventsSocket} from '../../../src/domain/shared/service/RoomEventsSocket';
+import type {RoomEventsSocket} from '../../../src/domain/shared/service/RoomEventsSocket';
 import {GameStatusEnum} from '../../../src/domain/Game/GameStatus';
-
-function createMockRouter(): Router {
-    return {
-        push: vi.fn(),
-        replace: vi.fn(),
-    };
-}
-
-function createMockRoomAPI(overrides: Partial<RoomAPI> = {}): RoomAPI {
-    return {
-        addRoom: vi.fn(),
-        getRoom: vi.fn(),
-        getRooms: vi.fn(),
-        updateRoom: vi.fn(),
-        userJoinRoom: vi.fn(),
-        userLeaveRoom: vi.fn(),
-        deleteRoom: vi.fn(),
-        ...overrides,
-    };
-}
-
-function buildRoom(overrides: Partial<RoomAPIResponseRaw> = {}): RoomAPIResponseRaw {
-    return {
-        id: 'room-1',
-        name: 'ROOM_NULL_PTR',
-        hostId: 'host-1',
-        activeGameId: '',
-        users: [{id: 'user-1', name: 'PlayerOne'}],
-        status: GameStatusEnum.WAITING_FOR_PLAYERS,
-        ...overrides,
-    };
-}
-
-function createMockRoomEventsSocket(): {roomEventsSocket: RoomEventsSocket, getHandlers: () => RoomEventsHandlers} {
-    let capturedHandlers: RoomEventsHandlers = {};
-    const roomEventsSocket: RoomEventsSocket = {
-        subscribe: vi.fn((handlers: RoomEventsHandlers) => {
-            capturedHandlers = handlers;
-            handlers.onConnect?.();
-            return vi.fn();
-        }),
-    };
-    return {roomEventsSocket, getHandlers: () => capturedHandlers};
-}
+import {createMockRouter, createMockRoomAPI, createMockRoomEventsSocket} from './shared/mocks';
+import {buildRoom} from './shared/builders';
+import {getConnectionStatus, getRoomListItems} from "./shared/get/roomList.ts";
 
 function renderRoomList(roomAPI: RoomAPI, router: Router, roomEventsSocket: RoomEventsSocket) {
     return render(
@@ -68,18 +27,6 @@ function renderRoomList(roomAPI: RoomAPI, router: Router, roomEventsSocket: Room
             )}
         )
     );
-}
-
-function userlist() {
-    return within(screen.getByTestId('userlist'));
-}
-
-function getConnectionStatus() {
-    return userlist().getByTestId('connectionStatus');
-}
-
-function getRoomListItems() {
-    return userlist().queryAllByTestId('roomListItem');
 }
 
 describe('User can see that the list of rooms is updated automatically', () => {

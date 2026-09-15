@@ -1,6 +1,6 @@
 import {describe, expect, it, vi} from 'vitest';
 import {createElement} from 'react';
-import {render, screen, waitFor, within} from '@testing-library/react';
+import {render, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {UserForm} from '../../../src/app/Menu/UserForm';
 import type {Router} from '../../../src/domain/shared/service/Router';
@@ -9,13 +9,8 @@ import {CommonError, SuccessResponse} from '../../../src/domain/shared/api/APICo
 import {UserAPIProvider} from '../../../src/infra/api/UserAPIContext';
 import {RouterProvider} from '../../../src/infra/service/RouterContext';
 import {DESIGN_COLORS} from '../testUtils';
-
-function createMockRouter(): Router {
-    return {
-        push: vi.fn(),
-        replace: vi.fn(),
-    };
-}
+import {createMockRouter} from './shared/mocks';
+import {getConnect, getUserNameErrorMessage, getUserNameInput, getUserNameTextField} from "./shared/get/userForm.ts";
 
 function renderUserForm(userAPI: UserAPI, router: Router) {
     return render(
@@ -29,26 +24,6 @@ function renderUserForm(userAPI: UserAPI, router: Router) {
     );
 }
 
-function userForm() {
-    return within(screen.getByTestId('userForm'));
-}
-
-function getUserNameTextField() {
-    return within(userForm().getByTestId('userNameTextField'));
-}
-
-function getInput() {
-    return getUserNameTextField().getByTestId('input');
-}
-
-function getErrorMessage() {
-    return getUserNameTextField().getByTestId('errorMessage');
-}
-
-function getConnect() {
-    return userForm().getByTestId('connect');
-}
-
 describe('User can choose a name', () => {
     it('WHEN UserForm is first rendered, connect button SHOULD show default "[ CONNECT ]" label styled grayed out and be disabled, and input SHOULD be focused with the accent color', () => {
         const router = createMockRouter();
@@ -56,7 +31,7 @@ describe('User can choose a name', () => {
 
         renderUserForm(userAPI, router);
 
-        const input = getInput();
+        const input = getUserNameInput();
         const connect = getConnect();
         const userNameTextField = getUserNameTextField();
 
@@ -80,7 +55,7 @@ describe('User can choose a name', () => {
 
         renderUserForm(userAPI, router);
 
-        const input = getInput();
+        const input = getUserNameInput();
         const connect = getConnect();
 
 
@@ -115,7 +90,7 @@ describe('User can choose a name', () => {
 
         renderUserForm(userAPI, router);
 
-        const input = getInput();
+        const input = getUserNameInput();
         const connect = getConnect();
         const userNameTextField = getUserNameTextField();
 
@@ -123,10 +98,10 @@ describe('User can choose a name', () => {
         await user.click(connect);
 
         await waitFor(() => {
-            expect(getErrorMessage()).toBeVisible();
+            expect(getUserNameErrorMessage()).toBeVisible();
         });
-        expect(getErrorMessage()).toHaveTextContent('ERR: PLAYER_NAME_TAKEN — TRY ANOTHER');
-        expect(getErrorMessage()).toHaveStyle({color: DESIGN_COLORS.errorRed});
+        expect(getUserNameErrorMessage()).toHaveTextContent('ERR: PLAYER_NAME_TAKEN — TRY ANOTHER');
+        expect(getUserNameErrorMessage()).toHaveStyle({color: DESIGN_COLORS.errorRed});
         expect(userNameTextField).toHaveStyle({borderColor: DESIGN_COLORS.errorRed});
         expect(connect).toBeDisabled();
         expect(connect).toHaveTextContent('[ CONNECT ]');
@@ -142,15 +117,15 @@ describe('User can choose a name', () => {
 
         renderUserForm(userAPI, router);
 
-        const input = getInput();
+        const input = getUserNameInput();
         const connect = getConnect();
         const userNameTextField = getUserNameTextField();
 
         await user.type(input, 'Sh');
 
-        expect(getErrorMessage()).toBeVisible();
-        expect(getErrorMessage()).toHaveTextContent('ERR: PLAYER_NAME_TOO_SHORT — (MIN 3 CHARS)');
-        expect(getErrorMessage()).toHaveStyle({color: DESIGN_COLORS.errorRed});
+        expect(getUserNameErrorMessage()).toBeVisible();
+        expect(getUserNameErrorMessage()).toHaveTextContent('ERR: PLAYER_NAME_TOO_SHORT — (MIN 3 CHARS)');
+        expect(getUserNameErrorMessage()).toHaveStyle({color: DESIGN_COLORS.errorRed});
         expect(userNameTextField).toHaveStyle({borderColor: DESIGN_COLORS.errorRed});
         expect(connect).toBeDisabled();
         expect(connect).toHaveTextContent('[ CONNECT ]');

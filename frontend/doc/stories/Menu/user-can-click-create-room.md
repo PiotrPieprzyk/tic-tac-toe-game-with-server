@@ -8,7 +8,7 @@ To do
 
 Elements in #/rooms:
 
-- data-testId="userlist" < as wrapper
+- data-testId="roomList" < as wrapper
     - data-testId="createRoom"
     - data-testId="noActiveRoomsFound"
     - data-testId="loading"

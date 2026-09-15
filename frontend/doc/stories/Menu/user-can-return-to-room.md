@@ -8,7 +8,7 @@ To do
 
 Elements in #/rooms, replacing/augmenting elements from [[user-can-see-list-of-rooms]]:
 
-- data-testId="userlist"
+- data-testId="roomList"
     - data-testId="createRoom" < hidden when the user already belongs to a room
     - data-testId="returnToRoom" < shown instead of createRoom when the user already belongs to a room
     - data-testId="alreadyInRoomMessage" < shown when the user already belongs to a room

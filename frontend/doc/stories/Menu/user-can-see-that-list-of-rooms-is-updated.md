@@ -8,7 +8,7 @@ To do
 
 Elements in #/rooms:
 
-- data-testId="userlist"
+- data-testId="roomList"
     - data-testId="connectionStatus" — LIVE while the websocket is connected
     - data-testId="roomListItem" < repeated per room, see [[user-can-see-list-of-rooms]]
 

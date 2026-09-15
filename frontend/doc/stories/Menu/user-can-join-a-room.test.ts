@@ -1,47 +1,18 @@
 import {describe, expect, it, vi} from 'vitest';
 import {createElement} from 'react';
-import {render, screen, waitFor, within} from '@testing-library/react';
+import {render, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {RoomList} from '../../../src/app/Menu/RoomList';
 import type {Router} from '../../../src/domain/shared/service/Router';
-import type {RoomAPI, RoomAPIJoinRequest, RoomAPIResponse, RoomAPIResponseRaw} from '../../../src/domain/shared/api/RoomAPI';
+import type {RoomAPI, RoomAPIJoinRequest, RoomAPIResponse} from '../../../src/domain/shared/api/RoomAPI';
 import {CommonError, SuccessResponse} from '../../../src/domain/shared/api/APICommon';
 import {RoomAPIProvider} from '../../../src/infra/api/RoomAPIContext';
 import {RouterProvider} from '../../../src/infra/service/RouterContext';
 import {GameStatusEnum} from '../../../src/domain/Game/GameStatus';
 import {DESIGN_COLORS} from '../testUtils';
-
-function createMockRouter(): Router {
-    return {
-        push: vi.fn(),
-        replace: vi.fn(),
-    };
-}
-
-function createMockRoomAPI(overrides: Partial<RoomAPI> = {}): RoomAPI {
-    return {
-        addRoom: vi.fn(),
-        getRoom: vi.fn(),
-        getRooms: vi.fn(),
-        updateRoom: vi.fn(),
-        userJoinRoom: vi.fn(),
-        userLeaveRoom: vi.fn(),
-        deleteRoom: vi.fn(),
-        ...overrides,
-    };
-}
-
-function buildRoom(overrides: Partial<RoomAPIResponseRaw> = {}): RoomAPIResponseRaw {
-    return {
-        id: 'room-1',
-        name: 'ROOM_NULL_PTR',
-        hostId: 'host-1',
-        activeGameId: '',
-        users: [{id: 'user-1', name: 'PlayerOne'}],
-        status: GameStatusEnum.WAITING_FOR_PLAYERS,
-        ...overrides,
-    };
-}
+import {createMockRouter, createMockRoomAPI} from './shared/mocks';
+import {buildRoom} from './shared/builders';
+import {getErrorMessage, getJoinRoom, getRoomStatus} from "./shared/get/roomList.ts";
 
 function renderRoomList(roomAPI: RoomAPI, router: Router) {
     return render(
@@ -53,26 +24,6 @@ function renderRoomList(roomAPI: RoomAPI, router: Router) {
             )}
         )
     );
-}
-
-function roomList() {
-    return within(screen.getByTestId('roomList'));
-}
-
-function getRoomListItem() {
-    return within(roomList().getByTestId('roomListItem'));
-}
-
-function getJoinRoom() {
-    return getRoomListItem().getByTestId('joinRoom');
-}
-
-function getRoomStatus() {
-    return getRoomListItem().getByTestId('roomStatus');
-}
-
-function getErrorMessage() {
-    return roomList().getByTestId('errorMessage');
 }
 
 describe('User can join a room from the rooms list', () => {

@@ -1,10 +1,10 @@
 import {describe, expect, it, vi} from 'vitest';
 import {createElement} from 'react';
-import {render, screen, waitFor, within} from '@testing-library/react';
+import {render, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {RoomList} from '../../../src/app/Menu/RoomList';
 import type {Router} from '../../../src/domain/shared/service/Router';
-import type {RoomAPI, RoomAPIGetRoomsOptions, RoomAPIResponseRaw} from '../../../src/domain/shared/api/RoomAPI';
+import type {RoomAPI, RoomAPIGetRoomsOptions} from '../../../src/domain/shared/api/RoomAPI';
 import {SuccessResponse} from '../../../src/domain/shared/api/APICommon';
 import {RoomAPIProvider} from '../../../src/infra/api/RoomAPIContext';
 import {RouterProvider} from '../../../src/infra/service/RouterContext';
@@ -12,40 +12,17 @@ import {UserSessionProvider} from '../../../src/infra/service/UserSessionContext
 import {UserId} from '../../../src/domain/User/UserId';
 import {GameStatusEnum} from '../../../src/domain/Game/GameStatus';
 import {DESIGN_COLORS} from '../testUtils';
+import {createMockRouter, createMockRoomAPI} from './shared/mocks';
+import {buildRoom} from './shared/builders';
+import {
+    getAlreadyInRoomMessage, getCreateRoom,
+    getJoinRoom,
+    getReturnToRoom,
+    getRoomListItems,
+    getRoomStatus, roomList
+} from "./shared/get/roomList.ts";
 
 const CURRENT_USER_ID = UserId.create();
-
-function createMockRouter(): Router {
-    return {
-        push: vi.fn(),
-        replace: vi.fn(),
-    };
-}
-
-function createMockRoomAPI(overrides: Partial<RoomAPI> = {}): RoomAPI {
-    return {
-        addRoom: vi.fn(),
-        getRoom: vi.fn(),
-        getRooms: vi.fn(),
-        updateRoom: vi.fn(),
-        userJoinRoom: vi.fn(),
-        userLeaveRoom: vi.fn(),
-        deleteRoom: vi.fn(),
-        ...overrides,
-    };
-}
-
-function buildRoom(overrides: Partial<RoomAPIResponseRaw> = {}): RoomAPIResponseRaw {
-    return {
-        id: 'room-1',
-        name: 'ROOM_NULL_PTR',
-        hostId: 'host-1',
-        activeGameId: '',
-        users: [{id: 'user-1', name: 'PlayerOne'}],
-        status: GameStatusEnum.WAITING_FOR_PLAYERS,
-        ...overrides,
-    };
-}
 
 function renderRoomList(roomAPI: RoomAPI, router: Router) {
     return render(
@@ -60,34 +37,6 @@ function renderRoomList(roomAPI: RoomAPI, router: Router) {
             )}
         )
     );
-}
-
-function userlist() {
-    return within(screen.getByTestId('userlist'));
-}
-
-function getCreateRoom() {
-    return userlist().getByTestId('createRoom');
-}
-
-function getReturnToRoom() {
-    return userlist().getByTestId('returnToRoom');
-}
-
-function getAlreadyInRoomMessage() {
-    return userlist().getByTestId('alreadyInRoomMessage');
-}
-
-function getRoomListItems() {
-    return userlist().queryAllByTestId('roomListItem');
-}
-
-function getJoinRoom(index: number) {
-    return within(getRoomListItems()[index]).getByTestId('joinRoom');
-}
-
-function getRoomStatus(index: number) {
-    return within(getRoomListItems()[index]).getByTestId('roomStatus');
 }
 
 describe('User can return to the room they are already in', () => {
@@ -109,7 +58,7 @@ describe('User can return to the room they are already in', () => {
         await waitFor(() => {
             expect(getReturnToRoom()).toBeVisible();
         });
-        expect(userlist().queryByTestId('createRoom')).not.toBeInTheDocument();
+        expect(roomList().queryByTestId('createRoom')).not.toBeInTheDocument();
         expect(getAlreadyInRoomMessage()).toHaveTextContent('♦ YOU MUST LEAVE YOUR CURRENT ROOM TO JOIN ANOTHER');
     });
 
@@ -180,7 +129,7 @@ describe('User can return to the room they are already in', () => {
         await waitFor(() => {
             expect(getCreateRoom()).toBeVisible();
         });
-        expect(userlist().queryByTestId('returnToRoom')).not.toBeInTheDocument();
-        expect(userlist().queryByTestId('alreadyInRoomMessage')).not.toBeInTheDocument();
+        expect(roomList().queryByTestId('returnToRoom')).not.toBeInTheDocument();
+        expect(roomList().queryByTestId('alreadyInRoomMessage')).not.toBeInTheDocument();
     });
 });

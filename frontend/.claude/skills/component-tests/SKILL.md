@@ -18,7 +18,7 @@ spec.
 Every `*.test.ts` under `frontend/doc/stories/**` has a matching `.md` file.
 The `.md` is the source of truth for:
 
-- the `data-testid` tree (nesting matters, see step 3)
+- the `data-testid` tree (nesting matters, see steps 3-4)
 - one `#### WHEN ...` heading per test case — this is the test's `it(...)` title
 
 For the exact labels, button text, color, font, and error messages look at the
@@ -56,25 +56,25 @@ wrapper first with `within`, then query children inside it, mirroring the
 nesting exactly:
 
 ```ts
-import {render, screen, within} from '@testing-library/react';
+import {screen, within} from '@testing-library/react';
 
-function userForm() {
+export function userForm() {
     return within(screen.getByTestId('userForm'));
 }
 
-function getUserNameTextField() {
+export function getUserNameTextField() {
     return within(userForm().getByTestId('userNameTextField'));
 }
 
-function getInput() {
+export function getUserNameInput() {
     return getUserNameTextField().getByTestId('input');
 }
 
-function getErrorMessage() {
+export function getUserNameErrorMessage() {
     return getUserNameTextField().getByTestId('errorMessage');
 }
 
-function getConnect() {
+export function getConnect() {
     return userForm().getByTestId('connect');
 }
 ```
@@ -82,24 +82,64 @@ function getConnect() {
 Add one such getter function per node in the tree, named after its testid.
 Call the getter functions fresh inside each assertion/`waitFor` rather than
 caching the element across an interaction that might re-render it (unless you
-already re-fetch it inside `waitFor`, as `getErrorMessage()` does above).
+already re-fetch it inside `waitFor`, as `getUserNameErrorMessage()` does
+above).
 
-## 4. Structure of a test file
+Prefix a getter with the wrapper's name (e.g. `getUserNameInput`,
+`getRoomNameInput`) instead of a generic one (`getInput`) whenever more than
+one component tree in the same feature folder has a node with that testid —
+this is required once the getters live in a shared file (see step 4), since
+plain names like `getInput` or `getErrorMessage` would collide across
+components.
+
+## 4. Put mocks, builders, and getX helpers in a per-feature `shared/` folder
+
+Once a second story file for the same feature (e.g. `Menu`) needs the same
+mock, builder, or element tree, do not redefine it locally — move it into
+`frontend/doc/stories/<Feature>/shared/` and import it. Split by concern, one
+file per component tree for the getX helpers:
+
+```
+frontend/doc/stories/Menu/shared/
+  mocks.ts          # createMockRouter, createMockRoomAPI, createMockRoomEventsSocket, ...
+  builders.ts       # buildRoom, ... — one builder per domain response shape
+  get/
+    roomList.ts     # roomList() + every getX for the RoomList/roomList testid tree
+    roomForm.ts     # roomForm() + every getX for the RoomForm/roomForm testid tree
+    userForm.ts     # userForm() + every getX for the UserForm/userForm testid tree
+```
+
+Rules:
+
+- `mocks.ts` holds one `createMock<Dependency>(overrides)` per injected
+  dependency, each returning `vi.fn()` per method and spreading `overrides`
+  last so individual tests can override specific methods.
+- `builders.ts` holds one `build<Thing>(overrides)` per domain response/DTO
+  shape, with sensible defaults and `overrides` spread last.
+- `get/<component>.ts` holds the wrapper getter (named after the component,
+  e.g. `roomList()`) plus every getX for that component's testid tree, in
+  outer-to-inner order — even getters only used by one story file today, so
+  the next story for the same component doesn't redefine them.
+- A story test file imports what it needs from these shared files instead of
+  declaring local `createMock...`/`build...`/`get...` functions. Only a
+  `render<Component>(...)` wiring helper (providers + the component under
+  test) stays local to each test file, since its provider composition is
+  usually specific to that story.
+
+## 5. Structure of a test file
 
 1. Imports: testing-library, `userEvent`, the component under test, its
    domain types (`Router`, the API interface, response types), the relevant
-   `*Provider` for context, and `DESIGN_COLORS`/`DESIGN_FONTS` from
-   `../testUtils`.
-2. A `createMock<Dependency>()` helper per injected dependency (e.g.
-   `createMockRouter()` returning `vi.fn()` for each method).
-3. A `render<Component>(...)` helper that wraps the component in all required
+   `*Provider` for context, `DESIGN_COLORS`/`DESIGN_FONTS` from
+   `../testUtils`, and the shared `mocks`/`builders`/`get/<component>`
+   helpers from step 4.
+2. A `render<Component>(...)` helper that wraps the component in all required
    providers.
-4. The `getByTestId` tree-walking helpers from step 3.
-5. One `describe('<story title>', () => { ... })` block containing one `it`
+3. One `describe('<story title>', () => { ... })` block containing one `it`
    per `#### WHEN ...` heading in the `.md`, using that heading verbatim (or
    near-verbatim) as the test title.
 
-## 5. What to assert — behavior, not implementation
+## 6. What to assert — behavior, not implementation
 
 For every test, prefer assertions on what a user perceives, not internal
 state or markup structure:
@@ -125,13 +165,13 @@ Avoid: snapshot tests, querying by CSS class or DOM tag, asserting on
 component internals/props, or testing implementation details (e.g. hook
 call order, internal state variable names).
 
-## 6. One test per distinct WHEN, merge same-WHEN assertions
+## 7. One test per distinct WHEN, merge same-WHEN assertions
 
 If two things must be true for the same triggering action (the same `WHEN`
 clause), put them in the same `it` as multiple assertions rather than
 splitting into separate tests — don't fragment one behavior across tests.
 
-## 7. Run and confirm the expected failure
+## 8. Run and confirm the expected failure
 
 After writing/updating tests, run them:
 
