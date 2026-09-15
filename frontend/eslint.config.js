@@ -32,4 +32,68 @@ export default defineConfig([
       ],
     },
   },
+  {
+    files: ['src/domain/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['.*', '@/app/*', '@/infra/*'],
+              message: 'domain must not depend on app or infra. Keep domain free of framework and I/O concerns.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/infra/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['.*', '@/app/*'],
+              message: 'infra must not depend on app. infra may depend on domain.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/app/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['.*', '@/infra/*'],
+              message: 'app must not depend on infra directly. Depend on domain abstractions instead; infra implementations are wired in at the composition root (App.tsx).',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/comp/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['.*', '@/infra/*', '@/app/*', '@/domain/*'],
+              message: 'comp must not depend on domain, app or infra.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ])

@@ -1,6 +1,6 @@
 import '@/App.css'
-import {UserAPIProvider} from "@/infra/api/UserAPIContext.tsx";
-import {RouterProvider} from "@/infra/service/RouterContext.tsx";
+import {UserAPIProvider} from "@/domain/shared/context/UserAPIContext.tsx";
+import {RouterProvider} from "@/domain/shared/context/RouterContext.tsx";
 import {SimpleUserAPI} from "@/infra/api/SimpleUserAPI.ts";
 import {ReactRouter} from "@/infra/service/ReactRouter.ts";
 

@@ -1,6 +1,6 @@
 import type {ReactElement} from "react";
-import {useUserAPI} from "@/infra/api/UserAPIContext.tsx";
-import {useRouter} from "@/infra/service/RouterContext.tsx";
+import {useUserAPI} from "@/domain/shared/context/UserAPIContext.tsx";
+import {useRouter} from "@/domain/shared/context/RouterContext.tsx";
 
 export function UserForm(): ReactElement {
     useUserAPI();
