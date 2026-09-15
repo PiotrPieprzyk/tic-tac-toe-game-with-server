@@ -10,7 +10,7 @@ import {UserAPIProvider} from '@/domain/shared/context/UserAPIContext';
 import {RouterProvider} from '@/domain/shared/context/RouterContext';
 import {DESIGN_COLORS} from '@doc/stories/testUtils';
 import {createMockRouter} from '@doc/stories/Menu/shared/mocks';
-import {getConnect, getUserNameErrorMessage, getUserNameInput, getUserNameTextField} from "@doc/stories/Menu/shared/get/userForm.ts";
+import {getConnect, getUserNameErrorMessage, getUserNameInput, getUserNameTextFieldBorder} from "@doc/stories/Menu/shared/get/userForm.ts";
 
 function renderUserForm(userAPI: UserAPI, router: Router) {
     return render(
@@ -33,7 +33,7 @@ describe('User can choose a name', () => {
 
         const input = getUserNameInput();
         const connect = getConnect();
-        const userNameTextField = getUserNameTextField();
+        const userNameTextField = getUserNameTextFieldBorder();
 
         expect(connect).toHaveTextContent('[ CONNECT ]');
         expect(connect).toHaveStyle({color: DESIGN_COLORS.dimmedText});
@@ -92,7 +92,7 @@ describe('User can choose a name', () => {
 
         const input = getUserNameInput();
         const connect = getConnect();
-        const userNameTextField = getUserNameTextField();
+        const userNameTextField = getUserNameTextFieldBorder();
 
         await user.type(input, 'TakenName');
         await user.click(connect);
@@ -119,7 +119,7 @@ describe('User can choose a name', () => {
 
         const input = getUserNameInput();
         const connect = getConnect();
-        const userNameTextField = getUserNameTextField();
+        const userNameTextField = getUserNameTextFieldBorder();
 
         await user.type(input, 'Sh');
 

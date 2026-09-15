@@ -37,6 +37,7 @@ export function TextField({
     <div data-testid={dataTestId}>
       {label ? <label className="mb-2 block font-mono text-body text-text-muted">{label}</label> : null}
       <div
+        data-testid="inputBorder"
         className={[
           'relative flex items-center border bg-input-background p-3',
           hasError

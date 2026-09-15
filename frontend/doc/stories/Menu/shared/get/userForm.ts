@@ -6,15 +6,19 @@ export function userForm() {
 }
 
 export function getUserNameTextField() {
-    return within(userForm().getByTestId('userNameTextField'));
+    return userForm().getByTestId('userNameTextField');
+}
+
+export function getUserNameTextFieldBorder() {
+    return within(getUserNameTextField()).getByTestId('inputBorder');
 }
 
 export function getUserNameInput() {
-    return getUserNameTextField().getByTestId('input');
+    return within(getUserNameTextField()).getByTestId('input');
 }
 
 export function getUserNameErrorMessage() {
-    return getUserNameTextField().getByTestId('errorMessage');
+    return within(getUserNameTextField()).getByTestId('errorMessage');
 }
 
 export function getConnect() {

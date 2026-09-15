@@ -25,9 +25,30 @@ export default defineConfig({
       {
         extends: true,
         test: {
+          name: 'unit',
           environment: 'jsdom',
           setupFiles: ['./src/test/setup.ts'],
           globals: true,
+          exclude: ['doc/stories/**', 'node_modules/**'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          // Story specs assert real computed CSS (colors, etc.) via toHaveStyle,
+          // which requires resolved Tailwind CSS variables — jsdom's CSS engine
+          // does not support @layer or resolve var(), so these run in a real
+          // browser instead.
+          name: 'stories',
+          include: ['doc/stories/**/*.test.ts'],
+          setupFiles: ['./src/test/setup.browser.ts'],
+          globals: true,
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({}),
+            instances: [{ browser: 'chromium' }],
+          },
         },
       },
       {

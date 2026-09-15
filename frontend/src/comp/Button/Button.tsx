@@ -34,7 +34,8 @@ export function Button({
       disabled={isDisabled}
       className={[
         'inline-flex items-center justify-center gap-1 border p-3 font-mono text-button tracking-button',
-        'disabled:cursor-not-allowed disabled:border-primary-border disabled:text-text-faint disabled:hover:bg-transparent disabled:hover:text-text-faint disabled:hover:shadow-none',
+        'disabled:cursor-not-allowed disabled:border-primary-border disabled:hover:bg-transparent disabled:hover:shadow-none',
+        loading ? 'text-text-faint disabled:hover:text-text-faint' : 'disabled:text-text-faintest disabled:hover:text-text-faintest',
         variantClasses[variant],
         className,
       ]

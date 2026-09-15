@@ -34,6 +34,7 @@
   --color-text-primary: #d9ffe9;
   --color-text-muted: rgb(217 255 233 / 0.5);
   --color-text-faint: rgb(217 255 233 / 0.35);
+  --color-text-faintest: rgb(217 255 233 / 0.3);
 
   /* Primary (calls to action, links, focus) */
   --color-primary: #00ff9c;
