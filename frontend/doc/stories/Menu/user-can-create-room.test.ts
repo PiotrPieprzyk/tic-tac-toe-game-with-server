@@ -84,6 +84,31 @@ describe('User can create a room, but only one', () => {
         expect(createRoom).toBeDisabled();
     });
 
+    it('WHEN user try to create room but room is already created createRoom button SHOULD NOT be clickable and errorMessage should be visible', async () => {
+        const user = userEvent.setup();
+        const router = createMockRouter();
+        const roomAPI = createMockRoomAPI({
+            addRoom: vi.fn(async (_body: RoomAPIAddRequest) =>
+                new CommonError('User already created room', 400)
+            ),
+        });
+
+        renderRoomForm(roomAPI, router);
+
+        const input = getRoomNameInput();
+        const createRoom = getCreateRoom();
+
+        await user.type(input, 'TakenName');
+        await user.click(createRoom);
+
+        await waitFor(() => {
+            expect(getRoomNameErrorMessage()).toBeVisible();
+        });
+        expect(getRoomNameErrorMessage()).toHaveTextContent('ERR: USER_ALREADY_CREATED_ROOM — CLICK CANCEL');
+        expect(getRoomNameErrorMessage()).toHaveStyle({color: DESIGN_COLORS.errorRed});
+        expect(createRoom).toBeDisabled();
+    });
+
     it('WHEN user type roomName "Sh" createRoom button SHOULD NOT be clickable and errorMessage should be visible', async () => {
         const user = userEvent.setup();
         const router = createMockRouter();

@@ -9,6 +9,8 @@ import {Button} from "@/comp/Button/Button.tsx";
 const MIN_NAME_LENGTH = 3;
 const TOO_SHORT_ERROR = "ERR: ROOM_NAME_TOO_SHORT — (MIN 3 CHARS)";
 const NAME_TAKEN_SERVER_MESSAGE = "Room name already taken";
+const USER_ALREADY_CREATED_ROOM_SERVER_MESSAGE = "User already created room";
+const USER_ALREADY_CREATED_ROOM_ERROR = "ERR: USER_ALREADY_CREATED_ROOM — CLICK CANCEL";
 const TAKEN_ERROR = "ERR: ROOM_NAME_TAKEN — TRY ANOTHER";
 const GENERIC_SERVER_ERROR = "SERVER ERR: PLEASE TRY AGAIN";
 
@@ -37,7 +39,15 @@ export function RoomForm(): ReactElement {
         setIsSubmitting(true);
         const response = await roomAPI.addRoom({name: roomName, hostId: currentUserId, usersIds: [currentUserId]});
         if (response instanceof CommonError) {
-            setServerError(response.message === NAME_TAKEN_SERVER_MESSAGE ? TAKEN_ERROR : GENERIC_SERVER_ERROR);
+            const message = response.message;
+            if(message === USER_ALREADY_CREATED_ROOM_SERVER_MESSAGE) {
+                setServerError(USER_ALREADY_CREATED_ROOM_ERROR);
+            } else if(message === NAME_TAKEN_SERVER_MESSAGE) {
+                setServerError(TAKEN_ERROR);
+            } else {
+                setServerError(GENERIC_SERVER_ERROR);
+            }
+
             setIsSubmitting(false);
             return;
         }
