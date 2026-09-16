@@ -26,7 +26,9 @@ function RootLayout(): ReactElement {
             <UserAPIProvider userAPI={userAPI}>
                 <RoomAPIProvider roomAPI={roomAPI}>
                     <UserSessionProvider userSession={userSession}>
-                        <Outlet />
+                        <div className="flex min-h-screen items-center justify-center px-4 py-10">
+                            <Outlet />
+                        </div>
                     </UserSessionProvider>
                 </RoomAPIProvider>
             </UserAPIProvider>

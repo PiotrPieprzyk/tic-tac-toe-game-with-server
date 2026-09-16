@@ -5,6 +5,7 @@ import {useUserSession} from "@/domain/shared/context/UserSessionContext.tsx";
 import {CommonError} from "@/domain/shared/api/APICommon.ts";
 import {TextField} from "@/comp/TextField/TextField.tsx";
 import {Button} from "@/comp/Button/Button.tsx";
+import {TerminalCard} from "@/comp/TerminalCard/TerminalCard.tsx";
 
 const MIN_NAME_LENGTH = 3;
 const TOO_SHORT_ERROR = "ERR: ROOM_NAME_TOO_SHORT — (MIN 3 CHARS)";
@@ -55,32 +56,44 @@ export function RoomForm(): ReactElement {
     }
 
     return (
-        <div data-testid="roomForm">
-            <TextField
-                data-testid="roomNameTextField"
-                value={roomName}
-                onChange={handleChange}
-                errorMessage={errorMessage}
-                autoFocus
-                disabled={isSubmitting}
-            />
-            <Button
-                data-testid="createRoom"
-                disabled={!canSubmit}
-                loading={isSubmitting}
-                loadingText="CREATING"
-                onClick={handleCreateRoom}
-            >
-                CREATE_ROOM
-            </Button>
-            <Button
-                variant="ghost"
-                data-testid="cancel"
-                disabled={isSubmitting}
-                onClick={() => router.push('#/rooms')}
-            >
-                CANCEL
-            </Button>
-        </div>
+        <TerminalCard titleBarLabel="create_room.sh" className="w-full max-w-[390px]">
+            <div data-testid="roomForm" className="flex flex-col gap-6 p-6">
+                <div>
+                    <div className="mb-1.5 font-mono text-meta text-text-faint">ALLOCATING SESSION</div>
+                    <div className="font-mono text-display text-primary tracking-wide">{'>_ NEW_ROOM'}</div>
+                </div>
+                <TextField
+                    data-testid="roomNameTextField"
+                    label="ENTER_ROOM_NAME:"
+                    hint="3–24 CHARS"
+                    value={roomName}
+                    onChange={handleChange}
+                    errorMessage={errorMessage}
+                    autoFocus
+                    disabled={isSubmitting}
+                />
+                <div className="flex flex-col gap-2">
+                    <Button
+                        data-testid="createRoom"
+                        disabled={!canSubmit}
+                        loading={isSubmitting}
+                        loadingText="CREATING"
+                        onClick={handleCreateRoom}
+                        className="w-full"
+                    >
+                        CREATE_ROOM
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        data-testid="cancel"
+                        disabled={isSubmitting}
+                        onClick={() => router.push('#/rooms')}
+                        className="w-full"
+                    >
+                        CANCEL
+                    </Button>
+                </div>
+            </div>
+        </TerminalCard>
     );
 }

@@ -6,6 +6,7 @@ import {CommonError} from "@/domain/shared/api/APICommon.ts";
 import {UserId} from "@/domain/User/UserId.ts";
 import {TextField} from "@/comp/TextField/TextField.tsx";
 import {Button} from "@/comp/Button/Button.tsx";
+import {TerminalCard} from "@/comp/TerminalCard/TerminalCard.tsx";
 
 const MIN_NAME_LENGTH = 3;
 
@@ -64,24 +65,33 @@ export function UserForm(): ReactElement {
     }
 
     return (
-        <div data-testid="userForm">
-            <TextField
-                data-testid="userNameTextField"
-                value={userName}
-                onChange={handleChange}
-                errorMessage={errorMessage}
-                autoFocus
-                disabled={isSubmitting}
-            />
-            <Button
-                data-testid="connect"
-                disabled={!canSubmit}
-                loading={isSubmitting}
-                loadingText="CONNECTING"
-                onClick={handleConnect}
-            >
-                CONNECT
-            </Button>
-        </div>
+        <TerminalCard titleBarLabel="guest_session.sh" className="w-full max-w-[390px]">
+            <div data-testid="userForm" className="flex flex-col gap-6 p-6">
+                <div>
+                    <div className="mb-1.5 font-mono text-meta text-text-faint">SYSTEM READY</div>
+                    <div className="font-mono text-display text-primary tracking-wide">{'>_ CONNECT'}</div>
+                </div>
+                <TextField
+                    data-testid="userNameTextField"
+                    label="ENTER_HANDLE:"
+                    hint="3–20 CHARS · MUST BE UNIQUE"
+                    value={userName}
+                    onChange={handleChange}
+                    errorMessage={errorMessage}
+                    autoFocus
+                    disabled={isSubmitting}
+                />
+                <Button
+                    data-testid="connect"
+                    disabled={!canSubmit}
+                    loading={isSubmitting}
+                    loadingText="CONNECTING"
+                    onClick={handleConnect}
+                    className="w-full"
+                >
+                    CONNECT
+                </Button>
+            </div>
+        </TerminalCard>
     );
 }
