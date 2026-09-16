@@ -1,9 +1,11 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 export type ButtonVariant = 'primary' | 'danger' | 'ghost'
+export type ButtonSize = 'md' | 'sm'
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   variant?: ButtonVariant
+  size?: ButtonSize
   loading?: boolean
   loadingText?: ReactNode
   children: ReactNode
@@ -16,8 +18,14 @@ const variantClasses: Record<ButtonVariant, string> = {
   ghost: 'border-text-faint text-text-muted hover:border-text-primary hover:text-text-primary',
 }
 
+const sizeClasses: Record<ButtonSize, string> = {
+  md: 'p-3 text-button tracking-button',
+  sm: 'p-1.5 text-meta tracking-button',
+}
+
 export function Button({
   variant = 'primary',
+  size = 'md',
   loading = false,
   loadingText,
   disabled,
@@ -33,8 +41,9 @@ export function Button({
       aria-busy={loading || undefined}
       disabled={isDisabled}
       className={[
-        'inline-flex items-center justify-center gap-1 border p-3 font-mono text-button tracking-button',
-        'disabled:cursor-not-allowed disabled:border-primary-border disabled:hover:bg-transparent disabled:hover:shadow-none',
+        'inline-flex items-center justify-center gap-1 border font-mono',
+        sizeClasses[size],
+        'disabled:cursor-not-allowed disabled:border-control-disabled-border disabled:hover:bg-transparent disabled:hover:shadow-none',
         loading ? 'text-text-faint disabled:hover:text-text-faint' : 'disabled:text-text-faintest disabled:hover:text-text-faintest',
         variantClasses[variant],
         className,

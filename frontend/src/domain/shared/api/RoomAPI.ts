@@ -3,6 +3,7 @@ import type {UserRaw} from "@/domain/User/User.ts";
 import type {GameStatusEnum} from "@/domain/Game/GameStatus.ts";
 import type {RoomId} from "@/domain/Room/RoomId.ts";
 import type {UserId} from "@/domain/User/UserId.ts";
+import type {PaginatedResponse} from "@/domain/shared/api/Pagination.ts";
 
 export type RoomAPIResponseRaw = {
     id: string,
@@ -37,10 +38,9 @@ export type RoomAPILeaveRequest = {
 
 export type RoomAPIDeletedResponse = SuccessResponse<undefined>;
 
-export type RoomAPIListResponseRaw = {
+export type RoomAPIListResponseRaw = PaginatedResponse<{
     rooms: RoomAPIResponseRaw[];
-    nextPageToken: string | null;
-}
+}>;
 
 export type RoomAPIListResponse = SuccessResponse<RoomAPIListResponseRaw>
 

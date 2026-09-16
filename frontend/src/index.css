@@ -3,6 +3,7 @@
 @theme {
   --font-mono: "JetBrains Mono", monospace;
   --animate-blink-cursor: blinkCursor 1s steps(1) infinite;
+  --animate-pulse-dot: pulseDot 1.6s ease-in-out infinite;
 
   /* Type scale — see doc/design TYPE inventory (JetBrains Mono) */
   --text-display: 26px;
@@ -35,6 +36,7 @@
   --color-text-muted: rgb(217 255 233 / 0.5);
   --color-text-faint: rgb(217 255 233 / 0.35);
   --color-text-faintest: rgb(217 255 233 / 0.3);
+  --color-control-disabled-border: rgb(217 255 233 / 0.25);
 
   /* Primary (calls to action, links, focus) */
   --color-primary: #00ff9c;
@@ -79,5 +81,17 @@ body {
   50%,
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes pulseDot {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 4px 1px var(--color-primary);
+  }
+  50% {
+    opacity: 0.35;
+    box-shadow: 0 0 2px 0 var(--color-primary);
   }
 }

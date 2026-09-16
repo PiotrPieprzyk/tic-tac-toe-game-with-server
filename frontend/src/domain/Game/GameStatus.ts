@@ -14,6 +14,12 @@ export enum GameStatusEnumUI {
     DEFAULT = 'Unknown'
 }
 
+export const GameStatusShortLabel: Record<GameStatusEnum, string> = {
+    [GameStatusEnum.WAITING_FOR_PLAYERS]: 'WAITING',
+    [GameStatusEnum.IN_PROGRESS]: 'IN_PROGRESS',
+    [GameStatusEnum.ENDED]: 'ENDED',
+};
+
 export class GameStatus extends ValueObject<GameStatusEnum>{
     private constructor(value: GameStatusEnum) {
         super(value);

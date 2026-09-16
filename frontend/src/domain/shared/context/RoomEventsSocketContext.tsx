@@ -1,7 +1,11 @@
 import {createContext, useContext, type ReactElement, type ReactNode} from "react";
 import type {RoomEventsSocket} from "@/domain/shared/service/RoomEventsSocket.ts";
 
-const RoomEventsSocketContext = createContext<RoomEventsSocket | null>(null);
+const noopRoomEventsSocket: RoomEventsSocket = {
+    subscribe: () => () => {},
+};
+
+const RoomEventsSocketContext = createContext<RoomEventsSocket>(noopRoomEventsSocket);
 
 export function RoomEventsSocketProvider({roomEventsSocket, children}: { roomEventsSocket: RoomEventsSocket, children: ReactNode }): ReactElement {
     return (
@@ -12,9 +16,5 @@ export function RoomEventsSocketProvider({roomEventsSocket, children}: { roomEve
 }
 
 export function useRoomEventsSocket(): RoomEventsSocket {
-    const roomEventsSocket = useContext(RoomEventsSocketContext);
-    if (!roomEventsSocket) {
-        throw new Error("useRoomEventsSocket must be used within a RoomEventsSocketProvider");
-    }
-    return roomEventsSocket;
+    return useContext(RoomEventsSocketContext);
 }

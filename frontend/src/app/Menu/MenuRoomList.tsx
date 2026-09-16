@@ -1,9 +1,6 @@
 import type {ReactElement} from "react";
+import {RoomList} from "@/app/Menu/RoomList.tsx";
 
 export function MenuRoomList(): ReactElement {
-  return (
-    <div>
-      <h2>Room List</h2>
-    </div>
-  );
+    return <RoomList />;
 }
