@@ -1,18 +1,34 @@
-import {createContext, useContext, type ReactElement, type ReactNode} from "react";
+import {createContext, useContext, useSyncExternalStore, type ReactElement, type ReactNode} from "react";
+import type {UserSession} from "@/domain/shared/service/UserSession.ts";
 import {UserId} from "@/domain/User/UserId.ts";
 
 export const ANONYMOUS_USER_ID = UserId.create();
 
-const UserSessionContext = createContext<UserId>(ANONYMOUS_USER_ID);
+const noopUserSession: UserSession = {
+    userId: ANONYMOUS_USER_ID,
+    setUserId: () => {},
+    subscribe: () => () => {},
+};
 
-export function UserSessionProvider({userId, children}: { userId: UserId, children: ReactNode }): ReactElement {
+const UserSessionContext = createContext<UserSession>(noopUserSession);
+
+export function UserSessionProvider({userSession, children}: { userSession: UserSession, children: ReactNode }): ReactElement {
     return (
-        <UserSessionContext.Provider value={userId}>
+        <UserSessionContext.Provider value={userSession}>
             {children}
         </UserSessionContext.Provider>
     );
 }
 
 export function useUserSession(): UserId {
-    return useContext(UserSessionContext);
+    const userSession = useContext(UserSessionContext);
+    return useSyncExternalStore(
+        (onStoreChange) => userSession.subscribe(onStoreChange),
+        () => userSession.userId
+    );
+}
+
+export function useSetUserSession(): (userId: UserId) => void {
+    const userSession = useContext(UserSessionContext);
+    return (userId) => userSession.setUserId(userId);
 }

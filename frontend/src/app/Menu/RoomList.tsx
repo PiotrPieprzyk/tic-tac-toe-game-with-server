@@ -55,7 +55,7 @@ export function RoomList(): ReactElement {
         roomAPI.getRooms({pageToken}).then((response) => {
             if (cancelled) return;
             if (!(response instanceof CommonError)) {
-                setRooms(response.value.rooms);
+                setRooms(response.value.results);
                 setNextPageToken(response.value.nextPageToken);
                 setPrevPageToken(response.value.prevPageToken ?? null);
             }
@@ -73,7 +73,7 @@ export function RoomList(): ReactElement {
         let cancelled = false;
         roomAPI.getRooms({userId: currentUserId}).then((response) => {
             if (cancelled || response instanceof CommonError) return;
-            setOwnRoomId(response.value.rooms[0]?.id ?? null);
+            setOwnRoomId(response.value.results[0]?.id ?? null);
         });
         return () => {
             cancelled = true;

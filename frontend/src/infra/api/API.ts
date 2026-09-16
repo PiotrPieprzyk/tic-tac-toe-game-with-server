@@ -2,7 +2,7 @@ import {CommonError, type Options, SuccessResponse} from "@/domain/shared/api/AP
 
 export class API {
 
-    static domain = 'http://localhost:3000';
+    static domain = 'http://127.0.0.1:3000';
 
     static async handleCommonError(response: Response): Promise<CommonError | null> {
         if (response.status < 200 || 400 <= response.status) {
@@ -22,6 +22,7 @@ export class API {
         try {
             const response = await fetch(`${API.domain}${url}`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     ...options?.headers
@@ -49,6 +50,7 @@ export class API {
             const query = options?.queries ? '?' + options.queries.join(',') : '';
             const response = await fetch(`${API.domain}${url}${query}`, {
                 method: 'GET',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     ...options?.headers
@@ -75,6 +77,7 @@ export class API {
         try {
             const response = await fetch(`${API.domain}${url}`, {
                 method: 'PUT',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     ...options?.headers
@@ -101,6 +104,7 @@ export class API {
         try {
             const response = await fetch(`${API.domain}${url}`, {
                 method: 'DELETE',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     ...options?.headers

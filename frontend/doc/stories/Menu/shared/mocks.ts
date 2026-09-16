@@ -2,11 +2,21 @@ import {vi} from 'vitest';
 import type {Router} from '@/domain/shared/service/Router';
 import type {RoomAPI} from '@/domain/shared/api/RoomAPI';
 import type {RoomEventsHandlers, RoomEventsSocket} from '@/domain/shared/service/RoomEventsSocket';
+import type {UserSession} from '@/domain/shared/service/UserSession';
+import type {UserId} from '@/domain/User/UserId';
 
 export function createMockRouter(): Router {
     return {
         push: vi.fn(),
         replace: vi.fn(),
+    };
+}
+
+export function createMockUserSession(userId: UserId): UserSession {
+    return {
+        userId,
+        setUserId: vi.fn(),
+        subscribe: vi.fn(() => vi.fn()),
     };
 }
 

@@ -33,7 +33,7 @@ describe('User can join a room from the rooms list', () => {
         let resolveJoin: (value: RoomAPIResponse) => void = () => {};
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async () => new SuccessResponse({
-                rooms: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}]})],
+                results: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}]})],
                 nextPageToken: null,
             })),
             userJoinRoom: vi.fn((_roomId, _body: RoomAPIJoinRequest) => new Promise<RoomAPIResponse>((resolve) => {
@@ -63,7 +63,7 @@ describe('User can join a room from the rooms list', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async () => new SuccessResponse({
-                rooms: [buildRoom({status: GameStatusEnum.IN_PROGRESS})],
+                results: [buildRoom({status: GameStatusEnum.IN_PROGRESS})],
                 nextPageToken: null,
             })),
         });
@@ -81,7 +81,7 @@ describe('User can join a room from the rooms list', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async () => new SuccessResponse({
-                rooms: [buildRoom({status: GameStatusEnum.ENDED})],
+                results: [buildRoom({status: GameStatusEnum.ENDED})],
                 nextPageToken: null,
             })),
         });
@@ -99,7 +99,7 @@ describe('User can join a room from the rooms list', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async () => new SuccessResponse({
-                rooms: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}, {id: 'user-2', name: 'PlayerTwo'}]})],
+                results: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}, {id: 'user-2', name: 'PlayerTwo'}]})],
                 nextPageToken: null,
             })),
         });
@@ -118,7 +118,7 @@ describe('User can join a room from the rooms list', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async () => new SuccessResponse({
-                rooms: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}]})],
+                results: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}]})],
                 nextPageToken: null,
             })),
             userJoinRoom: vi.fn(async (_roomId, _body: RoomAPIJoinRequest) =>

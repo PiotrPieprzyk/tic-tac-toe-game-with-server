@@ -50,7 +50,7 @@ describe('User can see the list of rooms and players in each room', () => {
     it('WHEN no rooms exist SHOULD show noActiveRoomsFound and SHOULD NOT show loading or any roomListItem', async () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
-            getRooms: vi.fn(async () => new SuccessResponse({rooms: [], nextPageToken: null})),
+            getRooms: vi.fn(async () => new SuccessResponse({results: [], nextPageToken: null})),
         });
 
         renderRoomList(roomAPI, router);
@@ -66,7 +66,7 @@ describe('User can see the list of rooms and players in each room', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async () => new SuccessResponse({
-                rooms: [buildRoom({name: 'ROOM_NULL_PTR', status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}]})],
+                results: [buildRoom({name: 'ROOM_NULL_PTR', status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}]})],
                 nextPageToken: null,
             })),
         });
@@ -87,7 +87,7 @@ describe('User can see the list of rooms and players in each room', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async () => new SuccessResponse({
-                rooms: [buildRoom({users: [{id: 'user-1', name: 'PlayerOne'}, {id: 'user-2', name: 'PlayerTwo'}]})],
+                results: [buildRoom({users: [{id: 'user-1', name: 'PlayerOne'}, {id: 'user-2', name: 'PlayerTwo'}]})],
                 nextPageToken: null,
             })),
         });
@@ -104,7 +104,7 @@ describe('User can see the list of rooms and players in each room', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async () => new SuccessResponse({
-                rooms: [buildRoom()],
+                results: [buildRoom()],
                 nextPageToken: 'page-2-token',
             })),
         });
@@ -124,20 +124,20 @@ describe('User can see the list of rooms and players in each room', () => {
         const router = createMockRouter();
         const getRooms = vi.fn();
         getRooms.mockImplementationOnce(async () => new SuccessResponse({
-            rooms: [buildRoom({id: 'room-1', name: 'PAGE_ONE_ROOM'})],
+            results: [buildRoom({id: 'room-1', name: 'PAGE_ONE_ROOM'})],
             prevPageToken: null,
             nextPageToken: 'page-2-token',
         }));
         getRooms.mockImplementationOnce(async (options?: {pageToken?: string}) => {
             expect(options?.pageToken).toBe('page-2-token');
             return new SuccessResponse({
-                rooms: [buildRoom({id: 'room-2', name: 'PAGE_TWO_ROOM'})],
+                results: [buildRoom({id: 'room-2', name: 'PAGE_TWO_ROOM'})],
                 prevPageToken: 'page-1-token',
                 nextPageToken: null,
             });
         });
         getRooms.mockImplementationOnce(async () => new SuccessResponse({
-            rooms: [buildRoom({id: 'room-1', name: 'PAGE_ONE_ROOM'})],
+            results: [buildRoom({id: 'room-1', name: 'PAGE_ONE_ROOM'})],
             prevPageToken: null,
             nextPageToken: 'page-2-token',
         }));
@@ -173,7 +173,7 @@ describe('User can see the list of rooms and players in each room', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async () => new SuccessResponse({
-                rooms: [buildRoom()],
+                results: [buildRoom()],
                 nextPageToken: null,
             })),
         });

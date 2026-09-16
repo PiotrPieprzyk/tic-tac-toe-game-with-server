@@ -39,7 +39,7 @@ export type RoomAPILeaveRequest = {
 export type RoomAPIDeletedResponse = SuccessResponse<undefined>;
 
 export type RoomAPIListResponseRaw = PaginatedResponse<{
-    rooms: RoomAPIResponseRaw[];
+    results: RoomAPIResponseRaw[];
 }>;
 
 export type RoomAPIListResponse = SuccessResponse<RoomAPIListResponseRaw>

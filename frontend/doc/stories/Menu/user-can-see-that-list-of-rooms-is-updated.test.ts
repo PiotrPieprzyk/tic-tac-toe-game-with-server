@@ -33,7 +33,7 @@ describe('User can see that the list of rooms is updated automatically', () => {
     it('WHEN websocket is connected SHOULD show connectionStatus as LIVE', async () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
-            getRooms: vi.fn(async () => new SuccessResponse({rooms: [], nextPageToken: null})),
+            getRooms: vi.fn(async () => new SuccessResponse({results: [], nextPageToken: null})),
         });
         const {roomEventsSocket} = createMockRoomEventsSocket();
 
@@ -47,7 +47,7 @@ describe('User can see that the list of rooms is updated automatically', () => {
     it('WHEN a roomAdded event is received SHOULD show a new roomListItem for that room without a page reload', async () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
-            getRooms: vi.fn(async () => new SuccessResponse({rooms: [], nextPageToken: null})),
+            getRooms: vi.fn(async () => new SuccessResponse({results: [], nextPageToken: null})),
         });
         const {roomEventsSocket, getHandlers} = createMockRoomEventsSocket();
 
@@ -70,7 +70,7 @@ describe('User can see that the list of rooms is updated automatically', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async () => new SuccessResponse({
-                rooms: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}]})],
+                results: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}]})],
                 nextPageToken: null,
             })),
         });
@@ -99,7 +99,7 @@ describe('User can see that the list of rooms is updated automatically', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async () => new SuccessResponse({
-                rooms: [buildRoom({id: 'room-1'})],
+                results: [buildRoom({id: 'room-1'})],
                 nextPageToken: null,
             })),
         });

@@ -31,7 +31,7 @@ describe('User can create a room, but only one', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async () => new SuccessResponse({
-                rooms: [{id: 'room-1', name: 'ROOM_NULL_PTR', hostId: 'host-1', activeGameId: '', users: [], status: GameStatusEnum.WAITING_FOR_PLAYERS}],
+                results: [{id: 'room-1', name: 'ROOM_NULL_PTR', hostId: 'host-1', activeGameId: '', users: [], status: GameStatusEnum.WAITING_FOR_PLAYERS}],
                 nextPageToken: null,
             })),
         });
@@ -53,7 +53,7 @@ describe('User can create a room, but only one', () => {
         const user = userEvent.setup();
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
-            getRooms: vi.fn(async () => new SuccessResponse({rooms: [], nextPageToken: null})),
+            getRooms: vi.fn(async () => new SuccessResponse({results: [], nextPageToken: null})),
         });
 
         renderMenuRoomList(roomAPI, router);

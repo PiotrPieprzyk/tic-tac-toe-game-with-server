@@ -1,5 +1,9 @@
 import type {UserId} from "@/domain/User/UserId.ts";
 
 export interface UserSession {
-    userId: UserId;
+    readonly userId: UserId;
+
+    setUserId(userId: UserId): void;
+
+    subscribe(listener: () => void): () => void;
 }

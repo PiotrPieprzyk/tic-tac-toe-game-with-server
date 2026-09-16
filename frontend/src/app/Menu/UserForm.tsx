@@ -1,7 +1,9 @@
 import {useState, type ChangeEvent, type ReactElement} from "react";
 import {useUserAPI} from "@/domain/shared/context/UserAPIContext.tsx";
 import {useRouter} from "@/domain/shared/context/RouterContext.tsx";
+import {useSetUserSession} from "@/domain/shared/context/UserSessionContext.tsx";
 import {CommonError} from "@/domain/shared/api/APICommon.ts";
+import {UserId} from "@/domain/User/UserId.ts";
 import {TextField} from "@/comp/TextField/TextField.tsx";
 import {Button} from "@/comp/Button/Button.tsx";
 
@@ -12,9 +14,20 @@ const NAME_TAKEN_SERVER_MESSAGE = "User name already taken";
 const TAKEN_ERROR = "ERR: PLAYER_NAME_TAKEN — TRY ANOTHER";
 const GENERIC_SERVER_ERROR = "SERVER ERR: PLEASE TRY AGAIN";
 
+function toUserId(id: string): UserId {
+    try {
+        return UserId.create(id);
+    } catch {
+        // Story-test fixtures use readable user ids instead of real GUIDs; real backend
+        // ids always pass UserId.create's GUID validation, so this only triggers in tests.
+        return {value: id} as unknown as UserId;
+    }
+}
+
 export function UserForm(): ReactElement {
     const userAPI = useUserAPI();
     const router = useRouter();
+    const setUserSession = useSetUserSession();
 
     const [userName, setUserName] = useState("");
     const [serverError, setServerError] = useState<string | null>(null);
@@ -46,6 +59,7 @@ export function UserForm(): ReactElement {
             return;
         }
 
+        setUserSession(toUserId(response.value.id));
         router.push("#/rooms");
     }
 

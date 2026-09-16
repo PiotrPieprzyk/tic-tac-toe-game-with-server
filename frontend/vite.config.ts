@@ -14,6 +14,10 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
   ],
+  server: {
+    host: '127.0.0.1',
+    port: 4000,
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

@@ -12,7 +12,7 @@ import {UserSessionProvider} from '@/domain/shared/context/UserSessionContext';
 import {UserId} from '@/domain/User/UserId';
 import {GameStatusEnum} from '@/domain/Game/GameStatus';
 import {DESIGN_COLORS} from '@doc/stories/testUtils';
-import {createMockRouter, createMockRoomAPI} from '@doc/stories/Menu/shared/mocks';
+import {createMockRouter, createMockRoomAPI, createMockUserSession} from '@doc/stories/Menu/shared/mocks';
 import {buildRoom} from '@doc/stories/Menu/shared/builders';
 import {
     getAlreadyInRoomMessage, getCreateRoom,
@@ -30,7 +30,7 @@ function renderRoomList(roomAPI: RoomAPI, router: Router) {
             RouterProvider,
             {router, children: createElement(
                 UserSessionProvider,
-                {userId: CURRENT_USER_ID, children: createElement(
+                {userSession: createMockUserSession(CURRENT_USER_ID), children: createElement(
                     RoomAPIProvider,
                     {roomAPI, children: createElement(RoomList)}
                 )}
@@ -47,9 +47,9 @@ describe('User can return to the room they are already in', () => {
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async (options?: RoomAPIGetRoomsOptions) => {
                 if (options?.userId) {
-                    return new SuccessResponse({rooms: [ownRoom], nextPageToken: null});
+                    return new SuccessResponse({results: [ownRoom], nextPageToken: null});
                 }
-                return new SuccessResponse({rooms: [ownRoom, otherRoom], nextPageToken: null});
+                return new SuccessResponse({results: [ownRoom, otherRoom], nextPageToken: null});
             }),
         });
 
@@ -69,9 +69,9 @@ describe('User can return to the room they are already in', () => {
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async (options?: RoomAPIGetRoomsOptions) => {
                 if (options?.userId) {
-                    return new SuccessResponse({rooms: [ownRoom], nextPageToken: null});
+                    return new SuccessResponse({results: [ownRoom], nextPageToken: null});
                 }
-                return new SuccessResponse({rooms: [ownRoom, otherRoom], nextPageToken: null});
+                return new SuccessResponse({results: [ownRoom, otherRoom], nextPageToken: null});
             }),
         });
 
@@ -92,9 +92,9 @@ describe('User can return to the room they are already in', () => {
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async (options?: RoomAPIGetRoomsOptions) => {
                 if (options?.userId) {
-                    return new SuccessResponse({rooms: [ownRoom], nextPageToken: null});
+                    return new SuccessResponse({results: [ownRoom], nextPageToken: null});
                 }
-                return new SuccessResponse({rooms: [ownRoom], nextPageToken: null});
+                return new SuccessResponse({results: [ownRoom], nextPageToken: null});
             }),
         });
 
@@ -118,9 +118,9 @@ describe('User can return to the room they are already in', () => {
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async (options?: RoomAPIGetRoomsOptions) => {
                 if (options?.userId) {
-                    return new SuccessResponse({rooms: [], nextPageToken: null});
+                    return new SuccessResponse({results: [], nextPageToken: null});
                 }
-                return new SuccessResponse({rooms: [otherRoom], nextPageToken: null});
+                return new SuccessResponse({results: [otherRoom], nextPageToken: null});
             }),
         });
 

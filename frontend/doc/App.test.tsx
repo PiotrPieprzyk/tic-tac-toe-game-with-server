@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import App from '@/App'
 
 describe('App', () => {
-  it('renders hello', () => {
+  it('renders the user form at the root route', () => {
     render(<App />)
-    expect(screen.getByText('hello')).toBeInTheDocument()
+    expect(screen.getByTestId('userForm')).toBeInTheDocument()
   })
 })
