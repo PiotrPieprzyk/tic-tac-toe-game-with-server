@@ -126,7 +126,7 @@ export function RoomList(): ReactElement {
             <div data-testid="roomList" className="flex flex-col">
                 <div className="flex flex-col gap-2.5 border-b border-panel-border-subtle p-4 pb-3">
                     <div className="flex items-center justify-between">
-                        <div className="font-mono text-body text-text-primary">{'>_ ROOM_LIST'}</div>
+                        <div className="font-mono text-body text-text-primary">{'User: XXX'}</div>
                         <div data-testid="connectionStatus" className="flex items-center gap-1.5 font-mono text-meta text-text-muted">
                             <PulseDot />
                             {connected ? 'LIVE' : 'OFFLINE'}
