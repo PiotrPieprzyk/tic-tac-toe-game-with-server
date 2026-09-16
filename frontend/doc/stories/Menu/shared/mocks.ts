@@ -12,10 +12,11 @@ export function createMockRouter(): Router {
     };
 }
 
-export function createMockUserSession(userId: UserId): UserSession {
+export function createMockUserSession(userId: UserId, userName: string | null = null): UserSession {
     return {
         userId,
-        setUserId: vi.fn(),
+        userName,
+        setUser: vi.fn(),
         subscribe: vi.fn(() => vi.fn()),
     };
 }

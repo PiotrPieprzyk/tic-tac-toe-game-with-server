@@ -1,7 +1,7 @@
 import {useEffect, useState, type ReactElement} from "react";
 import {useRoomAPI} from "@/domain/shared/context/RoomAPIContext.tsx";
 import {useRouter} from "@/domain/shared/context/RouterContext.tsx";
-import {ANONYMOUS_USER_ID, useUserSession} from "@/domain/shared/context/UserSessionContext.tsx";
+import {ANONYMOUS_USER_ID, useUserName, useUserSession} from "@/domain/shared/context/UserSessionContext.tsx";
 import {useRoomEventsSocket} from "@/domain/shared/context/RoomEventsSocketContext.tsx";
 import {CommonError} from "@/domain/shared/api/APICommon.ts";
 import type {RoomAPIResponseRaw} from "@/domain/shared/api/RoomAPI.ts";
@@ -38,6 +38,7 @@ export function RoomList(): ReactElement {
     const roomAPI = useRoomAPI();
     const router = useRouter();
     const currentUserId = useUserSession();
+    const currentUserName = useUserName();
     const roomEventsSocket = useRoomEventsSocket();
 
     const [rooms, setRooms] = useState<RoomAPIResponseRaw[]>([]);
@@ -97,6 +98,15 @@ export function RoomList(): ReactElement {
     const hasPrev = prevPageToken != null;
     const pageLabel = `PAGE ${pageIndex + 1}/${pageIndex + 1 + (hasNext ? 1 : 0)}`;
 
+    const getHostName = (room: RoomAPIResponseRaw) => {
+        try {
+            return room.users.find((user) => user.id === room.hostId).name;
+        } catch (e) {
+            console.log(e);
+            return 'UNKNOWN';
+        }
+    }
+
     function handlePrevPage() {
         if (!prevPageToken) return;
         setPageIndex((index) => Math.max(0, index - 1));
@@ -126,7 +136,7 @@ export function RoomList(): ReactElement {
             <div data-testid="roomList" className="flex flex-col">
                 <div className="flex flex-col gap-2.5 border-b border-panel-border-subtle p-4 pb-3">
                     <div className="flex items-center justify-between">
-                        <div className="font-mono text-body text-text-primary">{'User: XXX'}</div>
+                        <div className="font-mono text-body text-text-primary">{`User: ${currentUserName ?? 'UNKNOWN'}`}</div>
                         <div data-testid="connectionStatus" className="flex items-center gap-1.5 font-mono text-meta text-text-muted">
                             <PulseDot />
                             {connected ? 'LIVE' : 'OFFLINE'}
@@ -170,6 +180,7 @@ export function RoomList(): ReactElement {
                                 statusTone={STATUS_TONE[room.status]}
                                 statusLabel={GameStatusShortLabel[room.status]}
                                 playerCount={room.users.length}
+                                hostname={getHostName(room)}
                                 maxPlayers={MAX_PLAYERS}
                                 disabled={
                                     room.status !== GameStatusEnum.WAITING_FOR_PLAYERS ||

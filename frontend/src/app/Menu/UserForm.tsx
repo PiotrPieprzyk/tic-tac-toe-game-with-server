@@ -60,7 +60,7 @@ export function UserForm(): ReactElement {
             return;
         }
 
-        setUserSession(toUserId(response.value.id));
+        setUserSession(toUserId(response.value.id), userName);
         router.push("#/rooms");
     }
 

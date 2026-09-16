@@ -6,7 +6,8 @@ export const ANONYMOUS_USER_ID = UserId.create();
 
 const noopUserSession: UserSession = {
     userId: ANONYMOUS_USER_ID,
-    setUserId: () => {},
+    userName: null,
+    setUser: () => {},
     subscribe: () => () => {},
 };
 
@@ -28,7 +29,15 @@ export function useUserSession(): UserId {
     );
 }
 
-export function useSetUserSession(): (userId: UserId) => void {
+export function useUserName(): string | null {
     const userSession = useContext(UserSessionContext);
-    return (userId) => userSession.setUserId(userId);
+    return useSyncExternalStore(
+        (onStoreChange) => userSession.subscribe(onStoreChange),
+        () => userSession.userName
+    );
+}
+
+export function useSetUserSession(): (userId: UserId, userName: string) => void {
+    const userSession = useContext(UserSessionContext);
+    return (userId, userName) => userSession.setUser(userId, userName);
 }

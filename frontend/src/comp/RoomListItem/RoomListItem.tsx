@@ -10,6 +10,7 @@ export interface RoomListItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 
   playerCount: number
   maxPlayers: number
   disabled: boolean
+  hostname: string
   joining: boolean
   onJoin: () => void
   className?: string
@@ -22,6 +23,7 @@ export function RoomListItem({
   playerCount,
   maxPlayers,
   disabled,
+  hostname,
   joining,
   onJoin,
   className,
@@ -45,7 +47,7 @@ export function RoomListItem({
                     {name}
                 </div>
                 <span className='font-mono text-meta text-text-faint' data-testid="roomPlayerCount">
-                        Host: xxx {isFull ? 'ROOM_IS_FULL' : `${playerCount}/${maxPlayers}`}
+                        Host: {hostname} {isFull ? 'ROOM_IS_FULL' : `${playerCount}/${maxPlayers}`}
                 </span>
             </div>
 
