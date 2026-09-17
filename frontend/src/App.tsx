@@ -12,6 +12,7 @@ import {UserForm} from "@/app/Menu/UserForm.tsx";
 import {RoomForm} from "@/app/Menu/RoomForm.tsx";
 import {MenuRoomList} from "@/app/Menu/RoomList/MenuRoomList";
 import {RoomPage} from "@/app/Room/RoomPage.tsx";
+import {RoomRenameForm} from "@/app/Room/RoomRenameForm.tsx";
 
 
 function RootLayout(): ReactElement {
@@ -45,6 +46,7 @@ const dataRouter = createHashRouter([
             {path: "rooms", element: <MenuRoomList/>},
             {path: "rooms/create", element: <RoomForm/>},
             {path: "rooms/:roomId", element: <RoomPage/>},
+            {path: "rooms/:roomId/rename", element: <RoomRenameForm/>},
         ],
     },
 ]);

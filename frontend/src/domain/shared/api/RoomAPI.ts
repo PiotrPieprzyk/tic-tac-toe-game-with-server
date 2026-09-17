@@ -38,6 +38,13 @@ export type RoomAPILeaveRequest = {
 
 export type RoomAPIDeletedResponse = SuccessResponse<undefined>;
 
+export type GameAPIResponseRaw = {
+    id: string
+    roomId: string
+}
+
+export type GameAPIResponse = SuccessResponse<GameAPIResponseRaw>
+
 export type RoomAPIListResponseRaw = PaginatedResponse<{
     results: RoomAPIResponseRaw[];
 }>;
@@ -63,4 +70,6 @@ export interface RoomAPI {
     userLeaveRoom(roomId: RoomId, body: RoomAPILeaveRequest): Promise<{} | CommonError>;
 
     deleteRoom(roomId: RoomId): Promise<RoomAPIDeletedResponse | CommonError>;
+
+    startGame(roomId: RoomId): Promise<GameAPIResponse | CommonError>;
 }

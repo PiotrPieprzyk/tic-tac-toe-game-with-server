@@ -1,4 +1,5 @@
 import type {
+    GameAPIResponseRaw,
     RoomAPI,
     RoomAPIGetRoomsOptions,
     RoomAPIJoinRequest,
@@ -46,5 +47,9 @@ export class SimpleRoomAPI implements RoomAPI {
 
     async deleteRoom(id: RoomId) {
         return await API.delete<undefined>(`${SimpleRoomAPI.path}/${id}`);
+    }
+
+    async startGame(id: RoomId) {
+        return await API.post<GameAPIResponseRaw>(`/games`, {roomId: id.value});
     }
 }
