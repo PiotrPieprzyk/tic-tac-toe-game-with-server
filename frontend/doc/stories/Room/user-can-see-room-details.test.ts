@@ -10,7 +10,6 @@ import {renderRoomPage} from '@doc/stories/Room/shared/render';
 import {
     getEmptySlotMessage,
     getEnterGame,
-    getErrorMessage,
     getHostTag,
     getLeaveRoom,
     getPlayerName,
@@ -139,7 +138,7 @@ describe("User can see the room's details: its name, id, players, and status", (
         expect(router.push).toHaveBeenCalledWith('#/games/game-1');
     });
 
-    it('WHEN the room fails to load SHOULD show an error message and no room details', async () => {
+    it('WHEN the room fails to load SHOULD redirect to #/rooms', async () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRoom: vi.fn(async () => new CommonError('Room not found', 404)),
@@ -150,8 +149,7 @@ describe("User can see the room's details: its name, id, players, and status", (
         renderRoomPage(roomAPI, router, userSession, roomEventsSocket);
 
         await waitFor(() => {
-            expect(getErrorMessage()).toBeVisible();
+            expect(router.push).toHaveBeenCalledWith('#/rooms');
         });
-        expect(getPlayerSlots()).toHaveLength(0);
     });
 });

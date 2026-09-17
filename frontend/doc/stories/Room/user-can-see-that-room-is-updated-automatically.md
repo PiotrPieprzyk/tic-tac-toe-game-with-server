@@ -14,6 +14,8 @@ The room page subscribes to the room events websocket (see backend `rooms-list-i
 updates without a manual refresh or page reload:
 
 - roomEdited for this room — the room's name/players/status update in place.
+- roomEdited for this room where the current user is no longer in the players list — the user is redirected to
+  #/rooms (they were removed from the room).
 - roomDeleted for this room — the user is redirected to #/rooms (the room no longer exists).
 
 Events for a different room are ignored (no state changes as a side effect of an event for another room).
@@ -57,6 +59,14 @@ Prerequisites:
 - Mock API GET /rooms/{roomId} — return a room with 2 of 2 players and status WAITING_FOR_PLAYERS
 - Current user is the host
 - Emit roomEdited event for this room with status IN_PROGRESS and an activeGameId
+
+#### WHEN a roomEdited event is received for this room with the current user removed from the players list SHOULD navigate back to #/rooms
+
+Prerequisites:
+
+- Mock API GET /rooms/{roomId} — return a room with 2 of 2 players
+- Current user is the non-host player
+- Emit roomEdited event for this room with only the host left
 
 #### WHEN a roomDeleted event is received for this room SHOULD navigate back to #/rooms
 

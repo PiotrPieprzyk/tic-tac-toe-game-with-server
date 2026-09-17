@@ -108,6 +108,27 @@ describe('User can see that the room is updated automatically', () => {
         });
     });
 
+    it('WHEN a roomEdited event is received for this room with the current user removed from the players list SHOULD navigate back to #/rooms', async () => {
+        const router = createMockRouter();
+        const roomAPI = createMockRoomAPI({
+            getRoom: vi.fn(async () => new SuccessResponse(buildRoom({hostId: HOST.id, users: [HOST, OPPONENT], status: GameStatusEnum.WAITING_FOR_PLAYERS}))),
+        });
+        const userSession = createMockUserSession(OPPONENT_ID);
+        const {roomEventsSocket, getHandlers} = createMockRoomEventsSocket();
+
+        renderRoomPage(roomAPI, router, userSession, roomEventsSocket);
+
+        await waitFor(() => {
+            expect(getPlayerName(1)).toHaveTextContent(OPPONENT.name);
+        });
+
+        getHandlers().onRoomEdited?.(buildRoom({hostId: HOST.id, users: [HOST], status: GameStatusEnum.WAITING_FOR_PLAYERS}));
+
+        await waitFor(() => {
+            expect(router.push).toHaveBeenCalledWith('#/rooms');
+        });
+    });
+
     it("WHEN a roomDeleted event is received for this room SHOULD navigate back to #/rooms", async () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({

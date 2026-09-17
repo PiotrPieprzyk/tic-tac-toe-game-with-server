@@ -29,9 +29,9 @@ Elements in #/rooms/{roomId}:
       #/games/{activeGameId}
     - data-testId="deleteRoom" — host only
     - data-testId="leaveRoom" — non-host only (the host has no leave control, only deleteRoom)
-    - data-testId="errorMessage" — shown when the room fails to load
 
-The room is fetched from GET /rooms/{roomId} on mount.
+The room is fetched from GET /rooms/{roomId} on mount. If the fetch fails, the user is redirected to #/rooms (see
+[[user-can-see-that-room-is-updated-automatically]] for the equivalent behavior once the room is loaded).
 
 ### Tests
 
@@ -75,7 +75,7 @@ Prerequisites:
 - Mock API GET /rooms/room-1 — return a room with 2 players, status IN_PROGRESS, and activeGameId "game-1"
 - Current user is the non-host player
 
-#### WHEN the room fails to load SHOULD show an error message and no room details
+#### WHEN the room fails to load SHOULD redirect to #/rooms
 
 Prerequisites:
 
