@@ -13,6 +13,50 @@ The goal is **high cohesion, low coupling**: each file does one job, can be
 read and reasoned about on its own, and doesn't need to know how its
 siblings are implemented.
 
+## 0. Before you start: what to read, in order
+
+Building a new `app/<Feature>` page or component always needs the same
+handful of inputs. Read them in this order instead of open-endedly exploring
+the codebase — it's a fixed list, not a search problem:
+
+1. **The story spec + test** — `doc/stories/<Feature>/<story-name>.md` and
+   `.test.ts`. This is the behavioral source of truth: the exact
+   `data-testid` tree, button/error copy, and one `#### WHEN ...` per test
+   case. If a feature has multiple stories (e.g. `Room/` has 8), skim all of
+   them first — they usually share one `data-testid` tree (see `shared/get/`)
+   and describe different facets of the same component(s).
+2. **`doc/stories/<Feature>/shared/render.ts`** (or wherever the feature's
+   render helper lives) — this pins down the *exact* provider nesting order
+   your component(s) will be mounted under, and which providers are/aren't
+   present (e.g. `RoomRenameForm` is deliberately rendered without a
+   `RoomEventsSocketProvider`). It also tells you the **exact import path**
+   the test expects (e.g. `from '@/app/Room/RoomPage'`, a bare folder import
+   with no filename — that requires an `index.tsx` re-export in the folder,
+   not just a same-named `.tsx` file inside it).
+3. **`doc/stories/<Feature>/shared/{mocks,builders}.ts` and `get/*.ts`** —
+   the mock factories tell you the exact domain interface shapes you're
+   coding against; the `get/*.ts` getters tell you the exact nesting of
+   `data-testid`s to render (outer to inner).
+4. **The matching section of `doc/design/*.dc.html`** — visual structure,
+   exact copy/labels, color/tone per state. Grep the file for the feature
+   name or a testid string if it's a large single-file mockup.
+5. **The closest existing sibling feature**, to copy conventions rather than
+   invent them: a list-style page → `Menu/RoomList/`; a single-submit form →
+   `Menu/RoomForm.tsx`. Read its root component and one or two children in
+   full, not just the exports.
+6. **`src/comp/` inventory** — list the folder, skim each component's props.
+   Cross-check against the design mockup's own "Design System" / component
+   inventory section (if it has one) to find components the mockup expects
+   that don't exist yet under `comp/` — those need to be built first, using
+   the same conventions (see step 5's sibling components for the pattern:
+   `Record<Variant, string>` class maps, `className`/`...rest` passthrough,
+   theme type-scale classes only).
+7. **Domain interfaces** — see `domain-interfaces.md` in this skill folder
+   for a standing cheat sheet of `RoomAPI`/`UserSession`/`Router`/
+   `RoomEventsSocket` shapes, the value-object comparison gotcha, and the
+   `useRoomEventsSocket` no-op-in-prod caveat. Only re-read the actual
+   `domain/shared/**` source if something in the cheat sheet looks stale.
+
 ## 1. One folder per feature, one root component
 
 A feature/"page" lives in its own folder under `app/<Feature>/`, e.g.
@@ -89,3 +133,10 @@ tests without touching real infra.
 
 See `frontend/.claude/skills/component-tests` for how the story tests in
 `doc/stories/**` are written against these components' `data-testid` tree.
+
+## 6. Domain interfaces reference
+
+See `domain-interfaces.md` in this skill folder for the `RoomAPI` /
+`UserSession` / `Router` / `RoomEventsSocket` shapes, the value-object
+comparison gotcha, and known gaps (no real `RoomEventsSocket` infra wired
+into `App.tsx` yet).

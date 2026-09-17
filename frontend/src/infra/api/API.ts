@@ -4,6 +4,11 @@ export class API {
 
     static domain = 'http://127.0.0.1:3000';
 
+    static async parseJsonBody(response: Response): Promise<unknown> {
+        const text = await response.text();
+        return text ? JSON.parse(text) : undefined;
+    }
+
     static async handleCommonError(response: Response): Promise<CommonError | null> {
         if (response.status < 200 || 400 <= response.status) {
             const json = await response.json();
@@ -36,9 +41,9 @@ export class API {
                 return commonError;
             }
 
-            const json = await response.json();
+            const json = await API.parseJsonBody(response);
 
-            return new SuccessResponse(json);
+            return new SuccessResponse(json as T);
         } catch (e) {
             console.error(e);
             return new CommonError('Server error. Please try again', 500);
@@ -63,9 +68,9 @@ export class API {
                 return commonError;
             }
 
-            const json = await response.json();
+            const json = await API.parseJsonBody(response);
 
-            return new SuccessResponse(json);
+            return new SuccessResponse(json as T);
         } catch (e) {
             console.error(e);
             return new CommonError('Server error. Please try again', 500);
@@ -88,12 +93,12 @@ export class API {
             const commonError = await API.handleCommonError(response);
 
             if (commonError) {
-                return Promise.reject(commonError);
+                return commonError;
             }
 
-            const json = await response.json();
+            const json = await API.parseJsonBody(response);
 
-            return new SuccessResponse(json);
+            return new SuccessResponse(json as T);
         } catch (e) {
             console.error(e);
             return new CommonError('Server error. Please try again', 500);
@@ -114,12 +119,12 @@ export class API {
             const commonError = await API.handleCommonError(response);
 
             if (commonError) {
-                return Promise.reject(commonError);
+                return commonError;
             }
 
-            const json = await response.json();
+            const json = await API.parseJsonBody(response);
 
-            return new SuccessResponse(json);
+            return new SuccessResponse(json as T);
         } catch (e) {
             console.error(e);
             return new CommonError('Server error. Please try again', 500);

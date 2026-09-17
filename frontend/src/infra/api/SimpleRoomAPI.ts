@@ -19,7 +19,7 @@ export class SimpleRoomAPI implements RoomAPI {
     }
 
     async getRoom(id: RoomId) {
-        return await API.get<RoomAPIResponseRaw>(`${SimpleRoomAPI.path}/${id}`);
+        return await API.get<RoomAPIResponseRaw>(`${SimpleRoomAPI.path}/${id.value}`);
     }
 
     async getRooms(options?: RoomAPIGetRoomsOptions) {
@@ -34,19 +34,29 @@ export class SimpleRoomAPI implements RoomAPI {
     }
 
     async updateRoom(id: RoomId, body: RoomAPIUpdateRequest) {
-        return await API.put<RoomAPIResponseRaw>(`${SimpleRoomAPI.path}/${id}`, body);
+        const rawBody = {
+            name: body.name,
+            usersIds: body.usersIds.map((id) => id.value),
+        }
+        return await API.put<RoomAPIResponseRaw>(`${SimpleRoomAPI.path}/${id.value}`, rawBody);
     }
 
     async userJoinRoom(id: RoomId, body: RoomAPIJoinRequest) {
-        return await API.put<RoomAPIResponseRaw>(`${SimpleRoomAPI.path}/${id}/join`, body);
+        const rawBody = {
+            userId: body.userId.value,
+        }
+        return await API.put<RoomAPIResponseRaw>(`${SimpleRoomAPI.path}/${id.value}/join`, rawBody);
     }
 
     async userLeaveRoom(id: RoomId, body: RoomAPILeaveRequest) {
-        return await API.put<undefined>(`${SimpleRoomAPI.path}/${id}/leave`, body);
+        const rawBody = {
+            userId: body.userId.value,
+        }
+        return await API.put<undefined>(`${SimpleRoomAPI.path}/${id.value}/leave`, rawBody);
     }
 
     async deleteRoom(id: RoomId) {
-        return await API.delete<undefined>(`${SimpleRoomAPI.path}/${id}`);
+        return await API.delete<undefined>(`${SimpleRoomAPI.path}/${id.value}`);
     }
 
     async startGame(id: RoomId) {

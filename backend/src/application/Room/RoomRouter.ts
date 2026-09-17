@@ -43,6 +43,20 @@ export class RoomRouter {
 
         app.get('/rooms', async (req, res, next) => {
             try {
+                if (req.query.userId) {
+                    const userId = UserId.create(req.query.userId as string);
+                    const room = await this.roomRepository.findRoomByUserId(userId);
+                    const roomsDTO = room ? [await this.getRoomDTO(room)] : [];
+
+                    res.status(200).json({
+                        results: roomsDTO,
+                        nextPageToken: null,
+                        prevPageToken: null,
+                        totalSize: roomsDTO.length
+                    });
+                    return;
+                }
+
                 const pageToken = PageToken.create(req.query.pageToken as string);
                 const pageSize = PageSize.create(req.query.pageSize as string);
                 const roomsPage = await this.roomRepository.getPage(pageToken, pageSize);

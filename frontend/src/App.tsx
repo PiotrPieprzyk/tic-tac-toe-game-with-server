@@ -11,7 +11,7 @@ import {SimpleUserSession} from "@/infra/service/SimpleUserSession.ts";
 import {UserForm} from "@/app/Menu/UserForm.tsx";
 import {RoomForm} from "@/app/Menu/RoomForm.tsx";
 import {MenuRoomList} from "@/app/Menu/RoomList/MenuRoomList";
-import {RoomPage} from "@/app/Room/RoomPage.tsx";
+import {RoomPage} from "@/app/Room/RoomPage";
 import {RoomRenameForm} from "@/app/Room/RoomRenameForm.tsx";
 
 

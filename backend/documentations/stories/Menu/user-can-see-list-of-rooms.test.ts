@@ -107,4 +107,27 @@ describe('User can see the list of rooms and players in the room.', () => {
         expect(secondPage.body.results).toHaveLength(1);
         expect(secondPage.body.results[0].id).not.toBe(firstPage.body.results[0].id);
     });
+
+    it('WHEN rooms list is requested with a userId that belongs to a room SHOULD return 200 with only that user\'s room', async () => {
+        const roomId = createdRoomIds[0];
+
+        const response = await request.get(`/rooms?userId=${user.id}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.results).toHaveLength(1);
+        expect(response.body.results[0].id).toBe(roomId);
+        expect(response.body.totalSize).toBe(1);
+    });
+
+    it('WHEN rooms list is requested with a userId that does not belong to any room SHOULD return 200 with an empty results array', async () => {
+        const otherUserAgent = supertest.agent(app);
+        const otherUser = (await otherUserAgent.post('/users').send({name: 'ListUser4'})).body;
+        createdUserIds.push(otherUser.id);
+
+        const response = await request.get(`/rooms?userId=${otherUser.id}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.results).toHaveLength(0);
+        expect(response.body.totalSize).toBe(0);
+    });
 });

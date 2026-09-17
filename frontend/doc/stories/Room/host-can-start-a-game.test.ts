@@ -47,10 +47,11 @@ describe('Host can start a game once the room has 2 of 2 players', () => {
         expect(getRemovePlayer(1)).toBeDisabled();
         expect(getDeleteRoom()).toBeEnabled();
 
+        resolveStartGame(new SuccessResponse({id: 'game-1', roomId: buildReadyRoom().id}));
+
         await waitFor(() => {
             expect(router.push).toHaveBeenCalledWith('#/games/game-1');
         });
-        resolveStartGame(new SuccessResponse({id: 'game-1', roomId: buildReadyRoom().id}));
     });
 
     it('WHEN starting the game fails SHOULD show an error message and re-enable startGame', async () => {
