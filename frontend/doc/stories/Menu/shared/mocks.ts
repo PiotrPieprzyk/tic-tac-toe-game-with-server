@@ -1,6 +1,7 @@
 import {vi} from 'vitest';
 import type {Router} from '@/domain/shared/service/Router';
-import type {RoomAPI} from '@/domain/shared/api/RoomAPI';
+import type {RoomAPI, RoomAPIGetRoomsOptions, RoomAPIListResponseRaw} from '@/domain/shared/api/RoomAPI';
+import {SuccessResponse} from '@/domain/shared/api/APICommon';
 import type {RoomEventsHandlers, RoomEventsSocket} from '@/domain/shared/service/RoomEventsSocket';
 import type {UserSession} from '@/domain/shared/service/UserSession';
 import type {UserId} from '@/domain/User/UserId';
@@ -32,6 +33,17 @@ export function createMockRoomAPI(overrides: Partial<RoomAPI> = {}): RoomAPI {
         deleteRoom: vi.fn(),
         ...overrides,
     };
+}
+
+// RoomList and RoomListHeader each look up the current user's own room independently
+// (options.userId set), separately from the paginated room list (options.pageToken).
+export function mockGetRooms(
+    list: RoomAPIListResponseRaw,
+    ownRoom: RoomAPIListResponseRaw = {results: [], nextPageToken: null},
+): RoomAPI['getRooms'] {
+    return vi.fn(async (options?: RoomAPIGetRoomsOptions) =>
+        new SuccessResponse(options?.userId ? ownRoom : list)
+    );
 }
 
 export function createMockRoomEventsSocket(): {roomEventsSocket: RoomEventsSocket, getHandlers: () => RoomEventsHandlers} {

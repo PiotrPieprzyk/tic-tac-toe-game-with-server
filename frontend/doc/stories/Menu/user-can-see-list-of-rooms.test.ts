@@ -2,14 +2,16 @@ import {describe, expect, it, vi} from 'vitest';
 import {createElement} from 'react';
 import {render, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {RoomList} from '@/app/Menu/RoomList';
+import {MenuRoomList} from '@/app/Menu/RoomList/MenuRoomList';
 import type {Router} from '@/domain/shared/service/Router';
-import type {RoomAPI, RoomAPIListResponse} from '@/domain/shared/api/RoomAPI';
+import type {RoomAPI, RoomAPIGetRoomsOptions, RoomAPIListResponse} from '@/domain/shared/api/RoomAPI';
 import {SuccessResponse} from '@/domain/shared/api/APICommon';
 import {RoomAPIProvider} from '@/domain/shared/context/RoomAPIContext';
 import {RouterProvider} from '@/domain/shared/context/RouterContext';
+import {UserSessionProvider} from '@/domain/shared/context/UserSessionContext';
+import {UserId} from '@/domain/User/UserId';
 import {GameStatusEnum} from '@/domain/Game/GameStatus';
-import {createMockRouter, createMockRoomAPI} from '@doc/stories/Menu/shared/mocks';
+import {createMockRouter, createMockRoomAPI, createMockUserSession, mockGetRooms} from '@doc/stories/Menu/shared/mocks';
 import {buildRoom} from '@doc/stories/Menu/shared/builders';
 import {
     getLoading,
@@ -21,13 +23,18 @@ import {
     getRoomStatus, roomList
 } from "@doc/stories/Menu/shared/get/roomList.ts";
 
-function renderRoomList(roomAPI: RoomAPI, router: Router) {
+const CURRENT_USER_ID = UserId.create();
+
+function renderMenuRoomList(roomAPI: RoomAPI, router: Router) {
     return render(
         createElement(
             RouterProvider,
             {router, children: createElement(
-                RoomAPIProvider,
-                {roomAPI, children: createElement(RoomList)}
+                UserSessionProvider,
+                {userSession: createMockUserSession(CURRENT_USER_ID), children: createElement(
+                    RoomAPIProvider,
+                    {roomAPI, children: createElement(MenuRoomList)}
+                )}
             )}
         )
     );
@@ -40,7 +47,7 @@ describe('User can see the list of rooms and players in each room', () => {
             getRooms: vi.fn(() => new Promise<RoomAPIListResponse>(() => {})),
         });
 
-        renderRoomList(roomAPI, router);
+        renderMenuRoomList(roomAPI, router);
 
         expect(getLoading()).toBeVisible();
         expect(roomList().queryByTestId('noActiveRoomsFound')).not.toBeInTheDocument();
@@ -50,10 +57,10 @@ describe('User can see the list of rooms and players in each room', () => {
     it('WHEN no rooms exist SHOULD show noActiveRoomsFound and SHOULD NOT show loading or any roomListItem', async () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
-            getRooms: vi.fn(async () => new SuccessResponse({results: [], nextPageToken: null})),
+            getRooms: mockGetRooms({results: [], nextPageToken: null}),
         });
 
-        renderRoomList(roomAPI, router);
+        renderMenuRoomList(roomAPI, router);
 
         await waitFor(() => {
             expect(getNoActiveRoomsFound()).toBeVisible();
@@ -65,13 +72,13 @@ describe('User can see the list of rooms and players in each room', () => {
     it('WHEN one room exists SHOULD show one roomListItem with its name, status, and player count and SHOULD NOT show noActiveRoomsFound or loading', async () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
-            getRooms: vi.fn(async () => new SuccessResponse({
+            getRooms: mockGetRooms({
                 results: [buildRoom({name: 'ROOM_NULL_PTR', status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}]})],
                 nextPageToken: null,
-            })),
+            }),
         });
 
-        renderRoomList(roomAPI, router);
+        renderMenuRoomList(roomAPI, router);
 
         await waitFor(() => {
             expect(getRoomListItems()).toHaveLength(1);
@@ -86,13 +93,13 @@ describe('User can see the list of rooms and players in each room', () => {
     it('WHEN a room is full SHOULD show roomPlayerCount as ROOM_IS_FULL', async () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
-            getRooms: vi.fn(async () => new SuccessResponse({
+            getRooms: mockGetRooms({
                 results: [buildRoom({users: [{id: 'user-1', name: 'PlayerOne'}, {id: 'user-2', name: 'PlayerTwo'}]})],
                 nextPageToken: null,
-            })),
+            }),
         });
 
-        renderRoomList(roomAPI, router);
+        renderMenuRoomList(roomAPI, router);
 
         await waitFor(() => {
             expect(getRoomListItems()).toHaveLength(1);
@@ -103,13 +110,13 @@ describe('User can see the list of rooms and players in each room', () => {
     it('WHEN rooms list has more than one page SHOULD show pagination with prevPage disabled and nextPage clickable', async () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
-            getRooms: vi.fn(async () => new SuccessResponse({
+            getRooms: mockGetRooms({
                 results: [buildRoom()],
                 nextPageToken: 'page-2-token',
-            })),
+            }),
         });
 
-        renderRoomList(roomAPI, router);
+        renderMenuRoomList(roomAPI, router);
 
         await waitFor(() => {
             expect(getPagination()).toBeTruthy();
@@ -122,28 +129,26 @@ describe('User can see the list of rooms and players in each room', () => {
     it('WHEN user clicks nextPage SHOULD request the next page and show its rooms, and prevPage SHOULD become clickable', async () => {
         const user = userEvent.setup();
         const router = createMockRouter();
-        const getRooms = vi.fn();
-        getRooms.mockImplementationOnce(async () => new SuccessResponse({
-            results: [buildRoom({id: 'room-1', name: 'PAGE_ONE_ROOM'})],
-            prevPageToken: null,
-            nextPageToken: 'page-2-token',
-        }));
-        getRooms.mockImplementationOnce(async (options?: {pageToken?: string}) => {
-            expect(options?.pageToken).toBe('page-2-token');
+        const getRooms = vi.fn(async (options?: RoomAPIGetRoomsOptions) => {
+            if (options?.userId) {
+                return new SuccessResponse({results: [], nextPageToken: null});
+            }
+            if (options?.pageToken === 'page-2-token') {
+                return new SuccessResponse({
+                    results: [buildRoom({id: 'room-2', name: 'PAGE_TWO_ROOM'})],
+                    prevPageToken: 'page-1-token',
+                    nextPageToken: null,
+                });
+            }
             return new SuccessResponse({
-                results: [buildRoom({id: 'room-2', name: 'PAGE_TWO_ROOM'})],
-                prevPageToken: 'page-1-token',
-                nextPageToken: null,
+                results: [buildRoom({id: 'room-1', name: 'PAGE_ONE_ROOM'})],
+                prevPageToken: null,
+                nextPageToken: 'page-2-token',
             });
         });
-        getRooms.mockImplementationOnce(async () => new SuccessResponse({
-            results: [buildRoom({id: 'room-1', name: 'PAGE_ONE_ROOM'})],
-            prevPageToken: null,
-            nextPageToken: 'page-2-token',
-        }));
         const roomAPI = createMockRoomAPI({getRooms});
 
-        renderRoomList(roomAPI, router);
+        renderMenuRoomList(roomAPI, router);
 
         await waitFor(() => {
             expect(getRoomName(0)).toHaveTextContent('PAGE_ONE_ROOM');
@@ -172,13 +177,13 @@ describe('User can see the list of rooms and players in each room', () => {
     it('WHEN on the last page SHOULD show nextPage disabled', async () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
-            getRooms: vi.fn(async () => new SuccessResponse({
+            getRooms: mockGetRooms({
                 results: [buildRoom()],
                 nextPageToken: null,
-            })),
+            }),
         });
 
-        renderRoomList(roomAPI, router);
+        renderMenuRoomList(roomAPI, router);
 
         await waitFor(() => {
             expect(getPagination()).toBeTruthy();

@@ -2,7 +2,7 @@ import {describe, expect, it, vi} from 'vitest';
 import {createElement} from 'react';
 import {render, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {RoomList} from '@/app/Menu/RoomList';
+import {MenuRoomList} from '@/app/Menu/RoomList/MenuRoomList';
 import type {Router} from '@/domain/shared/service/Router';
 import type {RoomAPI, RoomAPIGetRoomsOptions} from '@/domain/shared/api/RoomAPI';
 import {SuccessResponse} from '@/domain/shared/api/APICommon';
@@ -24,7 +24,7 @@ import {
 
 const CURRENT_USER_ID = UserId.create();
 
-function renderRoomList(roomAPI: RoomAPI, router: Router) {
+function renderMenuRoomList(roomAPI: RoomAPI, router: Router) {
     return render(
         createElement(
             RouterProvider,
@@ -32,7 +32,7 @@ function renderRoomList(roomAPI: RoomAPI, router: Router) {
                 UserSessionProvider,
                 {userSession: createMockUserSession(CURRENT_USER_ID), children: createElement(
                     RoomAPIProvider,
-                    {roomAPI, children: createElement(RoomList)}
+                    {roomAPI, children: createElement(MenuRoomList)}
                 )}
             )}
         )
@@ -53,7 +53,7 @@ describe('User can return to the room they are already in', () => {
             }),
         });
 
-        renderRoomList(roomAPI, router);
+        renderMenuRoomList(roomAPI, router);
 
         await waitFor(() => {
             expect(getReturnToRoom()).toBeVisible();
@@ -75,7 +75,7 @@ describe('User can return to the room they are already in', () => {
             }),
         });
 
-        renderRoomList(roomAPI, router);
+        renderMenuRoomList(roomAPI, router);
 
         await waitFor(() => {
             expect(getRoomListItems()).toHaveLength(1);
@@ -98,7 +98,7 @@ describe('User can return to the room they are already in', () => {
             }),
         });
 
-        renderRoomList(roomAPI, router);
+        renderMenuRoomList(roomAPI, router);
 
         await waitFor(() => {
             expect(getReturnToRoom()).toBeVisible();
@@ -124,7 +124,7 @@ describe('User can return to the room they are already in', () => {
             }),
         });
 
-        renderRoomList(roomAPI, router);
+        renderMenuRoomList(roomAPI, router);
 
         await waitFor(() => {
             expect(getCreateRoom()).toBeVisible();

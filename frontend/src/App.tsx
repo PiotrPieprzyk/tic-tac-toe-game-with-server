@@ -10,16 +10,16 @@ import {ReactRouter} from "@/infra/service/ReactRouter.ts";
 import {SimpleUserSession} from "@/infra/service/SimpleUserSession.ts";
 import {UserForm} from "@/app/Menu/UserForm.tsx";
 import {RoomForm} from "@/app/Menu/RoomForm.tsx";
-import {MenuRoomList} from "@/app/Menu/MenuRoomList.tsx";
+import {MenuRoomList} from "@/app/Menu/RoomList/MenuRoomList";
 import {RoomPage} from "@/app/Room/RoomPage.tsx";
 
-const userAPI = new SimpleUserAPI();
-const roomAPI = new SimpleRoomAPI();
-const userSession = new SimpleUserSession(ANONYMOUS_USER_ID);
 
 function RootLayout(): ReactElement {
     const navigate = useNavigate();
     const router = useMemo(() => new ReactRouter(navigate), [navigate]);
+    const userAPI = useMemo(() => new SimpleUserAPI(), []);
+    const roomAPI = useMemo(() => new SimpleRoomAPI(), []);
+    const userSession = useMemo(() => new SimpleUserSession(ANONYMOUS_USER_ID), []);
 
     return (
         <RouterProvider router={router}>
@@ -27,7 +27,7 @@ function RootLayout(): ReactElement {
                 <RoomAPIProvider roomAPI={roomAPI}>
                     <UserSessionProvider userSession={userSession}>
                         <div className="flex min-h-screen items-center justify-center px-4 py-10">
-                            <Outlet />
+                            <Outlet/>
                         </div>
                     </UserSessionProvider>
                 </RoomAPIProvider>
@@ -39,18 +39,18 @@ function RootLayout(): ReactElement {
 const dataRouter = createHashRouter([
     {
         path: "/",
-        element: <RootLayout />,
+        element: <RootLayout/>,
         children: [
-            {index: true, element: <UserForm />},
-            {path: "rooms", element: <MenuRoomList />},
-            {path: "rooms/create", element: <RoomForm />},
-            {path: "rooms/:roomId", element: <RoomPage />},
+            {index: true, element: <UserForm/>},
+            {path: "rooms", element: <MenuRoomList/>},
+            {path: "rooms/create", element: <RoomForm/>},
+            {path: "rooms/:roomId", element: <RoomPage/>},
         ],
     },
 ]);
 
 function App() {
-    return <DataRouterProvider router={dataRouter} />;
+    return <DataRouterProvider router={dataRouter}/>;
 }
 
 export default App
