@@ -33,6 +33,11 @@ export class RoomRouter {
                     return;
                 }
 
+                if(!room.usersIds.has(req.cookies.UserId)) {
+                    next(new HTTPError(404, 'User is not part of the room'));
+                    return;
+                }
+
                 const roomDTO = await this.getRoomDTO(room);
 
                 res.status(200).json(roomDTO);
@@ -134,6 +139,11 @@ export class RoomRouter {
 
                 if (!room) {
                     next(new HTTPError(404, 'Room not found'));
+                    return;
+                }
+
+                if(!room.usersIds.has(req.cookies.UserId)) {
+                    next(new HTTPError(404, 'User is not part of the room'));
                     return;
                 }
 
