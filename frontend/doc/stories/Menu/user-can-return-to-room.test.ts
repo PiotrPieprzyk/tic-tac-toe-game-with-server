@@ -21,8 +21,10 @@ import {
     getRoomListItems,
     getRoomStatus, roomList
 } from "@doc/stories/Menu/shared/get/roomList.ts";
+import {RoomId} from '@/domain/Room/RoomId';
 
 const CURRENT_USER_ID = UserId.create();
+const PLAYER_TWO_ID = UserId.create();
 
 function renderMenuRoomList(roomAPI: RoomAPI, router: Router) {
     return render(
@@ -42,8 +44,8 @@ function renderMenuRoomList(roomAPI: RoomAPI, router: Router) {
 describe('User can return to the room they are already in', () => {
     it('WHEN user is a member of one of the listed rooms SHOULD show returnToRoom instead of createRoom, and SHOULD show alreadyInRoomMessage', async () => {
         const router = createMockRouter();
-        const ownRoom = buildRoom({id: 'own-room', name: 'MY_ROOM', users: [{id: CURRENT_USER_ID.value, name: 'Me'}]});
-        const otherRoom = buildRoom({id: 'other-room', name: 'OTHER_ROOM'});
+        const ownRoom = buildRoom({id: RoomId.create().value, name: 'MY_ROOM', users: [{id: CURRENT_USER_ID.value, name: 'Me'}]});
+        const otherRoom = buildRoom({id: RoomId.create().value, name: 'OTHER_ROOM'});
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async (options?: RoomAPIGetRoomsOptions) => {
                 if (options?.userId) {
@@ -64,8 +66,8 @@ describe('User can return to the room they are already in', () => {
 
     it('WHEN user is a member of one of the listed rooms SHOULD show joinRoom as not clickable on every other room', async () => {
         const router = createMockRouter();
-        const ownRoom = buildRoom({id: 'own-room', name: 'MY_ROOM', users: [{id: CURRENT_USER_ID.value, name: 'Me'}]});
-        const otherRoom = buildRoom({id: 'other-room', name: 'OTHER_ROOM', status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-2', name: 'PlayerTwo'}]});
+        const ownRoom = buildRoom({id: RoomId.create().value, name: 'MY_ROOM', users: [{id: CURRENT_USER_ID.value, name: 'Me'}]});
+        const otherRoom = buildRoom({id: RoomId.create().value, name: 'OTHER_ROOM', status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: PLAYER_TWO_ID.value, name: 'PlayerTwo'}]});
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async (options?: RoomAPIGetRoomsOptions) => {
                 if (options?.userId) {
@@ -88,7 +90,8 @@ describe('User can return to the room they are already in', () => {
     it('WHEN user clicks returnToRoom SHOULD redirect to #/rooms/{roomId} without calling the join API', async () => {
         const user = userEvent.setup();
         const router = createMockRouter();
-        const ownRoom = buildRoom({id: 'own-room', name: 'MY_ROOM', users: [{id: CURRENT_USER_ID.value, name: 'Me'}]});
+        const ownRoomId = RoomId.create().value;
+        const ownRoom = buildRoom({id: ownRoomId, name: 'MY_ROOM', users: [{id: CURRENT_USER_ID.value, name: 'Me'}]});
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async (options?: RoomAPIGetRoomsOptions) => {
                 if (options?.userId) {
@@ -107,14 +110,14 @@ describe('User can return to the room they are already in', () => {
         await user.click(getReturnToRoom());
 
         await waitFor(() => {
-            expect(router.push).toHaveBeenCalledWith('#/rooms/own-room');
+            expect(router.push).toHaveBeenCalledWith(`#/rooms/${ownRoomId}`);
         });
         expect(roomAPI.userJoinRoom).not.toHaveBeenCalled();
     });
 
     it('WHEN user is not a member of any listed room SHOULD show createRoom and SHOULD NOT show returnToRoom or alreadyInRoomMessage', async () => {
         const router = createMockRouter();
-        const otherRoom = buildRoom({id: 'other-room', name: 'OTHER_ROOM'});
+        const otherRoom = buildRoom({id: RoomId.create().value, name: 'OTHER_ROOM'});
         const roomAPI = createMockRoomAPI({
             getRooms: vi.fn(async (options?: RoomAPIGetRoomsOptions) => {
                 if (options?.userId) {

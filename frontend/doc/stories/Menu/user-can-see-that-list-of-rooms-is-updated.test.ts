@@ -13,9 +13,12 @@ import type {RoomEventsSocket} from '@/domain/shared/service/RoomEventsSocket';
 import {GameStatusEnum} from '@/domain/Game/GameStatus';
 import {createMockRouter, createMockRoomAPI, createMockRoomEventsSocket, createMockUserSession, mockGetRooms} from '@doc/stories/Menu/shared/mocks';
 import {buildRoom} from '@doc/stories/Menu/shared/builders';
+import {RoomId} from '@/domain/Room/RoomId';
 import {getConnectionStatus, getRoomListItems} from "@doc/stories/Menu/shared/get/roomList.ts";
 
 const CURRENT_USER_ID = UserId.create();
+const PLAYER_ONE_ID = UserId.create();
+const PLAYER_TWO_ID = UserId.create();
 
 function listFetchCalls(roomAPI: RoomAPI) {
     return (roomAPI.getRooms as ReturnType<typeof vi.fn>).mock.calls
@@ -68,7 +71,7 @@ describe('User can see that the list of rooms is updated automatically', () => {
             expect(getRoomListItems()).toHaveLength(0);
         });
 
-        getHandlers().onRoomAdded?.(buildRoom({id: 'new-room', name: 'NEW_ROOM'}));
+        getHandlers().onRoomAdded?.(buildRoom({id: RoomId.create().value, name: 'NEW_ROOM'}));
 
         await waitFor(() => {
             expect(getRoomListItems()).toHaveLength(1);
@@ -81,7 +84,7 @@ describe('User can see that the list of rooms is updated automatically', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: mockGetRooms({
-                results: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}]})],
+                results: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: PLAYER_ONE_ID.value, name: 'PlayerOne'}]})],
                 nextPageToken: null,
             }),
         });
@@ -95,7 +98,7 @@ describe('User can see that the list of rooms is updated automatically', () => {
 
         getHandlers().onRoomEdited?.(buildRoom({
             status: GameStatusEnum.IN_PROGRESS,
-            users: [{id: 'user-1', name: 'PlayerOne'}, {id: 'user-2', name: 'PlayerTwo'}],
+            users: [{id: PLAYER_ONE_ID.value, name: 'PlayerOne'}, {id: PLAYER_TWO_ID.value, name: 'PlayerTwo'}],
         }));
 
         await waitFor(() => {
@@ -108,9 +111,10 @@ describe('User can see that the list of rooms is updated automatically', () => {
 
     it('WHEN a roomDeleted event is received for a listed room SHOULD remove that roomListItem', async () => {
         const router = createMockRouter();
+        const roomId = RoomId.create().value;
         const roomAPI = createMockRoomAPI({
             getRooms: mockGetRooms({
-                results: [buildRoom({id: 'room-1'})],
+                results: [buildRoom({id: roomId})],
                 nextPageToken: null,
             }),
         });
@@ -122,7 +126,7 @@ describe('User can see that the list of rooms is updated automatically', () => {
             expect(getRoomListItems()).toHaveLength(1);
         });
 
-        getHandlers().onRoomDeleted?.('room-1');
+        getHandlers().onRoomDeleted?.(roomId);
 
         await waitFor(() => {
             expect(getRoomListItems()).toHaveLength(0);

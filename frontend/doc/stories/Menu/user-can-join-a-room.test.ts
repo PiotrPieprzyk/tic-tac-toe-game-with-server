@@ -17,6 +17,8 @@ import {buildRoom} from '@doc/stories/Menu/shared/builders';
 import {getErrorMessage, getJoinRoom, getRoomStatus} from "@doc/stories/Menu/shared/get/roomList.ts";
 
 const CURRENT_USER_ID = UserId.create();
+const PLAYER_ONE_ID = UserId.create();
+const PLAYER_TWO_ID = UserId.create();
 
 function renderMenuRoomList(roomAPI: RoomAPI, router: Router) {
     return render(
@@ -38,9 +40,10 @@ describe('User can join a room from the rooms list', () => {
         const user = userEvent.setup();
         const router = createMockRouter();
         let resolveJoin: (value: RoomAPIResponse) => void = () => {};
+        const room = buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: PLAYER_ONE_ID.value, name: 'PlayerOne'}]});
         const roomAPI = createMockRoomAPI({
             getRooms: mockGetRooms({
-                results: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}]})],
+                results: [room],
                 nextPageToken: null,
             }),
             userJoinRoom: vi.fn((_roomId, _body: RoomAPIJoinRequest) => new Promise<RoomAPIResponse>((resolve) => {
@@ -59,10 +62,10 @@ describe('User can join a room from the rooms list', () => {
         expect(getJoinRoom()).toHaveTextContent(/JOINING/);
         expect(getJoinRoom()).toHaveAttribute('aria-busy', 'true');
 
-        resolveJoin(new SuccessResponse(buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}, {id: 'user-2', name: 'PlayerTwo'}]})));
+        resolveJoin(new SuccessResponse(buildRoom({id: room.id, status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: PLAYER_ONE_ID.value, name: 'PlayerOne'}, {id: PLAYER_TWO_ID.value, name: 'PlayerTwo'}]})));
 
         await waitFor(() => {
-            expect(router.push).toHaveBeenCalledWith('#/rooms/room-1');
+            expect(router.push).toHaveBeenCalledWith(`#/rooms/${room.id}`);
         });
     });
 
@@ -106,7 +109,7 @@ describe('User can join a room from the rooms list', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: mockGetRooms({
-                results: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}, {id: 'user-2', name: 'PlayerTwo'}]})],
+                results: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: PLAYER_ONE_ID.value, name: 'PlayerOne'}, {id: PLAYER_TWO_ID.value, name: 'PlayerTwo'}]})],
                 nextPageToken: null,
             }),
         });
@@ -125,7 +128,7 @@ describe('User can join a room from the rooms list', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: mockGetRooms({
-                results: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}]})],
+                results: [buildRoom({status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: PLAYER_ONE_ID.value, name: 'PlayerOne'}]})],
                 nextPageToken: null,
             }),
             userJoinRoom: vi.fn(async (_roomId, _body: RoomAPIJoinRequest) =>

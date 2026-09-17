@@ -12,6 +12,8 @@ import {GameStatusEnum} from '@/domain/Game/GameStatus';
 import {DESIGN_COLORS} from '@doc/stories/testUtils';
 import {createMockRouter, createMockRoomAPI} from '@doc/stories/Menu/shared/mocks';
 import {getCreateRoom, getRoomNameErrorMessage, getRoomNameInput} from "@doc/stories/Menu/shared/get/roomForm.ts";
+import {RoomId} from '@/domain/Room/RoomId';
+import {UserId} from '@/domain/User/UserId';
 
 function renderRoomForm(roomAPI: RoomAPI, router: Router) {
     return render(
@@ -51,7 +53,7 @@ describe('User can create a room, but only one', () => {
         expect(createRoom).toBeDisabled();
 
         resolveAddRoom(new SuccessResponse({
-            id: 'room-1', name: 'ValidName', hostId: 'host-1', activeGameId: '', users: [], status: GameStatusEnum.WAITING_FOR_PLAYERS,
+            id: RoomId.create().value, name: 'ValidName', hostId: UserId.create().value, activeGameId: '', users: [], status: GameStatusEnum.WAITING_FOR_PLAYERS,
         }));
 
         await waitFor(() => {

@@ -13,6 +13,7 @@ import {UserId} from '@/domain/User/UserId';
 import {GameStatusEnum} from '@/domain/Game/GameStatus';
 import {createMockRouter, createMockRoomAPI, createMockUserSession, mockGetRooms} from '@doc/stories/Menu/shared/mocks';
 import {buildRoom} from '@doc/stories/Menu/shared/builders';
+import {RoomId} from '@/domain/Room/RoomId';
 import {
     getLoading,
     getNextPage, getNoActiveRoomsFound,
@@ -24,6 +25,8 @@ import {
 } from "@doc/stories/Menu/shared/get/roomList.ts";
 
 const CURRENT_USER_ID = UserId.create();
+const PLAYER_ONE_ID = UserId.create();
+const PLAYER_TWO_ID = UserId.create();
 
 function renderMenuRoomList(roomAPI: RoomAPI, router: Router) {
     return render(
@@ -73,7 +76,7 @@ describe('User can see the list of rooms and players in each room', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: mockGetRooms({
-                results: [buildRoom({name: 'ROOM_NULL_PTR', status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: 'user-1', name: 'PlayerOne'}]})],
+                results: [buildRoom({name: 'ROOM_NULL_PTR', status: GameStatusEnum.WAITING_FOR_PLAYERS, users: [{id: PLAYER_ONE_ID.value, name: 'PlayerOne'}]})],
                 nextPageToken: null,
             }),
         });
@@ -94,7 +97,7 @@ describe('User can see the list of rooms and players in each room', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: mockGetRooms({
-                results: [buildRoom({users: [{id: 'user-1', name: 'PlayerOne'}, {id: 'user-2', name: 'PlayerTwo'}]})],
+                results: [buildRoom({users: [{id: PLAYER_ONE_ID.value, name: 'PlayerOne'}, {id: PLAYER_TWO_ID.value, name: 'PlayerTwo'}]})],
                 nextPageToken: null,
             }),
         });
@@ -135,13 +138,13 @@ describe('User can see the list of rooms and players in each room', () => {
             }
             if (options?.pageToken === 'page-2-token') {
                 return new SuccessResponse({
-                    results: [buildRoom({id: 'room-2', name: 'PAGE_TWO_ROOM'})],
+                    results: [buildRoom({id: RoomId.create().value, name: 'PAGE_TWO_ROOM'})],
                     prevPageToken: 'page-1-token',
                     nextPageToken: null,
                 });
             }
             return new SuccessResponse({
-                results: [buildRoom({id: 'room-1', name: 'PAGE_ONE_ROOM'})],
+                results: [buildRoom({id: RoomId.create().value, name: 'PAGE_ONE_ROOM'})],
                 prevPageToken: null,
                 nextPageToken: 'page-2-token',
             });

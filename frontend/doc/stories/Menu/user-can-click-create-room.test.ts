@@ -11,6 +11,7 @@ import {UserSessionProvider} from '@/domain/shared/context/UserSessionContext';
 import {UserId} from '@/domain/User/UserId';
 import {GameStatusEnum} from '@/domain/Game/GameStatus';
 import {createMockRouter, createMockRoomAPI, createMockUserSession, mockGetRooms} from '@doc/stories/Menu/shared/mocks';
+import {RoomId} from '@/domain/Room/RoomId';
 
 import {getCreateRoom} from "@doc/stories/Menu/shared/get/roomList.ts";
 
@@ -37,7 +38,7 @@ describe('User can create a room, but only one', () => {
         const router = createMockRouter();
         const roomAPI = createMockRoomAPI({
             getRooms: mockGetRooms({
-                results: [{id: 'room-1', name: 'ROOM_NULL_PTR', hostId: 'host-1', activeGameId: '', users: [], status: GameStatusEnum.WAITING_FOR_PLAYERS}],
+                results: [{id: RoomId.create().value, name: 'ROOM_NULL_PTR', hostId: UserId.create().value, activeGameId: '', users: [], status: GameStatusEnum.WAITING_FOR_PLAYERS}],
                 nextPageToken: null,
             }),
         });

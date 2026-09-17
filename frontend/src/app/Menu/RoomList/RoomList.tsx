@@ -21,16 +21,6 @@ const STATUS_TONE: Record<GameStatusEnum, 'success' | 'warning' | 'danger'> = {
     [GameStatusEnum.ENDED]: 'danger',
 };
 
-function toRoomId(id: string): RoomId {
-    try {
-        return RoomId.create(id);
-    } catch {
-        // Story-test fixtures use readable room ids instead of real GUIDs; real backend
-        // ids always pass RoomId.create's GUID validation, so this only triggers in tests.
-        return {value: id} as unknown as RoomId;
-    }
-}
-
 export function RoomList(): ReactElement | null {
     const roomAPI = useRoomAPI();
     const router = useRouter();
@@ -99,7 +89,7 @@ export function RoomList(): ReactElement | null {
 
     async function handleJoin(room: RoomAPIResponseRaw) {
         setJoiningRoomId(room.id);
-        const response = await roomAPI.userJoinRoom(toRoomId(room.id), {userId: currentUserId});
+        const response = await roomAPI.userJoinRoom(RoomId.create(room.id), {userId: currentUserId});
         if (response instanceof CommonError) {
             menuEventBus.emit('ERROR', {message: "ERR: UNABLE_TO_JOIN — TRY AGAIN"})
 
