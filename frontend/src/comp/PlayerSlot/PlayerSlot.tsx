@@ -36,28 +36,33 @@ export function PlayerSlot({
         .join(' ')}
       {...rest}
     >
-      {isHost && (
-        <StatusBadge data-testid="hostTag" tone="success">
-          HOST
-        </StatusBadge>
-      )}
+      <div className={'flex gap-2'}>
+        {isHost && (
+            <StatusBadge data-testid="hostTag" tone="success">
+              HOST
+            </StatusBadge>
+
+        )}
+        {isYou && (
+            <StatusBadge data-testid="youTag" tone="neutral">
+              YOU
+            </StatusBadge>
+        )}
+      </div>
       {isEmpty ? (
         <div data-testid="emptySlotMessage" className="font-mono text-meta text-text-faint">
-          WAITING_FOR_OPPONENT...
+          WAITING_FOR
+          OPPONENT...
         </div>
       ) : (
         <>
           <div data-testid="playerName" className="font-mono text-body text-text-primary">
             {playerName}
           </div>
-          {isYou && (
-            <StatusBadge data-testid="youTag" tone="neutral">
-              YOU
-            </StatusBadge>
-          )}
+
           {removable && (
             <Button data-testid="removePlayer" variant="danger" size="sm" disabled={removeDisabled} onClick={onRemove}>
-              REMOVE_PLAYER
+              REMOVE
             </Button>
           )}
         </>

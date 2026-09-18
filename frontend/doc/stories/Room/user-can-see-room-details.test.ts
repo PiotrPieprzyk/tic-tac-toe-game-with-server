@@ -52,7 +52,7 @@ describe("User can see the room's details: its name, id, players, and status", (
         expect(getPlayerSlots()).toHaveLength(2);
         expect(getPlayerName(0)).toHaveTextContent(HOST.name);
         expect(getHostTag(0)).toBeInTheDocument();
-        expect(getEmptySlotMessage(1)).toHaveTextContent('WAITING_FOR_OPPONENT');
+        expect(getEmptySlotMessage(1)).toHaveTextContent('WAITING_FOR OPPONENT');
         expect(getStartGame()).toBeDisabled();
         expect(roomPage().queryByTestId('leaveRoom')).not.toBeInTheDocument();
     });

@@ -14,25 +14,29 @@ export function RoomHeader({roomId, roomName, isHost, renameDisabled}: RoomHeade
 
     return (
         <div className="flex items-center justify-between gap-2 border-b border-panel-border-subtle p-4">
-            <div className="flex flex-col">
-                <div data-testid="roomName" className="font-mono text-title text-primary">
-                    {roomName}
+            <div className="flex flex-col gap-1">
+                <div className={'flex gap-2 items-center'}>
+                    <div data-testid="roomName" className="font-mono text-title text-primary">
+                        {roomName}
+                    </div>
+                    {isHost && (
+                        <Button
+                            data-testid="renameRoom"
+                            variant="ghost"
+                            size="sm"
+                            disabled={renameDisabled}
+                            onClick={() => router.push(`#/rooms/${roomId}/rename`)}
+                        >
+                            RENAME
+                        </Button>
+                    )}
                 </div>
+
                 <div data-testid="roomId" className="font-mono text-meta text-text-faint">
                     {`ID: #${roomId}`}
                 </div>
             </div>
-            {isHost && (
-                <Button
-                    data-testid="renameRoom"
-                    variant="ghost"
-                    size="sm"
-                    disabled={renameDisabled}
-                    onClick={() => router.push(`#/rooms/${roomId}/rename`)}
-                >
-                    RENAME
-                </Button>
-            )}
+
         </div>
     );
 }

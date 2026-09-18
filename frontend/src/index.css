@@ -20,6 +20,7 @@
   --text-meta--font-weight: 400;
   --text-tag: 9px;
   --text-tag--font-weight: 600;
+  --text-tag--line-height: 10px;
   --tracking-tag: 0.05em;
 
   /* Surfaces */

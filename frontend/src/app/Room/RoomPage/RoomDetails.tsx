@@ -62,10 +62,13 @@ export function RoomDetails({room, onRoomChange, onError, errorMessage}: RoomDet
                 {label}
             </StatusBar>
             <div className="flex gap-3 p-4">
-                <PlayerSlot playerName={hostUser?.name} isHost/>
+                <PlayerSlot playerName={hostUser?.name} isHost
+                            isYou={hostUser.id === currentUserId.value}
+
+                />
                 <PlayerSlot
                     playerName={opponentUser?.name}
-                    isYou={!isHost && !!opponentUser && opponentUser.id === currentUserId.value}
+                    isYou={!!opponentUser && opponentUser.id === currentUserId.value}
                     removable={isHost && !!opponentUser}
                     removeDisabled={startingGame}
                     onRemove={opponentUser ? () => handleRemovePlayer(opponentUser.id) : undefined}

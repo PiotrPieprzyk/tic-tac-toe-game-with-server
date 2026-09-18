@@ -20,7 +20,7 @@ const variantClasses: Record<ButtonVariant, string> = {
 
 const sizeClasses: Record<ButtonSize, string> = {
   md: 'p-3 text-button tracking-button',
-  sm: 'p-1.5 text-meta tracking-button',
+  sm: 'h-4.5 px-1.5 text-tag tracking-button',
 }
 
 export function Button({
