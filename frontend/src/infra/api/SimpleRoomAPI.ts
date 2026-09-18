@@ -35,8 +35,8 @@ export class SimpleRoomAPI implements RoomAPI {
 
     async updateRoom(id: RoomId, body: RoomAPIUpdateRequest) {
         const rawBody = {
-            name: body.name,
-            usersIds: body.usersIds.map((id) => id.value),
+            ...(body.name && {name: body.name}),
+            ...(body.usersIds && {usersIds: body.usersIds?.map((id) => id.value)}),
         }
         return await API.put<RoomAPIResponseRaw>(`${SimpleRoomAPI.path}/${id.value}`, rawBody);
     }
