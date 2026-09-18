@@ -12,16 +12,19 @@ feature. Verify against the actual file only if something here looks stale
 | `useRoomAPI()` | `RoomAPI` | yes |
 | `useUserAPI()` | `UserAPI` | yes |
 | `useRouter()` | `Router` | yes |
-| `useRoomEventsSocket()` | `RoomEventsSocket` | no — defaults to a no-op (`subscribe` returns a no-op unsubscribe, handlers never fire) |
+| `useRoomEventsSocket()` | `RoomEventsSocket` | no — defaults to a no-op (`subscribe`/`subscribeToRoom` return a no-op unsubscribe, handlers never fire) |
 | `useUserSession()` | `UserId` | no — defaults to `ANONYMOUS_USER_ID` |
 | `useUserName()` | `string \| null` | no |
 | `useSetUserSession()` | `(userId: UserId, userName: string) => void` | no |
 
-**`useRoomEventsSocket` is not wired to a real implementation in `App.tsx`.**
-No `infra` websocket client exists yet — every `app/` component using it
-(`RoomList`, `RoomPage`, ...) gets the no-op in the running app today. Story
-tests inject a mock socket, so socket-driven behavior is still correctly
-tested; it just won't fire for real until that infra piece is built.
+**`useRoomEventsSocket` is wired to a real implementation (`SimpleRoomEventsSockets`,
+`src/infra/service/SimpleRoomEventsSockets.ts`) in `App.tsx`.** It opens one
+lazily-connected, long-lived native `WebSocket` (derived from `API.domain`,
+scheme swapped to `ws`/`wss`, path `/ws`) shared by every `subscribe`/
+`subscribeToRoom` caller for the whole app session, and reconnects
+automatically (with re-subscription) after a drop. Story tests still inject a
+mock socket via `RoomEventsSocketProvider`, so socket-driven behavior is
+tested against the mock, not the real connection.
 
 ## `RoomAPI` (`domain/shared/api/RoomAPI.ts`)
 
@@ -108,10 +111,12 @@ type RoomEventsHandlers = {
     onRoomDeleted?: (roomId: string) => void;
 }
 interface RoomEventsSocket {
-    subscribe(handlers: RoomEventsHandlers): () => void; // returns unsubscribe
+    subscribe(handlers: RoomEventsHandlers): () => void; // returns unsubscribe, ALL rooms
+    subscribeToRoom(roomId: string, handlers: RoomEventsHandlers): () => void; // returns unsubscribe, ONE room only
 }
 ```
-Standard subscription pattern:
+Standard subscription pattern (lobby/list views that legitimately want every
+room, e.g. `RoomList`/`RoomListHeader`):
 ```ts
 useEffect(() => {
     return roomEventsSocket.subscribe({
@@ -120,6 +125,19 @@ useEffect(() => {
     });
 }, [roomEventsSocket]);
 ```
-Always filter events by id in the handler when the component only cares
-about one room/entity (events for other ids should be ignored, not just
-filtered by luck).
+Scoped subscription pattern (detail views that only care about one room,
+e.g. `RoomPage`/`useRoom`) — prefer this over `subscribe` + client-side
+filtering when a component only ever needs events for a single known id; the
+server only delivers events for that room, which is both cheaper and matches
+intent:
+```ts
+useEffect(() => {
+    return roomEventsSocket.subscribeToRoom(roomId, {
+        onRoomEdited: (room) => { /* merge into local state */ },
+        onRoomDeleted: (deletedRoomId) => { /* remove/redirect */ },
+    });
+}, [roomEventsSocket, roomId]);
+```
+Even with `subscribeToRoom`, still filter events by id in the handler as a
+defensive check at this system boundary (an inbound socket message) — events
+for other ids should be ignored, not just filtered by luck.

@@ -33,6 +33,9 @@ paths:
   /games/{gameId}/leave:
     $ref: './GameAPIDocs.yaml#/paths/~1games~1{gameId}~1leave'
 
+  /ws:
+    $ref: './WebSocketAPIDocs.yaml#/paths/~1ws'
+
 components:
   securitySchemes:
     UserIdCookie:

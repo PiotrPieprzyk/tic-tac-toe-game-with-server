@@ -55,6 +55,7 @@ export function createMockRoomEventsSocket(): {roomEventsSocket: RoomEventsSocke
             handlers.onConnect?.();
             return vi.fn();
         }),
+        subscribeToRoom: vi.fn(() => vi.fn()),
     };
     return {roomEventsSocket, getHandlers: () => capturedHandlers};
 }

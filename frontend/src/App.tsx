@@ -8,6 +8,8 @@ import {SimpleUserAPI} from "@/infra/api/SimpleUserAPI.ts";
 import {SimpleRoomAPI} from "@/infra/api/SimpleRoomAPI.ts";
 import {ReactRouter} from "@/infra/service/ReactRouter.ts";
 import {SimpleUserSession} from "@/infra/service/SimpleUserSession.ts";
+import {SimpleRoomEventsSockets} from "@/infra/service/SimpleRoomEventsSockets.ts";
+import {RoomEventsSocketProvider} from "@/domain/shared/context/RoomEventsSocketContext.tsx";
 import {UserForm} from "@/app/Menu/UserForm.tsx";
 import {RoomForm} from "@/app/Menu/RoomForm.tsx";
 import {MenuRoomList} from "@/app/Menu/RoomList/MenuRoomList";
@@ -21,15 +23,18 @@ function RootLayout(): ReactElement {
     const userAPI = useMemo(() => new SimpleUserAPI(), []);
     const roomAPI = useMemo(() => new SimpleRoomAPI(), []);
     const userSession = useMemo(() => new SimpleUserSession(ANONYMOUS_USER_ID), []);
+    const roomEventsSocket = useMemo(() => new SimpleRoomEventsSockets(), []);
 
     return (
         <RouterProvider router={router}>
             <UserAPIProvider userAPI={userAPI}>
                 <RoomAPIProvider roomAPI={roomAPI}>
                     <UserSessionProvider userSession={userSession}>
-                        <div className="flex min-h-screen items-center justify-center px-4 py-10">
-                            <Outlet/>
-                        </div>
+                        <RoomEventsSocketProvider roomEventsSocket={roomEventsSocket}>
+                            <div className="flex min-h-screen items-center justify-center px-4 py-10">
+                                <Outlet/>
+                            </div>
+                        </RoomEventsSocketProvider>
                     </UserSessionProvider>
                 </RoomAPIProvider>
             </UserAPIProvider>

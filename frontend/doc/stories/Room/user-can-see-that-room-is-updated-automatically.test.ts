@@ -34,6 +34,8 @@ describe('User can see that the room is updated automatically', () => {
             expect(getEmptySlotMessage(1)).toBeInTheDocument();
         });
 
+        expect(roomEventsSocket.subscribeToRoom).toHaveBeenCalledWith(DEFAULT_ROOM_ID, expect.anything());
+
         getHandlers().onRoomEdited?.(buildRoom({hostId: HOST.id, users: [HOST, OPPONENT], status: GameStatusEnum.WAITING_FOR_PLAYERS}));
 
         await waitFor(() => {

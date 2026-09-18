@@ -38,7 +38,7 @@ export function useRoom(roomId: string) {
     }, [roomAPI, roomId, router]);
 
     useEffect(() => {
-        return roomEventsSocket.subscribe({
+        return roomEventsSocket.subscribeToRoom(roomId, {
             onRoomEdited: (edited) => {
                 if (edited.id !== roomId) return;
                 if (!edited.users.some((user) => user.id === userId.value)) {

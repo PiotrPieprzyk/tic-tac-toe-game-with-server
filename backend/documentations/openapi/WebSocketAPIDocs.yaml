@@ -1,0 +1,228 @@
+openapi: "3.0.0"
+info:
+  title: "WebSocket API"
+  version: "1.0.0"
+  description: >
+    OpenAPI 3.0 has no native WebSocket primitive, so this endpoint is documented as a single
+    `GET /ws` operation whose description covers the full upgrade handshake and message
+    protocol below. It is NOT a real REST GET: there is no request body, no query/path
+    parameters, and no JSON response — connecting means performing an HTTP -> WebSocket
+    upgrade, after which the connection exchanges JSON text-frame messages in both directions
+    for as long as it stays open.
+servers:
+  - url: "http://localhost:3000"
+    description: "Local server"
+
+
+
+paths:
+  /ws:
+    get:
+      summary: "Open a WebSocket connection for real-time room and game events"
+      description: >
+        Connect via a WebSocket upgrade to `ws://<host>/ws` (e.g. `ws://localhost:3000/ws`).
+        This is a raw upgrade, not a conventional REST call: no request body or parameters are
+        sent, and nothing is returned by the upgrade itself — subscribe and event messages are
+        exchanged afterwards as JSON text frames over the open connection.
+
+
+        ### Subscribing (client -> server)
+
+        After the connection is open, the client sends JSON text-frame messages to choose which
+        events it receives. A connection may hold any number of `subscribeGame` and
+        `subscribeRooms` subscriptions plus **at most one** active `subscribeRoom` subscription
+        at a time (sending `subscribeRoom` again with a different `roomId` replaces the previous
+        one — no unsubscribe message exists or is needed for any subscription type). There is no
+        unsubscribe message of any kind; every subscription ends only when the connection closes.
+
+
+        - `{"action": "subscribeRooms"}` — receive `roomAdded`, `roomEdited` and `roomDeleted`
+        events for **every** room.
+
+        - `{"action": "subscribeRoom", "roomId": "<uuid>"}` — **new**. Receive `roomEdited` and
+        `roomDeleted` events for **one specific room only**. `roomId` is not validated against
+        any format; an id that doesn't match an existing room simply never has matching events
+        delivered.
+
+        - `{"action": "subscribeGame", "gameId": "<uuid>"}` — receive `gameLastTurn`,
+        `gameEnded` and `gameDeleted` events for **one specific game only**. Sending this again
+        with a different `gameId` replaces the previous game subscription on this connection
+        (pre-existing behavior). `gameId` is not validated against any format, same as `roomId`
+        above.
+
+
+        A message with an unrecognized `action`, or that is not valid JSON, is silently ignored.
+
+
+        ### Receiving events (server -> client)
+
+        Every push message has the same envelope:
+
+        ```json
+        { "eventType": "<string>", "dto": { /* event-specific payload, see below */ } }
+        ```
+
+
+        | eventType | delivered to | dto shape |
+        |---|---|---|
+        | `roomAdded` | `subscribeRooms` only | `Room` (see `RoomAPIDocs.yaml`) |
+        | `roomEdited` | `subscribeRooms`, and `subscribeRoom` for that room's id | `Room` (see `RoomAPIDocs.yaml`) |
+        | `roomDeleted` | `subscribeRooms`, and `subscribeRoom` for that room's id | `{"id": "<string>"}` |
+        | `gameLastTurn` | `subscribeGame` for that game's id | `Game` (see `GameAPIDocs.yaml`) |
+        | `gameEnded` | `subscribeGame` for that game's id | `Game` (see `GameAPIDocs.yaml`) |
+        | `gameDeleted` | `subscribeGame` for that game's id | `{"id": "<string>"}` |
+
+
+        A connection subscribed both via `subscribeRooms` and via `subscribeRoom` to that same
+        room receives a matching `roomEdited`/`roomDeleted` event twice (once per subscription).
+        This is an accepted limitation of the protocol, not a bug.
+      responses:
+        '101':
+          description: >
+            Switching Protocols. The HTTP connection is upgraded to a WebSocket connection; no
+            response body. All further interaction happens through the message protocol
+            described above.
+        '400':
+          description: Not a valid WebSocket upgrade request.
+
+
+
+components:
+  schemas:
+    SubscribeRoomsMessage:
+      type: "object"
+      description: "Client -> server. Subscribe to events for every room."
+      properties:
+        action:
+          type: "string"
+          enum: ["subscribeRooms"]
+      required:
+        - action
+
+    SubscribeRoomMessage:
+      type: "object"
+      description: >
+        Client -> server. Subscribe to events for one specific room. Replaces this
+        connection's previous room subscription, if any.
+      properties:
+        action:
+          type: "string"
+          enum: ["subscribeRoom"]
+        roomId:
+          type: "string"
+      required:
+        - action
+        - roomId
+
+    SubscribeGameMessage:
+      type: "object"
+      description: >
+        Client -> server. Subscribe to events for one specific game. Replaces this
+        connection's previous game subscription, if any.
+      properties:
+        action:
+          type: "string"
+          enum: ["subscribeGame"]
+        gameId:
+          type: "string"
+      required:
+        - action
+        - gameId
+
+    RoomAddedEvent:
+      type: "object"
+      description: "Server -> client. A room was added. Delivered only to subscribeRooms."
+      properties:
+        eventType:
+          type: "string"
+          enum: ["roomAdded"]
+        dto:
+          $ref: "./RoomAPIDocs.yaml#/components/schemas/Room"
+      required:
+        - eventType
+        - dto
+
+    RoomEditedEvent:
+      type: "object"
+      description: >
+        Server -> client. A room's name, players or status changed. Delivered to subscribeRooms,
+        and to a subscribeRoom subscription for this room's id.
+      properties:
+        eventType:
+          type: "string"
+          enum: ["roomEdited"]
+        dto:
+          $ref: "./RoomAPIDocs.yaml#/components/schemas/Room"
+      required:
+        - eventType
+        - dto
+
+    RoomDeletedEvent:
+      type: "object"
+      description: >
+        Server -> client. A room was deleted. Delivered to subscribeRooms, and to a
+        subscribeRoom subscription for this room's id.
+      properties:
+        eventType:
+          type: "string"
+          enum: ["roomDeleted"]
+        dto:
+          type: "object"
+          properties:
+            id:
+              type: "string"
+          required:
+            - id
+      required:
+        - eventType
+        - dto
+
+    GameLastTurnEvent:
+      type: "object"
+      description: >
+        Server -> client. A cell was marked and the game is still in progress. Delivered to a
+        subscribeGame subscription for this game's id.
+      properties:
+        eventType:
+          type: "string"
+          enum: ["gameLastTurn"]
+        dto:
+          $ref: "./GameAPIDocs.yaml#/components/schemas/Game"
+      required:
+        - eventType
+        - dto
+
+    GameEndedEvent:
+      type: "object"
+      description: >
+        Server -> client. The game ended (win, draw, or a player left). Delivered to a
+        subscribeGame subscription for this game's id.
+      properties:
+        eventType:
+          type: "string"
+          enum: ["gameEnded"]
+        dto:
+          $ref: "./GameAPIDocs.yaml#/components/schemas/Game"
+      required:
+        - eventType
+        - dto
+
+    GameDeletedEvent:
+      type: "object"
+      description: >
+        Server -> client. The game was deleted (its only player left before a second player
+        joined). Delivered to a subscribeGame subscription for this game's id.
+      properties:
+        eventType:
+          type: "string"
+          enum: ["gameDeleted"]
+        dto:
+          type: "object"
+          properties:
+            id:
+              type: "string"
+          required:
+            - id
+      required:
+        - eventType
+        - dto

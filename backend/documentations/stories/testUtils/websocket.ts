@@ -22,3 +22,13 @@ export async function connectAndSubscribeGame(serverPort: number, gameId: string
     client.send(JSON.stringify({action: 'subscribeGame', gameId}));
     return client;
 }
+
+export async function connectAndSubscribeRoom(serverPort: number, roomId: string): Promise<WebSocket> {
+    const client = new WebSocket(`ws://localhost:${serverPort}/ws`);
+    await new Promise<void>((resolve, reject) => {
+        client.on('open', resolve);
+        client.on('error', reject);
+    });
+    client.send(JSON.stringify({action: 'subscribeRoom', roomId}));
+    return client;
+}

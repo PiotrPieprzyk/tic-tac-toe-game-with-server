@@ -3,6 +3,7 @@ import type {RoomEventsSocket} from "@/domain/shared/service/RoomEventsSocket.ts
 
 const noopRoomEventsSocket: RoomEventsSocket = {
     subscribe: () => () => {},
+    subscribeToRoom: () => () => {},
 };
 
 const RoomEventsSocketContext = createContext<RoomEventsSocket>(noopRoomEventsSocket);

@@ -10,4 +10,5 @@ export type RoomEventsHandlers = {
 
 export interface RoomEventsSocket {
     subscribe(handlers: RoomEventsHandlers): () => void;
+    subscribeToRoom(roomId: string, handlers: RoomEventsHandlers): () => void;
 }

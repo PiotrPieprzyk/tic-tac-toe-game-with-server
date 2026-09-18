@@ -19,6 +19,8 @@ export class WebsocketServer {
                         broadcaster.subscribeToGame(ws, parsed.gameId);
                     } else if (parsed.action === 'subscribeRooms') {
                         broadcaster.subscribeToRooms(ws);
+                    } else if (parsed.action === 'subscribeRoom' && parsed.roomId) {
+                        broadcaster.subscribeToRoom(ws, parsed.roomId);
                     }
                 } catch {
                     // ignore malformed messages

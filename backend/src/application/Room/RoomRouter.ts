@@ -33,7 +33,7 @@ export class RoomRouter {
                     return;
                 }
 
-                if(!room.usersIds.has(req.cookies.UserId)) {
+                if(!room.usersIds.has(UserId.create(req.cookies.UserId))) {
                     next(new HTTPError(404, 'User is not part of the room'));
                     return;
                 }
@@ -142,7 +142,7 @@ export class RoomRouter {
                     return;
                 }
 
-                if(!room.usersIds.has(req.cookies.UserId)) {
+                if(!room.usersIds.has(UserId.create(req.cookies.UserId))) {
                     next(new HTTPError(404, 'User is not part of the room'));
                     return;
                 }
