@@ -31,7 +31,10 @@ export const getApp = (repositories: RouterRepositories = defaultRepositories())
     app.use(express.static(path.join(__dirname, './public')));
 
     app.use(cors({
-        origin: ['http://127.0.0.1:4000'],
+        origin: [
+            'http://127.0.0.1:4000',
+            /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:4000$/,
+        ],
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true
     }));

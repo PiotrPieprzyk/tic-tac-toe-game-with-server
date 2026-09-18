@@ -2,7 +2,7 @@ import {CommonError, type Options, SuccessResponse} from "@/domain/shared/api/AP
 
 export class API {
 
-    static domain = 'http://127.0.0.1:3000';
+    static domain = import.meta.env.VITE_API_DOMAIN ?? 'http://127.0.0.1:3000';
 
     static async parseJsonBody(response: Response): Promise<unknown> {
         const text = await response.text();
