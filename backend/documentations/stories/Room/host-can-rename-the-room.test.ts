@@ -60,7 +60,7 @@ describe('Host can rename the room.', () => {
         });
 
         expect(response.status).toBe(400);
-        const roomAfter = (await request.get(`/rooms/${roomRes.body.id}`)).body;
+        const roomAfter = (await agentA.get(`/rooms/${roomRes.body.id}`)).body;
         expect(roomAfter.name).toBe('Rename Room 2');
 
         await agentB.put(`/rooms/${roomRes.body.id}/leave`).send();
@@ -77,7 +77,7 @@ describe('Host can rename the room.', () => {
 
         expect(tooShort.status).toBe(400);
         expect(tooLong.status).toBe(400);
-        const roomAfter = (await request.get(`/rooms/${roomRes.body.id}`)).body;
+        const roomAfter = (await agentA.get(`/rooms/${roomRes.body.id}`)).body;
         expect(roomAfter.name).toBe('Rename Room 3');
 
         await agentA.delete(`/rooms/${roomRes.body.id}`);

@@ -61,7 +61,7 @@ describe('User can join a room.', () => {
         const response = await agentC.put(`/rooms/${room.id}/join`).send();
 
         expect(response.status).toBe(400);
-        const roomAfter = (await request.get(`/rooms/${room.id}`)).body;
+        const roomAfter = (await agentA.get(`/rooms/${room.id}`)).body;
         expect(roomAfter.users).toHaveLength(2);
 
         await agentB.put(`/rooms/${room.id}/leave`).send();
@@ -92,7 +92,7 @@ describe('User can join a room.', () => {
         const response = await agentA.put(`/rooms/${room.id}/join`).send();
 
         expect(response.status).toBe(400);
-        const roomAfter = (await request.get(`/rooms/${room.id}`)).body;
+        const roomAfter = (await agentA.get(`/rooms/${room.id}`)).body;
         expect(roomAfter.users).toHaveLength(1);
 
         await agentA.delete(`/rooms/${room.id}`);

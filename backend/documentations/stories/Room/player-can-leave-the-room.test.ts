@@ -41,7 +41,7 @@ describe('Player can leave the room.', () => {
         const response = await agentB.put(`/rooms/${roomRes.body.id}/leave`).send();
 
         expect(response.status).toBe(200);
-        const roomAfter = (await request.get(`/rooms/${roomRes.body.id}`)).body;
+        const roomAfter = (await agentA.get(`/rooms/${roomRes.body.id}`)).body;
         expect(roomAfter.users).toHaveLength(1);
         expect(roomAfter.users[0].id).toBe(userA.id);
 
@@ -56,7 +56,7 @@ describe('Player can leave the room.', () => {
         const response = await agentA.put(`/rooms/${roomRes.body.id}/leave`).send();
 
         expect(response.status).toBe(200);
-        const roomAfter = await request.get(`/rooms/${roomRes.body.id}`);
+        const roomAfter = await agentA.get(`/rooms/${roomRes.body.id}`);
         expect(roomAfter.status).toBe(404);
     });
 

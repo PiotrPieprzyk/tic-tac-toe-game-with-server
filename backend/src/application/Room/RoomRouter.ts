@@ -116,8 +116,8 @@ export class RoomRouter {
                 }
 
                 const existingMembership = await this.roomRepository.findRoomByUserId(userId);
-                if (existingMembership && !existingMembership.id.exact(roomId)) {
-                    next(new HTTPError(400, 'User is already a member of another room'));
+                if (existingMembership) {
+                    next(new HTTPError(400, 'User is already a member of a room'));
                     return;
                 }
 

@@ -59,7 +59,7 @@ describe('Host can remove a player from the room.', () => {
         });
 
         expect(response.status).toBe(400);
-        const roomAfter = (await request.get(`/rooms/${roomRes.body.id}`)).body;
+        const roomAfter = (await agentA.get(`/rooms/${roomRes.body.id}`)).body;
         expect(roomAfter.users).toHaveLength(2);
 
         await agentB.put(`/rooms/${roomRes.body.id}/leave`).send();
