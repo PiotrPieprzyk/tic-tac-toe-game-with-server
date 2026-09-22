@@ -72,20 +72,16 @@ describe('Player can see game details.', () => {
         expect(response.body.activePlayerId).not.toBe(game.activePlayerId);
     });
 
-    it('WHEN fetching a game that ended SHOULD return 404', async () => {
+    it("WHEN fetching a game that ended SHOULD return 200 with the result and the winner's id", async () => {
         const first = game.activePlayerId === game.players.find(p => p.userId === userA.id)?.id ? agentA : agentB;
         const second = first === agentA ? agentB : agentA;
 
         const sequence: {agent: typeof first; position: number}[] = [
             {agent: first, position: 0},
             {agent: second, position: 1},
-            {agent: first, position: 2},
-            {agent: second, position: 4},
             {agent: first, position: 3},
-            {agent: second, position: 5},
-            {agent: first, position: 7},
-            {agent: second, position: 6},
-            {agent: first, position: 8},
+            {agent: second, position: 4},
+            {agent: first, position: 6},
         ];
         for (const step of sequence) {
             await step.agent.put(`/games/${game.id}/mark`).send({position: step.position});
@@ -93,7 +89,10 @@ describe('Player can see game details.', () => {
 
         const response = await request.get(`/games/${game.id}`);
 
-        expect(response.status).toBe(404);
+        expect(response.status).toBe(200);
+        expect(response.body.status).toBe('ENDED');
+        expect(response.body.result).toBe('WIN');
+        expect(response.body.winnerId).toBe(game.activePlayerId);
     });
 
     it('WHEN game does not exist SHOULD return 404', async () => {

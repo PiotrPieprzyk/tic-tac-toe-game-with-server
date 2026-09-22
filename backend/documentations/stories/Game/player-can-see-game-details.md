@@ -6,7 +6,7 @@ To do
 
 ### Description
 
-A player can fetch a game and see the players' names and marks, whose turn it is, and the game result once the game has ended.
+A player can fetch a game and see the players' names and marks, whose turn it is, and the game result once the game has ended. Ended games are kept in the repository, so their details remain fetchable after the game is over.
 
 ### Tests
 
@@ -27,10 +27,10 @@ Prerequisites:
 - Game in progress
 - One cell already marked
 
-#### WHEN fetching a game that ended SHOULD return 404
+#### WHEN fetching a game that ended SHOULD return 200 with the result and the winner's id
 
 Prerequisites:
-- Game in ended
+- Game ended with a win
 
 #### WHEN game does not exist SHOULD return 404
 

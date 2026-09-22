@@ -32,7 +32,7 @@ export class GameRouter {
                 const gameId = GameId.create(req.params.id);
                 const game = await this.gameRepository.find(gameId);
 
-                if (!game || game.status.value === GameStatusEnum.ENDED) {
+                if (!game) {
                     next(new HTTPError(404, 'Game not found'));
                     return;
                 }
