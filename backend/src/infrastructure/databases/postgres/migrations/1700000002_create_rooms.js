@@ -1,24 +1,20 @@
-/**
- * TODO: create the "rooms" table, mirroring RoomPersistence
- * (backend/src/infrastructure/repositories/mock/RoomPersistenceMap.ts):
- *   id, name, hostId, activeGameId, usersIds (string[]), updatedTimestamp
- *
- * Things to decide:
- * - hostId as a foreign key into users(id)
- * - usersIds: a join table `room_users(room_id, user_id)` is the normalized
- *   approach — prefer it over a text[]/jsonb column so you can enforce
- *   referential integrity and query membership efficiently.
- * - activeGameId: nullable foreign key into games(id) (games table doesn't
- *   exist yet at this point — either reorder migrations or add the FK in a
- *   later migration once "games" exists).
- */
-
 exports.up = (pgm) => {
-    // pgm.createTable("rooms", { ... });
-    // pgm.createTable("room_users", { ... });
+    pgm.createTable("rooms", {
+        id: {type: "uuid", primaryKey: true, default: pgm.func("gen_random_uuid()")},
+        name: {type: "text", notNull: true},
+        host_id: {type: "uuid", notNull: true, references: "users", onDelete: "CASCADE"},
+        active_game_id: {type: "uuid", notNull: false},
+        updated_timestamp: {type: "bigint", notNull: true},
+    });
+
+    pgm.createTable("room_users", {
+        room_id: {type: "uuid", notNull: true, references: "rooms", onDelete: "CASCADE"},
+        user_id: {type: "uuid", notNull: true, references: "users", onDelete: "CASCADE"},
+    });
+    pgm.addConstraint("room_users", "room_users_pkey", {primaryKey: ["room_id", "user_id"]});
 };
 
 exports.down = (pgm) => {
-    // pgm.dropTable("room_users");
-    // pgm.dropTable("rooms");
+    pgm.dropTable("room_users");
+    pgm.dropTable("rooms");
 };

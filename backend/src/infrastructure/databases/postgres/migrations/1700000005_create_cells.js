@@ -1,18 +1,16 @@
-/**
- * TODO: create the "cells" table, mirroring CellPersistence
- * (backend/src/application/Game/CellMap.ts): id, mark, position, gameId
- *
- * Things to decide:
- * - gameId as a foreign key into games(id), ON DELETE CASCADE (cells are
- *   owned by their game — deleting a game should delete its cells)
- * - a UNIQUE constraint on (gameId, position) mirrors the domain invariant
- *   that a board has one cell per position
- */
-
 exports.up = (pgm) => {
-    // pgm.createTable("cells", { ... });
+    pgm.createTable("cells", {
+        id: {type: "uuid", primaryKey: true, default: pgm.func("gen_random_uuid()")},
+        mark: {type: "text", notNull: true},
+        position: {type: "integer", notNull: true},
+        game_id: {type: "uuid", notNull: true, references: "games", onDelete: "CASCADE"},
+    });
+
+    pgm.addConstraint("cells", "cells_game_id_position_unique", {
+        unique: ["game_id", "position"],
+    });
 };
 
 exports.down = (pgm) => {
-    // pgm.dropTable("cells");
+    pgm.dropTable("cells");
 };

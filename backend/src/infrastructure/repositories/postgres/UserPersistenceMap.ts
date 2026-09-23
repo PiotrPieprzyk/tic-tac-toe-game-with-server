@@ -6,6 +6,12 @@ export type UserPersistence = {
     lastActiveDate: number,
 }
 
+export type UserRow = {
+    id: string,
+    name: string,
+    last_active_date: string | number,
+}
+
 /**
  * A Postgres row uses snake_case columns (see migrations/1700000001_create_users.js:
  * last_active_date) while UserPersistence stays camelCase to match the mock shape —
@@ -14,17 +20,34 @@ export type UserPersistence = {
  */
 export class UserPersistenceMap {
     static toPersistence(user: User): UserPersistence {
-        // TODO: same as UserPersistenceMap in mock/ — this direction doesn't
-        // change with the storage engine.
-        throw new Error("not implemented");
+        return {
+            id: user.id.value,
+            name: user.name.value,
+            lastActiveDate: user.lastActiveDate.toPersistent()
+        };
     }
 
     static toDomain(persistence: UserPersistence): User {
-        // TODO: same as UserPersistenceMap in mock/.
-        throw new Error("not implemented");
+        return User.create({
+            id: persistence.id,
+            name: persistence.name,
+            lastActiveDate: persistence.lastActiveDate,
+        });
     }
 
-    // TODO: add a fromRow(row) that maps a raw pg row ({ id, name, last_active_date })
-    // to UserPersistence, and a toRow(persistence) for the reverse — used by
-    // PostgresUserRepository around each query.
+    static fromRow(row: UserRow): UserPersistence {
+        return {
+            id: row.id,
+            name: row.name,
+            lastActiveDate: Number(row.last_active_date),
+        };
+    }
+
+    static toRow(persistence: UserPersistence): { id?: string, name: string, last_active_date: number } {
+        return {
+            id: persistence.id,
+            name: persistence.name,
+            last_active_date: persistence.lastActiveDate,
+        };
+    }
 }

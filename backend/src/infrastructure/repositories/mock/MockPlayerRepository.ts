@@ -2,6 +2,7 @@ import {PlayerRepository} from "@/infrastructure/repositories/interfaces/PlayerR
 import {PlayerPersistence} from "@/application/Game/PlayerMap";
 import {MockPlayerDatabase} from "@/infrastructure/databases/mock/MockPlayerDatabase";
 import {PlayerId} from "@/domain/Game/Player/PlayerId";
+import {GameId} from "@/domain/Game/valueObject/GameId";
 
 type Id = PlayerId;
 type Persistence = PlayerPersistence;
@@ -37,6 +38,10 @@ export class MockPlayerRepository implements PlayerRepository {
 
     async find (id: Id): Promise<Persistence|undefined> {
         return await this.database.find(id.value)
+    }
+
+    async findByGameId (gameId: GameId): Promise<Persistence[]|[]> {
+        return await this.database.findByGameId(gameId.value)
     }
 
     async delete (id: Id): Promise<void> {

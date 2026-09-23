@@ -5,6 +5,20 @@ import {CellPersistence} from "@/application/Game/CellMap";
 import {GameId} from "@/domain/Game/valueObject/GameId";
 import {PostgresConnection} from "@/infrastructure/databases/postgres/PostgresConnection";
 
+type CellRow = {
+    id: string,
+    mark: string,
+    position: number,
+    game_id: string,
+}
+
+const fromRow = (row: CellRow): CellPersistence => ({
+    id: row.id,
+    mark: row.mark,
+    position: row.position,
+    gameId: row.game_id,
+});
+
 let repository: PostgresCellRepository;
 
 export class PostgresCellRepository implements CellRepository {
@@ -22,22 +36,26 @@ export class PostgresCellRepository implements CellRepository {
     }
 
     async save(cellPersistence: CellPersistence): Promise<void> {
-        // TODO: INSERT ... ON CONFLICT (id) DO UPDATE
-        throw new Error("not implemented");
+        await this.pool.query(
+            `INSERT INTO cells (id, mark, position, game_id)
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (id) DO UPDATE SET mark = $2, position = $3, game_id = $4`,
+            [cellPersistence.id, cellPersistence.mark, cellPersistence.position, cellPersistence.gameId]
+        );
     }
 
     async find(cellId: CellId): Promise<CellPersistence | undefined> {
-        // TODO: SELECT * FROM cells WHERE id = $1
-        throw new Error("not implemented");
+        const result = await this.pool.query<CellRow>('SELECT * FROM cells WHERE id = $1', [cellId.value]);
+        const row = result.rows[0];
+        return row ? fromRow(row) : undefined;
     }
 
     async findByGameId(gameId: GameId): Promise<CellPersistence[] | []> {
-        // TODO: SELECT * FROM cells WHERE game_id = $1
-        throw new Error("not implemented");
+        const result = await this.pool.query<CellRow>('SELECT * FROM cells WHERE game_id = $1', [gameId.value]);
+        return result.rows.map(fromRow);
     }
 
     async delete(cellId: CellId): Promise<void> {
-        // TODO: DELETE FROM cells WHERE id = $1
-        throw new Error("not implemented");
+        await this.pool.query('DELETE FROM cells WHERE id = $1', [cellId.value]);
     }
 }

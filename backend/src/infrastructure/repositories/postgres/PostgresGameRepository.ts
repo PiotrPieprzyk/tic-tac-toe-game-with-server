@@ -2,9 +2,11 @@ import {Pool} from "pg";
 import {GameRepository} from "@/domain/Game/GameRepository";
 import {GameId} from "@/domain/Game/valueObject/GameId";
 import {Game} from "@/domain/Game/Game";
-import {GamePersistence, GamePersistenceMap} from "@/infrastructure/repositories/postgres/GamePersistenceMap";
+import {GamePersistence, GamePersistenceMap, GameRow} from "@/infrastructure/repositories/postgres/GamePersistenceMap";
 import {PostgresCellRepository} from "@/infrastructure/repositories/postgres/PostgresCellRepository";
+import {PostgresPlayerRepository} from "@/infrastructure/repositories/postgres/PostgresPlayerRepository";
 import {CellRepository} from "@/infrastructure/repositories/interfaces/CellRepository";
+import {PlayerRepository} from "@/infrastructure/repositories/interfaces/PlayerRepository";
 import {CellMap} from "@/application/Game/CellMap";
 import {PostgresConnection} from "@/infrastructure/databases/postgres/PostgresConnection";
 
@@ -13,10 +15,12 @@ let repository: PostgresGameRepository;
 export class PostgresGameRepository implements GameRepository {
     private pool: Pool;
     private cellRepository: CellRepository;
+    private playerRepository: PlayerRepository;
 
     private constructor() {
         this.pool = PostgresConnection.getPool();
         this.cellRepository = PostgresCellRepository.create();
+        this.playerRepository = PostgresPlayerRepository.create();
     }
 
     static create(): PostgresGameRepository {
@@ -27,28 +31,47 @@ export class PostgresGameRepository implements GameRepository {
     }
 
     async save(game: Game): Promise<void> {
-        // TODO: upsert the game row, then Promise.all(...) the cell saves via
-        // this.cellRepository, mirroring MockGameRepository.save.
-        //
-        // Note: MockGameRepository never touches a player repository — Game's
-        // players are just part of GamePersistence and saved as part of the
-        // game row there. Decide deliberately here: either a `players` jsonb
-        // column on games (closest to the mock), or a normalized players
-        // table keyed by game_id (closer to how cells are done) using
-        // PostgresPlayerRepository. Whichever you pick, keep GameRepository's
-        // public contract unchanged — that decision stays inside this class.
-        throw new Error("not implemented");
+        const persistence = GamePersistenceMap.toPersistence(game);
+        const row = GamePersistenceMap.toRow(persistence);
+
+        await this.pool.query(
+            `INSERT INTO games (id, status, result, room_id, active_player_id, winner_player_id, updated_timestamp)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)
+             ON CONFLICT (id) DO UPDATE SET
+                 status = $2, result = $3, room_id = $4, active_player_id = $5,
+                 winner_player_id = $6, updated_timestamp = $7`,
+            [row.id, row.status, row.result, row.room_id, row.active_player_id, row.winner_player_id, row.updated_timestamp]
+        );
+
+        const currentPlayerIds = persistence.players.map(player => player.id);
+        await this.pool.query(
+            `DELETE FROM players WHERE game_id = $1 AND id != ALL($2::uuid[])`,
+            [row.id, currentPlayerIds]
+        );
+
+        await Promise.all([
+            ...game.cells.map(cell => this.cellRepository.save(CellMap.toPersistence(cell))),
+            ...persistence.players.map(player => this.playerRepository.save(player)),
+        ]);
     }
 
     async find(id: GameId): Promise<Game | undefined> {
-        // TODO: SELECT the game row (+ players, however you stored them),
-        // then this.cellRepository.findByGameId(id), then GamePersistenceMap.toDomain
-        throw new Error("not implemented");
+        const result = await this.pool.query<GameRow>('SELECT * FROM games WHERE id = $1', [id.value]);
+        const row = result.rows[0];
+        if (!row) {
+            return undefined;
+        }
+
+        const [cells, players] = await Promise.all([
+            this.cellRepository.findByGameId(id),
+            this.playerRepository.findByGameId(id),
+        ]);
+
+        const persistence: GamePersistence = GamePersistenceMap.fromRow(row, players);
+        return GamePersistenceMap.toDomain(persistence, cells);
     }
 
     async delete(id: GameId): Promise<void> {
-        // TODO: DELETE FROM games WHERE id = $1 (cells should cascade —
-        // check the ON DELETE behavior you set in the migration)
-        throw new Error("not implemented");
+        await this.pool.query('DELETE FROM games WHERE id = $1', [id.value]);
     }
 }

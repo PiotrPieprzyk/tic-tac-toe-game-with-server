@@ -20,7 +20,7 @@ export class GamePersistenceMap {
         return {
             id: game.id.value,
             status: game.status.value,
-            players: game.players.map((player) => PlayerMap.toPersistence(player)),
+            players: game.players.map((player) => PlayerMap.toPersistence(player, game.id.value)),
             activePlayerId: game.activePlayerId?.value,
             result: game.result?.value,
             winnerPlayerId: game.winnerPlayerId?.value,

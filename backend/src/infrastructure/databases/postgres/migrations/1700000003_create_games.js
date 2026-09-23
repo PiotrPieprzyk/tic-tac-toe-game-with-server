@@ -1,22 +1,32 @@
-/**
- * TODO: create the "games" table, mirroring GamePersistence
- * (backend/src/infrastructure/repositories/mock/GamePersistenceMap.ts):
- *   id, status, activePlayerId, result, winnerPlayerId, roomId, updatedTimestamp
- *
- * "players" isn't a column here — it's a separate table (see the players
- * migration), since Game.players is a child collection just like Cell.
- *
- * Things to decide:
- * - roomId as a foreign key into rooms(id)
- * - status/result: could be a Postgres ENUM type (matches GameStatusEnum /
- *   GameResultEnum in the domain) or a plain text column with a CHECK
- *   constraint — either teaches you something different, pick one.
- */
-
 exports.up = (pgm) => {
-    // pgm.createTable("games", { ... });
+    pgm.createTable("games", {
+        id: {type: "uuid", primaryKey: true, default: pgm.func("gen_random_uuid()")},
+        status: {
+            type: "text",
+            notNull: true,
+            check: "status in ('IN_PROGRESS', 'ENDED', 'WAITING_FOR_PLAYERS')",
+        },
+        result: {
+            type: "text",
+            notNull: false,
+            check: "result in ('WIN', 'DRAW', 'PLAYER_LEFT_THE_GAME')",
+        },
+        room_id: {type: "uuid", notNull: true, references: "rooms", onDelete: "CASCADE"},
+        active_player_id: {type: "uuid", notNull: false},
+        winner_player_id: {type: "uuid", notNull: false},
+        updated_timestamp: {type: "bigint", notNull: true},
+    });
+
+    pgm.addConstraint("rooms", "rooms_active_game_id_fkey", {
+        foreignKeys: {
+            columns: "active_game_id",
+            references: "games(id)",
+            onDelete: "SET NULL",
+        },
+    });
 };
 
 exports.down = (pgm) => {
-    // pgm.dropTable("games");
+    pgm.dropConstraint("rooms", "rooms_active_game_id_fkey");
+    pgm.dropTable("games");
 };

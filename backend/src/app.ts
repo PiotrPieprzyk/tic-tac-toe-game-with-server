@@ -8,14 +8,26 @@ import cookieParser from "cookie-parser";
 import {MockUserRepository} from "@/infrastructure/repositories/mock/MockUserRepository";
 import {MockRoomRepository} from "@/infrastructure/repositories/mock/MockRoomRepository";
 import {MockGameRepository} from "@/infrastructure/repositories/mock/MockGameRepository";
+import {PostgresUserRepository} from "@/infrastructure/repositories/postgres/PostgresUserRepository";
+import {PostgresRoomRepository} from "@/infrastructure/repositories/postgres/PostgresRoomRepository";
+import {PostgresGameRepository} from "@/infrastructure/repositories/postgres/PostgresGameRepository";
 import {WebsocketBroadcaster} from "@/infrastructure/realtime/WebsocketBroadcaster";
 
-const defaultRepositories = (): RouterRepositories => ({
-    userRepository: MockUserRepository.create(),
-    roomRepository: MockRoomRepository.create(),
-    gameRepository: MockGameRepository.create(),
-    eventBroadcaster: WebsocketBroadcaster.create(),
-});
+const defaultRepositories = (): RouterRepositories => (
+    process.env.DATABASE_URL
+        ? {
+            userRepository: PostgresUserRepository.create(),
+            roomRepository: PostgresRoomRepository.create(),
+            gameRepository: PostgresGameRepository.create(),
+            eventBroadcaster: WebsocketBroadcaster.create(),
+        }
+        : {
+            userRepository: MockUserRepository.create(),
+            roomRepository: MockRoomRepository.create(),
+            gameRepository: MockGameRepository.create(),
+            eventBroadcaster: WebsocketBroadcaster.create(),
+        }
+);
 
 export const getApp = (repositories: RouterRepositories = defaultRepositories()) => {
     const app = express();

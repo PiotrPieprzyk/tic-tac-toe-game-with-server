@@ -69,7 +69,7 @@ services:
       dockerfile: Dockerfile
     container_name: tic-tac-toe-frontend
     environment:
-      VITE_API_DOMAIN: ${VITE_API_DOMAIN:-http://localhost:3000}
+      VITE_API_DOMAIN: ${VITE_API_DOMAIN:-http://127.0.0.1:3000}
     ports:
       - "4000:4000"
     depends_on:
@@ -86,7 +86,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.prod
       args:
-        VITE_API_DOMAIN: ${VITE_API_DOMAIN:-http://localhost:3000}
+        VITE_API_DOMAIN: ${VITE_API_DOMAIN:-http://127.0.0.1:3000}
     container_name: tic-tac-toe-frontend-prod
     profiles: ["prod"]
     ports:

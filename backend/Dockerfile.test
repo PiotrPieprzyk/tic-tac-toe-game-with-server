@@ -7,4 +7,4 @@ RUN npm ci
 
 COPY . .
 
-CMD ["npm", "test"]
+CMD ["sh", "-c", "npm run migrate up && npm test -- --runInBand"]

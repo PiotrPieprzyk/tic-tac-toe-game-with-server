@@ -1,6 +1,6 @@
 import type {
     GameAPIResponseRaw,
-    RoomAPI,
+    RoomAPI, RoomAPIAddRequest,
     RoomAPIGetRoomsOptions,
     RoomAPIJoinRequest,
     RoomAPILeaveRequest,
@@ -14,8 +14,13 @@ import type {RoomId} from "@/domain/Room/RoomId.ts";
 export class SimpleRoomAPI implements RoomAPI {
     static path = '/rooms';
 
-    async addRoom(body){
-        return await API.post<RoomAPIResponseRaw>(`${SimpleRoomAPI.path}`, body);
+    async addRoom(body: RoomAPIAddRequest) {
+        const bodyRaw = {
+            name: body.name,
+            usersIds: body.usersIds.map(u => u.value),
+            hostId: body.hostId.value,
+        };
+        return await API.post<RoomAPIResponseRaw>(`${SimpleRoomAPI.path}`, bodyRaw);
     }
 
     async getRoom(id: RoomId) {

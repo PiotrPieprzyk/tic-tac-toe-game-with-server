@@ -16,6 +16,10 @@ export class MockPlayerDatabase {
         return this.items.find(item => item.id === id);
     }
 
+    async findByGameId(gameId: any): Promise<any> {
+        return this.items.filter(item => item.gameId === gameId);
+    }
+
     async delete(id: any): Promise<void> {
         this.items = this.items.filter(item => item.id !== id);
     }

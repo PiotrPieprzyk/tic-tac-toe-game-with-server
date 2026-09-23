@@ -10,15 +10,15 @@ let pool: Pool;
 export class PostgresConnection {
     static getPool(): Pool {
         if (!pool) {
-            // TODO: read these from environment variables (e.g. via a config module),
-            // don't hardcode credentials here.
-            pool = new Pool({
-                host: process.env.POSTGRES_HOST,
-                port: Number(process.env.POSTGRES_PORT) || 5432,
-                user: process.env.POSTGRES_USER,
-                password: process.env.POSTGRES_PASSWORD,
-                database: process.env.POSTGRES_DB,
-            });
+            pool = process.env.DATABASE_URL
+                ? new Pool({connectionString: process.env.DATABASE_URL})
+                : new Pool({
+                    host: process.env.POSTGRES_HOST,
+                    port: Number(process.env.POSTGRES_PORT) || 5432,
+                    user: process.env.POSTGRES_USER,
+                    password: process.env.POSTGRES_PASSWORD,
+                    database: process.env.POSTGRES_DB,
+                });
         }
         return pool;
     }
