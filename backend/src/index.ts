@@ -2,6 +2,14 @@ import {WebsocketServer} from "@/websocket";
 import {getApp} from "@/app";
 import os from "os";
 
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught exception:', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled rejection:', reason);
+});
+
 const port = 3000;
 const app = getApp();
 
