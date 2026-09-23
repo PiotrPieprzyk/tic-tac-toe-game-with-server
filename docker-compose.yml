@@ -1,0 +1,98 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tic-tac-toe-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-tic_tac_toe}
+      POSTGRES_TEST_DB: ${POSTGRES_TEST_DB:-tic_tac_toe_test}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-tic_tac_toe}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Backend API, dev mode (nodemon + ts-node, hot reload via bind mount).
+  # Does not talk to postgres yet — env vars are wired up for when it does.
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tic-tac-toe-backend
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-tic_tac_toe}
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-tic_tac_toe}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  # `docker compose --profile test run --rm backend-test`
+  # Separate image (backend/Dockerfile.test) that runs the jest suite once
+  # against its own database and exits. Tests currently don't touch postgres,
+  # so this will pass trivially until the backend is wired up to use it.
+  backend-test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    container_name: tic-tac-toe-backend-test
+    profiles: ["test"]
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_TEST_DB:-tic_tac_toe_test}
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_TEST_DB:-tic_tac_toe_test}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Frontend, dev mode (Vite dev server, hot reload via bind mount).
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tic-tac-toe-frontend
+    environment:
+      VITE_API_DOMAIN: ${VITE_API_DOMAIN:-http://localhost:3000}
+    ports:
+      - "4000:4000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  # `docker compose --profile prod up frontend-prod`
+  # Production build (vite build) served by nginx, for testing the built
+  # bundle locally. VITE_API_DOMAIN is baked in at build time.
+  frontend-prod:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_DOMAIN: ${VITE_API_DOMAIN:-http://localhost:3000}
+    container_name: tic-tac-toe-frontend-prod
+    profiles: ["prod"]
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
