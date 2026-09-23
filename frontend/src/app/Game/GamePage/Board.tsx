@@ -27,10 +27,9 @@ function nonWinningMarkColor(mark: MarkRaw | undefined): string {
     return 'text-empty-cell';
 }
 
-function inProgressMarkColor(mark: MarkRaw | undefined): string {
-    if (mark === 'X') return 'text-x-mark';
-    if (mark === 'O') return 'text-primary';
-    return 'text-empty-cell';
+function inProgressMarkColor(mark: MarkRaw | undefined, activePlayerMark: MarkRaw | undefined): string {
+    if (!mark) return 'text-empty-cell';
+    return mark === activePlayerMark ? 'text-primary' : 'text-x-mark';
 }
 
 export function Board({game, myPlayer, onMark}: BoardProps): ReactElement {
@@ -53,7 +52,7 @@ export function Board({game, myPlayer, onMark}: BoardProps): ReactElement {
                     } else if (game.result === GameResultEnum.DRAW) {
                         colorClass = 'text-text-muted';
                     } else {
-                        colorClass = inProgressMarkColor(mark);
+                        colorClass = inProgressMarkColor(mark, activePlayerMark);
                         glow = game.status === GameStatusEnum.IN_PROGRESS && !!mark && mark === activePlayerMark;
                     }
                     const disabled = !(game.status === GameStatusEnum.IN_PROGRESS && game.activePlayerId === myPlayer?.id && !mark);
