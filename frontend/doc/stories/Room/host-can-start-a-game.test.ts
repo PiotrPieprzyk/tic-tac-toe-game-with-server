@@ -77,4 +77,21 @@ describe('Host can start a game once the room has 2 of 2 players', () => {
         });
         expect(getStartGame()).toBeEnabled();
     });
+
+    it("WHEN the room's previous game has ended SHOULD keep startGame enabled so the host can start the next game", async () => {
+        const router = createMockRouter();
+        const roomAPI = createMockRoomAPI({
+            getRoom: vi.fn(async () => new SuccessResponse(
+                buildRoom({hostId: HOST.id, users: [HOST, OPPONENT], status: GameStatusEnum.ENDED})
+            )),
+        });
+        const userSession = createMockUserSession(HOST_ID);
+        const {roomEventsSocket} = createMockRoomEventsSocket();
+
+        renderRoomPage(roomAPI, router, userSession, roomEventsSocket);
+
+        await waitFor(() => {
+            expect(getStartGame()).toBeEnabled();
+        });
+    });
 });

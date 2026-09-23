@@ -77,6 +77,7 @@ describe('Player can see that the game is updated automatically', () => {
             expect(getGameStatus()).toHaveTextContent('> GAME_OVER: NEO_7734_WINS');
         });
         expect(getGameStatus()).toHaveStyle({color: DESIGN_COLORS.accentGreen});
+        expect(getGameStatus()).toHaveStyle({textShadow: '0 0 10px rgb(0, 255, 156)'});
 
         expect(getPlayerName(0)).toHaveStyle({color: DESIGN_COLORS.accentGreen});
         expect(getPlayerMark(0)).toHaveStyle({color: DESIGN_COLORS.accentGreen});

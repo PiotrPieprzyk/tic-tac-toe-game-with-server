@@ -2,6 +2,8 @@ import {describe, expect, it, vi} from 'vitest';
 import {waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {CommonError, SuccessResponse} from '@/domain/shared/api/APICommon';
+import {GameStatusEnum} from '@/domain/Game/GameStatus';
+import {GameResultEnum} from '@/domain/Game/GameResult';
 import {createMockGameAPI, createMockGameEventsSocket, createMockRouter, createMockUserSession} from '@doc/stories/Game/shared/mocks';
 import {buildGame, DEFAULT_GAME_ID, DEFAULT_ROOM_ID, O_PLAYER, X_PLAYER, X_USER_ID} from '@doc/stories/Game/shared/builders';
 import {renderGamePage} from '@doc/stories/Game/shared/render';
@@ -58,5 +60,34 @@ describe('Player can leave the game', () => {
         expect(getPlayerName(0)).toHaveTextContent(X_PLAYER.userName);
         expect(getPlayerName(1)).toHaveTextContent(O_PLAYER.userName);
         expect(router.push).not.toHaveBeenCalled();
+    });
+
+    it("WHEN the player clicks leaveGame on an ended game SHOULD navigate to the game's room without calling the leave-game API", async () => {
+        const user = userEvent.setup();
+        const router = createMockRouter();
+        const gameAPI = createMockGameAPI({
+            getGame: vi.fn(async () => new SuccessResponse(buildGame({
+                status: GameStatusEnum.ENDED,
+                result: GameResultEnum.WIN,
+                winnerId: X_PLAYER.id,
+                activePlayerId: undefined,
+            }))),
+            leaveGame: vi.fn(async () => ({})),
+        });
+        const userSession = createMockUserSession(X_USER_ID);
+        const {gameEventsSocket} = createMockGameEventsSocket();
+
+        renderGamePage(gameAPI, router, userSession, gameEventsSocket);
+
+        await waitFor(() => {
+            expect(getLeaveGame()).toBeInTheDocument();
+        });
+
+        await user.click(getLeaveGame());
+
+        await waitFor(() => {
+            expect(router.push).toHaveBeenCalledWith(`#/rooms/${DEFAULT_ROOM_ID}`);
+        });
+        expect(gameAPI.leaveGame).not.toHaveBeenCalled();
     });
 });

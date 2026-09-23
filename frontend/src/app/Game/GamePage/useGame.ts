@@ -6,6 +6,7 @@ import {useUserSession} from "@/domain/shared/context/UserSessionContext.tsx";
 import {CommonError} from "@/domain/shared/api/APICommon.ts";
 import type {GameRaw, PlayerRaw} from "@/domain/Game/Game.ts";
 import {GameResultEnum} from "@/domain/Game/GameResult.ts";
+import {GameStatusEnum} from "@/domain/Game/GameStatus.ts";
 import {GameId} from "@/domain/Game/GameId.ts";
 import {Guid} from "@/domain/shared/models/GUID.ts";
 
@@ -90,6 +91,10 @@ export function useGame(gameId: string) {
 
     async function leaveGame() {
         if (!game) return;
+        if (game.status === GameStatusEnum.ENDED) {
+            router.push(`#/rooms/${game.roomId}`);
+            return;
+        }
         const response = await gameAPI.leaveGame(GameId.create(gameId));
         if (response instanceof CommonError) {
             setErrorMessage(response.message);

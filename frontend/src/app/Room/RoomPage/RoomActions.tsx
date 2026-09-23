@@ -25,7 +25,8 @@ export function RoomActions({room, isHost, onError, onStartGameLoadingChange}: R
     const currentUserId = useUserSession();
     const [startingGame, setStartingGame] = useState(false);
 
-    const readyToStart = room.users.length >= MAX_PLAYERS && room.status === GameStatusEnum.WAITING_FOR_PLAYERS;
+    const readyToStart = room.users.length >= MAX_PLAYERS
+        && (room.status === GameStatusEnum.WAITING_FOR_PLAYERS || room.status === GameStatusEnum.ENDED);
     const inProgress = room.status === GameStatusEnum.IN_PROGRESS;
 
     async function handleDelete() {

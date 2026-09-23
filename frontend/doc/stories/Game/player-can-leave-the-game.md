@@ -16,6 +16,10 @@ Clicking leaveGame leaves the game for the current user (see backend `player-can
 user is redirected to the game's room, #/rooms/{roomId} (leaving a game does not remove the player from the room). On
 failure an errorMessage is shown and the player stays on the game page. Per the design, leaving has no loading state.
 
+Once the game has already ended (win, draw, or opponent disconnected), the game is over for both players regardless —
+clicking leaveGame just navigates back to the room without calling the leave-game API, so the finished game stays
+untouched (allowing the host to start the next game from the room).
+
 The other player (if any) is told through the gameEnded / gameDeleted events, see
 [[player-can-see-that-game-is-updated-automatically]].
 
@@ -40,3 +44,9 @@ Prerequisites:
 Prerequisites:
 
 - Mock API leave game — return an error
+
+#### WHEN the player clicks leaveGame on an ended game SHOULD navigate to the game's room without calling the leave-game API
+
+Prerequisites:
+
+- Mock API GET /games/{gameId} — return an ENDED game with two players belonging to room {roomId}

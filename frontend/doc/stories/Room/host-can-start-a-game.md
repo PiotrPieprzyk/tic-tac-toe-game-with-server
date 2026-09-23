@@ -47,3 +47,9 @@ Prerequisites:
 Prerequisites:
 
 - Mock API startGame — return an error
+
+#### WHEN the room's previous game has ended SHOULD keep startGame enabled so the host can start the next game
+
+Prerequisites:
+
+- Mock API GET /rooms/{roomId} — return a room with 2 of 2 players and status ENDED (previous game finished)
