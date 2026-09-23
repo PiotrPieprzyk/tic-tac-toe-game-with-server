@@ -10,11 +10,16 @@ import {ReactRouter} from "@/infra/service/ReactRouter.ts";
 import {SimpleUserSession} from "@/infra/service/SimpleUserSession.ts";
 import {SimpleRoomEventsSockets} from "@/infra/service/SimpleRoomEventsSockets.ts";
 import {RoomEventsSocketProvider} from "@/domain/shared/context/RoomEventsSocketContext.tsx";
+import {GameAPIProvider} from "@/domain/shared/context/GameAPIContext.tsx";
+import {GameEventsSocketProvider} from "@/domain/shared/context/GameEventsSocketContext.tsx";
+import {SimpleGameAPI} from "@/infra/api/SimpleGameAPI.ts";
+import {SimpleGameEventsSockets} from "@/infra/service/SimpleGameEventsSockets.ts";
 import {UserForm} from "@/app/Menu/UserForm.tsx";
 import {RoomForm} from "@/app/Menu/RoomForm.tsx";
 import {MenuRoomList} from "@/app/Menu/RoomList/MenuRoomList";
 import {RoomPage} from "@/app/Room/RoomPage";
 import {RoomRenameForm} from "@/app/Room/RoomRenameForm.tsx";
+import {GamePage} from "@/app/Game/GamePage";
 
 
 function RootLayout(): ReactElement {
@@ -24,6 +29,8 @@ function RootLayout(): ReactElement {
     const roomAPI = useMemo(() => new SimpleRoomAPI(), []);
     const userSession = useMemo(() => new SimpleUserSession(ANONYMOUS_USER_ID), []);
     const roomEventsSocket = useMemo(() => new SimpleRoomEventsSockets(), []);
+    const gameAPI = useMemo(() => new SimpleGameAPI(), []);
+    const gameEventsSocket = useMemo(() => new SimpleGameEventsSockets(), []);
 
     return (
         <RouterProvider router={router}>
@@ -31,9 +38,13 @@ function RootLayout(): ReactElement {
                 <RoomAPIProvider roomAPI={roomAPI}>
                     <UserSessionProvider userSession={userSession}>
                         <RoomEventsSocketProvider roomEventsSocket={roomEventsSocket}>
-                            <div className="flex min-h-screen items-center justify-center px-4 py-10">
-                                <Outlet/>
-                            </div>
+                            <GameAPIProvider gameAPI={gameAPI}>
+                                <GameEventsSocketProvider gameEventsSocket={gameEventsSocket}>
+                                    <div className="flex min-h-screen items-center justify-center px-4 py-10">
+                                        <Outlet/>
+                                    </div>
+                                </GameEventsSocketProvider>
+                            </GameAPIProvider>
                         </RoomEventsSocketProvider>
                     </UserSessionProvider>
                 </RoomAPIProvider>
@@ -52,6 +63,7 @@ const dataRouter = createHashRouter([
             {path: "rooms/create", element: <RoomForm/>},
             {path: "rooms/:roomId", element: <RoomPage/>},
             {path: "rooms/:roomId/rename", element: <RoomRenameForm/>},
+            {path: "games/:gameId", element: <GamePage/>},
         ],
     },
 ]);

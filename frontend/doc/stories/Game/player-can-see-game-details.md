@@ -18,8 +18,8 @@ Elements in #/games/{gameId}:
         - "> GAME_OVER: DRAW" (result DRAW)
         - "> GAME_OVER: OPPONENT_DISCONNECTED" (result PLAYER_LEFT_THE_GAME)
 
-      The ended variants are only reachable through websocket events, see
-      [[player-can-see-that-game-is-updated-automatically]].
+      The ended variants are reachable either by fetching an already-ended game directly or through websocket
+      events, see [[player-can-see-that-game-is-updated-automatically]].
     - data-testId="board"
         - data-testId="cell" < repeated 9 times, index = board position 0-8 (left-to-right, top-to-bottom). Shows
           "X", "O", or "_" when empty
@@ -37,8 +37,10 @@ Colors while the game is IN_PROGRESS:
 
 The game is fetched from GET /games/{gameId} on mount and the page subscribes to that game's events. The current user
 is matched to a player through the player's `userId` (a player's `id` is what `activePlayerId` / `winnerId` refer to).
-If the fetch fails (e.g. the game doesn't exist or has already ended, which the server reports as 404) the user is
-redirected to #/rooms.
+Ended games are kept server-side and are still returned by this endpoint (with their final `status`/`result`/`winnerId`),
+so the GAME_OVER variants of `gameStatus` are also reachable by fetching a game directly, not only through websocket
+events. If the fetch fails (e.g. the game doesn't exist, which the server reports as 404) the user is redirected to
+#/rooms.
 
 ### Tests
 

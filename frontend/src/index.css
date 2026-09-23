@@ -38,6 +38,10 @@
   --color-text-faint: rgb(217 255 233 / 0.35);
   --color-text-faintest: rgb(217 255 233 / 0.3);
   --color-control-disabled-border: rgb(217 255 233 / 0.25);
+  --color-x-mark: rgb(217 255 233 / 0.4);
+  --color-empty-cell: rgb(217 255 233 / 0.15);
+  --color-draw-player-name: rgb(217 255 233 / 0.6);
+  --color-left-player-mark: rgb(217 255 233 / 0.25);
 
   /* Primary (calls to action, links, focus) */
   --color-primary: #00ff9c;
