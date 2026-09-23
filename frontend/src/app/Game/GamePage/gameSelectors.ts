@@ -44,3 +44,7 @@ export function statusTone(game: GameRaw): StatusBarTone {
     if (game.result === GameResultEnum.PLAYER_LEFT_THE_GAME) return 'danger';
     return 'neutral';
 }
+
+export function statusGlow(game: GameRaw): boolean {
+    return game.result === GameResultEnum.WIN || game.result === GameResultEnum.PLAYER_LEFT_THE_GAME;
+}

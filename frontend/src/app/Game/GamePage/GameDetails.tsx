@@ -6,7 +6,7 @@ import {Button} from "@/comp/Button/Button.tsx";
 import {Notice} from "@/comp/Notice/Notice.tsx";
 import {PlayerRow} from "@/app/Game/GamePage/PlayerRow.tsx";
 import {Board} from "@/app/Game/GamePage/Board.tsx";
-import {buildStatusText, statusTone} from "@/app/Game/GamePage/gameSelectors.ts";
+import {buildStatusText, statusGlow, statusTone} from "@/app/Game/GamePage/gameSelectors.ts";
 
 interface GameDetailsProps {
     game: GameRaw;
@@ -23,18 +23,16 @@ export function GameDetails({game, errorMessage, leftPlayerId, onMarkCell, onLea
     return (
         <>
             <PlayerRow players={game.players} game={game} leftPlayerId={leftPlayerId}/>
-            <StatusBar data-testid="gameStatus" tone={statusTone(game)}>
+            <StatusBar data-testid="gameStatus" tone={statusTone(game)} glow={statusGlow(game)}>
                 {buildStatusText(game, game.players)}
             </StatusBar>
-            <div className="p-3">
-                <Board game={game} myPlayer={myPlayer} onMark={onMarkCell}/>
-            </div>
+            <Board game={game} myPlayer={myPlayer} onMark={onMarkCell}/>
             {errorMessage && (
-                <Notice data-testid="errorMessage" tone="danger" className="mx-3 mb-2">
+                <Notice data-testid="errorMessage" tone="danger" className="mx-[18px] mb-2">
                     {errorMessage}
                 </Notice>
             )}
-            <div className="p-3 pt-0">
+            <div className="px-[18px] pb-5">
                 <Button data-testid="leaveGame" onClick={onLeaveGame} className="w-full">
                     LEAVE_GAME
                 </Button>

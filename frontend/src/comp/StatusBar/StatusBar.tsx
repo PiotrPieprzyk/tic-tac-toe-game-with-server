@@ -4,6 +4,7 @@ export type StatusBarTone = 'neutral' | 'success' | 'warning' | 'danger'
 
 export interface StatusBarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   tone: StatusBarTone
+  glow?: boolean
   children: ReactNode
 }
 
@@ -14,12 +15,13 @@ const toneClasses: Record<StatusBarTone, string> = {
   danger: 'border-danger-border bg-danger-surface text-danger',
 }
 
-export function StatusBar({tone, className, children, ...rest}: StatusBarProps) {
+export function StatusBar({tone, glow = false, className, children, ...rest}: StatusBarProps) {
   return (
     <div
       className={[
         'border-y py-2 text-center font-mono text-meta tracking-tag uppercase',
         toneClasses[tone],
+        glow ? '[text-shadow:0_0_10px_currentColor]' : '',
         className,
       ]
         .filter(Boolean)
