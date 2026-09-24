@@ -14,7 +14,10 @@ COPY . .
 ARG VITE_API_DOMAIN=http://localhost:3000
 ENV VITE_API_DOMAIN=$VITE_API_DOMAIN
 
-RUN pnpm run build
+# Overridable so a deployment can skip the `tsc -b` type check
+# (docker-compose.aws.yml uses `pnpm exec vite build`).
+ARG BUILD_COMMAND="pnpm run build"
+RUN sh -c "$BUILD_COMMAND"
 
 FROM nginx:1.27-alpine AS serve
 

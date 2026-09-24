@@ -1,0 +1,14 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+
+EXPOSE 3000
+
+# Same launcher as nodemon.json, without file watching. transpile-only skips
+# type checking at startup, which keeps memory usage low on small instances.
+CMD ["sh", "-c", "npm run migrate up && exec node -r ts-node/register/transpile-only -r tsconfig-paths/register src/index.ts"]
