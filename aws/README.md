@@ -18,6 +18,8 @@ It's sized for **short sessions**: about 1 hour, about 5 people, about 10 reques
 
 Run all scripts from the repository root. Names, sizes and the region live in [`config.mjs`](config.mjs).
 
+New to AWS? The [learning roadmap](learning/README.md) explains every service used here, in order, with official docs and hands-on labs.
+
 ---
 
 ## 1. Prerequisites
