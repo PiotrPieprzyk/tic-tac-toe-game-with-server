@@ -11,4 +11,7 @@ EXPOSE 3000
 
 # Same launcher as nodemon.json, without file watching. transpile-only skips
 # type checking at startup, which keeps memory usage low on small instances.
-CMD ["sh", "-c", "npm run migrate up && exec node -r ts-node/register/transpile-only -r tsconfig-paths/register src/index.ts"]
+# Migrations are not run here: docker-compose.aws.yml runs them in a separate
+# one-shot `migrate` container as the DB master user, while this server
+# connects as a least-privilege role that cannot change the schema.
+CMD ["node", "-r", "ts-node/register/transpile-only", "-r", "tsconfig-paths/register", "src/index.ts"]

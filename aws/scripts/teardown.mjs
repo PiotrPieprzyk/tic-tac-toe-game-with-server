@@ -24,7 +24,7 @@ main(async () => {
     console.log(`  DB subnet group:   ${config.rds.subnetGroup}`);
     console.log(`  Security groups:   ${sgIds.join(', ') || '-'}`);
     console.log(`  IAM:               ${config.iam.instanceProfile}, ${config.iam.role}`);
-    console.log(`  SSM parameters:    ${config.params.dbHost}, ${config.params.dbPassword}`);
+    console.log(`  SSM parameters:    ${config.params.dbHost}, ${config.params.dbPassword}, ${config.params.dbAppPassword}`);
     if (!args.yes) {
         console.log('\nDry run. Re-run with --yes to delete. THIS DELETES ALL GAME DATA.');
         return;
@@ -87,7 +87,7 @@ main(async () => {
     tryAws(['iam', 'delete-role', '--role-name', config.iam.role], notFound);
 
     log('Deleting SSM parameters');
-    aws(['ssm', 'delete-parameters', '--names', config.params.dbHost, config.params.dbPassword]);
+    aws(['ssm', 'delete-parameters', '--names', config.params.dbHost, config.params.dbPassword, config.params.dbAppPassword]);
 
     log('Verifying nothing tagged Project=tic-tac-toe is left');
     // Terminated instances can stay listed by the tagging API for up to an hour.

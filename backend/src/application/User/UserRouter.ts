@@ -60,8 +60,9 @@ export class UserRouter {
 
                 await this.userRepository.save(user);
 
-                // set cookie UserId
-                res.cookie('UserId', user.id.value);
+                // set cookie UserId. httpOnly: page scripts (e.g. injected XSS) can't read it;
+                // sameSite=lax: not sent on cross-site POST/PUT/DELETE requests.
+                res.cookie('UserId', user.id.value, {httpOnly: true, sameSite: 'lax'});
 
                 res.status(200).json(UserMap.toDTO(user));
             } catch (e) {

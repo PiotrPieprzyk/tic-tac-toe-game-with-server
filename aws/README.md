@@ -52,18 +52,26 @@ Run all scripts from the repository root. Names, sizes and the region live in [`
 ```
 Browser ──HTTP:80──▶ EC2 t4g.micro (Amazon Linux 2023, default VPC, SG: 80 open, no 22)
                      └─ docker compose -f docker-compose.aws.yml
+                        ├─ migrate   (one-shot)  node-pg-migrate, as master user `postgres`
+                        ├─ db-grants (one-shot)  aws/db/app-role.sql, as master user `postgres`
                         ├─ frontend (nginx)  serves the SPA
                         │     /api/*  ─▶ backend:3000/*     (/api prefix stripped)
                         │     /api/ws ─▶ backend:3000/ws    (WebSocket)
-                        └─ backend (node)    not exposed on the host
+                        └─ backend (node)    not exposed on the host, connects as `tic_tac_toe_app`
                                  │ TLS, verify-full with the RDS CA bundle
                                  ▼
                      RDS Postgres db.t4g.micro (SG: 5432 only from the EC2 SG, not public)
 ```
 
-- The browser talks to **one origin**. The frontend is built with `VITE_API_DOMAIN=/api` and nginx proxies `/api` to the backend, so no CORS setup is needed and the `UserId` cookie works as-is.
-- Backend migrations (`npm run migrate up`) run automatically each time the backend container starts.
-- The DB password is generated once and stored in **SSM Parameter Store** as the SecureString `/tic-tac-toe/db-password`. The RDS hostname is in `/tic-tac-toe/db-host`. The instance reads them through its IAM role while deploying and writes them to `/opt/tic-tac-toe/.env.aws`, which only root can read.
+- The browser talks to **one origin**. The frontend is built with `VITE_API_DOMAIN=/api` and nginx proxies `/api` to the backend, so no CORS setup is needed and the `UserId` cookie works as-is. The cookie is `HttpOnly` and `SameSite=Lax`.
+- **Two database users.** On every deploy, compose starts the containers in this order: `migrate` → `db-grants` → `backend` → `frontend`, and each step waits for the previous one to succeed.
+  - `migrate` runs the schema migrations as the RDS master user `postgres`.
+  - `db-grants` creates or updates the role `tic_tac_toe_app`. It can only `SELECT/INSERT/UPDATE/DELETE` table rows. It can't create, alter or drop tables, and it can't touch `pgmigrations`.
+  - The long-running `backend` only gets the app role's password. If the backend were ever compromised, the attacker couldn't drop tables or read the master password.
+- Both DB passwords are generated once and stored in **SSM Parameter Store** as SecureStrings: `/tic-tac-toe/db-password` (master) and `/tic-tac-toe/db-app-password` (app role). The RDS hostname is in `/tic-tac-toe/db-host`. The instance reads them through its IAM role while deploying and writes them to `/opt/tic-tac-toe/.env.aws`, which only root can read.
+- **Only the host can reach the instance metadata service** (IMDSv2 with hop limit 1). The metadata service at `169.254.169.254` hands out the instance role's temporary AWS credentials. Docker containers are one network hop further away, so they can't reach it. A bug in the internet-facing backend therefore can't be used to steal AWS credentials or read the passwords from Parameter Store.
+- The Docker compose and buildx plugins installed by user-data are **pinned versions checked against their sha256**. A mismatch stops the bootstrap.
+- Container logs are capped (3 × 10 MB per container), and each deploy removes build cache older than 72 h, so the 10 GB disk doesn't fill up.
 - Every resource is tagged `Project=tic-tac-toe`.
 
 Resources created:
@@ -73,7 +81,7 @@ Resources created:
 | Security group (app) | `tic-tac-toe-app-sg`: inbound TCP 80 from 0.0.0.0/0 |
 | Security group (db) | `tic-tac-toe-db-sg`: inbound TCP 5432 from `tic-tac-toe-app-sg` |
 | IAM role and instance profile | `tic-tac-toe-ec2-role` / `tic-tac-toe-ec2-profile` (`AmazonSSMManagedInstanceCore`, plus read access to `/tic-tac-toe/*` parameters) |
-| SSM parameters | `/tic-tac-toe/db-password`, `/tic-tac-toe/db-host` |
+| SSM parameters | `/tic-tac-toe/db-password`, `/tic-tac-toe/db-app-password`, `/tic-tac-toe/db-host` |
 | DB subnet group | `tic-tac-toe-db-subnets` (the default VPC subnets) |
 | RDS instance | `tic-tac-toe-db` |
 | EC2 instance | `tic-tac-toe-app` |
@@ -88,7 +96,9 @@ git push                              # the instance deploys from GitHub
 node aws/scripts/setup.mjs            # or: --branch master
 ```
 
-This takes about 15–20 minutes: RDS creation is about 5–10 minutes, and the first Docker build on the micro instance is about 5–10 minutes. The last line prints `App URL: http://<public-ip>`. The script is safe to re-run, because it reuses anything that already exists.
+This takes about 15–20 minutes: RDS creation is about 5–10 minutes, and the first Docker build on the micro instance is about 5–10 minutes. The last line prints `App URL: http://<public-ip>`. The script is safe to re-run. It reuses anything that already exists and re-applies the security group rules and instance metadata settings, so re-running it also repairs a run that failed partway through.
+
+**Upgrading a deployment created by an earlier version of these scripts:** make sure the project is enabled (`start.mjs`), push, then run `setup.mjs` once. It creates the new `/tic-tac-toe/db-app-password` parameter and sets the metadata hop limit to 1 on the existing instance. After that, `deploy.mjs` works as usual. Until then, `deploy.mjs` fails with `ParameterNotFound`.
 
 <details>
 <summary>Equivalent raw AWS CLI commands (what setup.mjs does)</summary>
@@ -126,9 +136,11 @@ aws iam put-role-policy --role-name tic-tac-toe-ec2-role --policy-name tic-tac-t
 aws iam create-instance-profile --instance-profile-name tic-tac-toe-ec2-profile --tags $TAG
 aws iam add-role-to-instance-profile --instance-profile-name tic-tac-toe-ec2-profile --role-name tic-tac-toe-ec2-role
 
-# DB password in Parameter Store
+# DB passwords in Parameter Store: master user + least-privilege app role
 DB_PASSWORD=$(node -e "console.log(require('crypto').randomBytes(24).toString('hex'))")
 aws ssm put-parameter --name /tic-tac-toe/db-password --type SecureString --value "$DB_PASSWORD" --tags $TAG
+aws ssm put-parameter --name /tic-tac-toe/db-app-password --type SecureString \
+  --value "$(node -e "console.log(require('crypto').randomBytes(24).toString('hex'))")" --tags $TAG
 
 # RDS
 aws rds create-db-subnet-group --db-subnet-group-name tic-tac-toe-db-subnets \
@@ -151,7 +163,7 @@ aws ec2 run-instances --image-id $AMI --instance-type t4g.micro \
   --subnet-id <one-of-$SUBNETS> --security-group-ids $APP_SG --associate-public-ip-address \
   --iam-instance-profile Name=tic-tac-toe-ec2-profile \
   --block-device-mappings 'DeviceName=/dev/xvda,Ebs={VolumeSize=10,VolumeType=gp3,Encrypted=true,DeleteOnTermination=true}' \
-  --metadata-options HttpTokens=required,HttpEndpoint=enabled \
+  --metadata-options HttpTokens=required,HttpEndpoint=enabled,HttpPutResponseHopLimit=1 \
   --user-data file://user-data.sh \
   --tag-specifications "ResourceType=instance,Tags=[{$TAG},{Key=Name,Value=tic-tac-toe-app}]" "ResourceType=volume,Tags=[{$TAG}]"
 aws ec2 wait instance-running --instance-ids <instance-id>
@@ -189,12 +201,19 @@ cat /var/log/cloud-init-output.log                # first-boot (user-data) log
 exit; exit                                        # end the session
 ```
 
-To connect to the database with psql, from inside the instance:
+To connect to the database with psql, from inside the instance. This uses the master user; replace `postgres:$DB_PASSWORD` with `$DB_APP_USER:$DB_APP_PASSWORD` to see what the backend is allowed to do.
 
 ```sh
 source .env.aws
 docker run --rm -it -v /opt/rds-ca:/certs:ro postgres:16-alpine \
   psql "postgres://postgres:$DB_PASSWORD@$DB_HOST:5432/tic_tac_toe?sslmode=verify-full&sslrootcert=/certs/rds-global-bundle.pem"
+```
+
+Migration and grant output (the one-shot containers stay around after they exit):
+
+```sh
+docker logs tic-tac-toe-migrate-aws
+docker logs tic-tac-toe-db-grants-aws
 ```
 
 ### One-off commands without an interactive session (SSM Run Command)
@@ -232,8 +251,9 @@ Run Command returns at most about 24 KB of output. For long or live logs, use th
   ```sh
   cd /opt/tic-tac-toe
   git fetch --prune origin && git checkout -f -B <branch> origin/<branch>
-  # write .env.aws from Parameter Store (DB_HOST, DB_PASSWORD)
+  # write .env.aws from Parameter Store (DB_HOST, DB_PASSWORD, DB_APP_USER, DB_APP_PASSWORD)
   docker compose -f docker-compose.aws.yml --env-file .env.aws up -d --build --remove-orphans
+  docker image prune -f && docker builder prune -f --filter until=72h
   ```
   A rebuild on `t4g.micro` takes a few minutes, mostly the frontend `pnpm install` and `vite build`.
 
@@ -285,10 +305,11 @@ It's public as soon as setup or start finishes:
 - nginx in the `frontend` container listens on host port 80 and proxies `/api` to the backend. The backend and the database aren't reachable from the internet.
 - Share the address `http://<public-ip>` from `status.mjs`.
 
-Possible upgrades (not set up):
+> **Traffic is plain HTTP for now.** Anyone on the same network as a player (for example café Wi-Fi) can read requests, including the `UserId` cookie, which is the player's only credential. That's acceptable for short sessions with friends. HTTPS is planned; see [section 10](#10-roadmap).
 
-- **A fixed address across stop/start:** an Elastic IP with `aws ec2 allocate-address` and `associate-address`. It costs about $3.6/month even while paused.
-- **A domain and HTTPS:** a DNS A record to the Elastic IP, plus Caddy or certbot in front of nginx, and TCP 443 opened in the security group.
+Other possible upgrades (not set up):
+
+- **A fixed address across stop/start without a domain:** an Elastic IP with `aws ec2 allocate-address` and `associate-address`. It costs about $3.6/month even while paused. The planned Cloudflare setup makes this unnecessary.
 - **Restricting access:** replace `0.0.0.0/0` with your friends' IPs:
   ```sh
   aws ec2 revoke-security-group-ingress --group-id $APP_SG --protocol tcp --port 80 --cidr 0.0.0.0/0
@@ -321,7 +342,7 @@ aws iam delete-instance-profile --instance-profile-name tic-tac-toe-ec2-profile
 aws iam detach-role-policy --role-name tic-tac-toe-ec2-role --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
 aws iam delete-role-policy --role-name tic-tac-toe-ec2-role --policy-name tic-tac-toe-read-params
 aws iam delete-role --role-name tic-tac-toe-ec2-role
-aws ssm delete-parameters --names /tic-tac-toe/db-host /tic-tac-toe/db-password
+aws ssm delete-parameters --names /tic-tac-toe/db-host /tic-tac-toe/db-password /tic-tac-toe/db-app-password
 ```
 
 To verify, run the commands below. The tagging API can keep listing a terminated instance for up to about an hour.
@@ -346,5 +367,35 @@ The default VPC and its subnets were only used, never created, so nothing else n
 | The backend keeps restarting and logs show `self-signed certificate` or `ENOENT /certs/...` | The RDS CA bundle is missing. On the instance: `curl -fsSL https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o /opt/rds-ca/rds-global-bundle.pem`. |
 | The backend logs `ECONNREFUSED` or a timeout to RDS | The DB isn't `available` yet (`status.mjs`), or the `tic-tac-toe-db-sg` rule is missing. |
 | The build dies with `Killed` or exit 137 | Out of memory. Check that swap is on (`free -m`); `swapon /swapfile` if it isn't. |
+| Deploy says `service "migrate"` or `"db-grants"` `didn't complete successfully` | A migration or the grant script failed, and the backend was not started. Check `docker logs tic-tac-toe-migrate-aws` or `docker logs tic-tac-toe-db-grants-aws`. |
+| Deploy fails with `ParameterNotFound` for `/tic-tac-toe/db-app-password` | The deployment predates the app DB role. Run `setup.mjs` once (section 3). |
+| The backend logs `permission denied for table …` | A new table was created outside migrations, or `db-grants` didn't run. Redeploy; `db-grants` re-applies the grants to every table. |
+| cloud-init log shows `sha256sum: WARNING: 1 computed checksum did NOT match` | The downloaded compose or buildx binary doesn't match the pinned hash. Don't bypass it: check the release on GitHub and update the version and hash together in `aws/ec2/user-data.sh`. |
 | The site loads but the API gives 502 | The backend is down. Run `node aws/scripts/logs.mjs backend`. |
 | `connect.mjs`: `SessionManagerPlugin is not found` | Install the Session Manager plugin (section 1). |
+
+---
+
+## 10. Roadmap
+
+Planned, not implemented yet.
+
+### HTTPS on a fixed domain with Cloudflare
+
+Goal: `https://<your-domain>` instead of `http://<ip-that-changes-on-every-start>`.
+
+- **Domain:** already bought, registered at Netlify. The registration stays at Netlify. Only the **DNS** moves: in Netlify, point the domain's nameservers to the two Cloudflare nameservers you get when you add the domain to a free Cloudflare account. Cloudflare's free plan needs the whole domain's DNS, not just a subdomain. Before switching, recreate in Cloudflare any records Netlify DNS currently serves, for example a Netlify site on the root domain, or it goes offline.
+- **Cloudflare Tunnel:** a `cloudflared` container runs next to nginx in `docker-compose.aws.yml` and makes an *outgoing* connection to Cloudflare. Cloudflare terminates HTTPS with its own certificate and forwards requests through the tunnel to `frontend:80`. WebSockets (`/api/ws`) work through the tunnel.
+- **What it gives us:**
+  - A fixed URL even though the EC2 IP changes on every start, with no Elastic IP needed.
+  - HTTPS, so the `UserId` cookie can also get the `Secure` flag.
+  - **Port 80 can be closed** in `tic-tac-toe-app-sg`, so the instance accepts no inbound connections at all.
+- **Work involved:** store the tunnel token in Parameter Store (SecureString, e.g. `/tic-tac-toe/cloudflare-tunnel-token`), write it to `.env.aws` in `deploy.mjs`, add the `cloudflared` service, revoke the port 80 rule in `setup.mjs`, add `secure: true` to the cookie, and update `publicUrl()` and this README.
+
+### Build Docker images in GitHub Actions
+
+Today the `t4g.micro` builds both images on every deploy. That takes minutes, needs 2 GB of swap, and a build can run out of memory.
+
+- A GitHub Actions workflow builds the `linux/arm64` images on push and pushes them to a registry: GHCR (free for public repos) or Amazon ECR (the instance role would then need ECR pull permissions).
+- `docker-compose.aws.yml` switches from `build:` to `image: …:<git-sha>`, and `deploy.mjs` runs `docker compose pull && up -d` instead of `up --build`.
+- The instance then no longer needs buildx, the swap file, or the build cache cleanup.

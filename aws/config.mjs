@@ -25,7 +25,10 @@ export const config = {
         engineVersion: '16',
         storageGb: 20,
         dbName: 'tic_tac_toe',
+        // Master user: only used by the one-shot migrate/db-grants containers.
         username: 'postgres',
+        // Least-privilege role the backend connects as (created by aws/db/app-role.sql).
+        appUsername: 'tic_tac_toe_app',
         subnetGroup: 'tic-tac-toe-db-subnets',
         // stop.mjs creates <prefix>-<timestamp>, start.mjs restores the newest one.
         snapshotPrefix: 'tic-tac-toe-db-paused',
@@ -46,5 +49,6 @@ export const config = {
     params: {
         dbHost: '/tic-tac-toe/db-host',
         dbPassword: '/tic-tac-toe/db-password',
+        dbAppPassword: '/tic-tac-toe/db-app-password',
     },
 };

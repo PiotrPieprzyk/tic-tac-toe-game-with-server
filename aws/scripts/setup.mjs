@@ -46,16 +46,17 @@ main(async () => {
         '--tag-specifications', tagSpecification('security-group', name),
     ]).GroupId;
 
-    let appSgId = getSecurityGroupId(config.sg.app);
-    if (!appSgId) {
-        appSgId = createSg(config.sg.app, 'tic-tac-toe app: public HTTP');
-        aws(['ec2', 'authorize-security-group-ingress', '--group-id', appSgId, '--protocol', 'tcp', '--port', '80', '--cidr', '0.0.0.0/0']);
-    }
-    let dbSgId = getSecurityGroupId(config.sg.db);
-    if (!dbSgId) {
-        dbSgId = createSg(config.sg.db, 'tic-tac-toe db: postgres from app only');
-        aws(['ec2', 'authorize-security-group-ingress', '--group-id', dbSgId, '--protocol', 'tcp', '--port', '5432', '--source-group', appSgId]);
-    }
+    // Rules are (re)applied on every run, not only right after creating the
+    // group, so a run that crashed in between is repaired by re-running.
+    const allowIngress = (groupId, port, source) => tryAws(
+        ['ec2', 'authorize-security-group-ingress', '--group-id', groupId, '--protocol', 'tcp', '--port', String(port), ...source],
+        /InvalidPermission\.Duplicate/,
+    );
+
+    const appSgId = getSecurityGroupId(config.sg.app) ?? createSg(config.sg.app, 'tic-tac-toe app: public HTTP');
+    allowIngress(appSgId, 80, ['--cidr', '0.0.0.0/0']);
+    const dbSgId = getSecurityGroupId(config.sg.db) ?? createSg(config.sg.db, 'tic-tac-toe db: postgres from app only');
+    allowIngress(dbSgId, 5432, ['--source-group', appSgId]);
     console.log(`app SG ${appSgId}, db SG ${dbSgId}`);
 
     // ------------------------------------------------------------ IAM
@@ -94,18 +95,20 @@ main(async () => {
     }
 
     // ------------------------------------------------------------ RDS
-    log('Database password (SSM Parameter Store, SecureString)');
-    if (!tryAws(['ssm', 'get-parameter', '--name', config.params.dbPassword], /ParameterNotFound/)) {
-        // Alphanumeric only: RDS rejects / @ " and space, and URL-special chars would break DATABASE_URL.
-        const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
-        const password = Array.from({length: 32}, () => alphabet[randomInt(alphabet.length)]).join('');
-        aws([
-            'ssm', 'put-parameter',
-            '--name', config.params.dbPassword,
-            '--type', 'SecureString',
-            '--value', fileArg(password),
-            '--tags', projectTag,
-        ]);
+    log('Database passwords: master + app role (SSM Parameter Store, SecureString)');
+    for (const name of [config.params.dbPassword, config.params.dbAppPassword]) {
+        if (!tryAws(['ssm', 'get-parameter', '--name', name], /ParameterNotFound/)) {
+            // Alphanumeric only: RDS rejects / @ " and space, and URL-special chars would break DATABASE_URL.
+            const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+            const password = Array.from({length: 32}, () => alphabet[randomInt(alphabet.length)]).join('');
+            aws([
+                'ssm', 'put-parameter',
+                '--name', name,
+                '--type', 'SecureString',
+                '--value', fileArg(password),
+                '--tags', projectTag,
+            ]);
+        }
     }
 
     log('DB subnet group');
@@ -167,7 +170,9 @@ main(async () => {
             '--associate-public-ip-address',
             '--iam-instance-profile', `Name=${config.iam.instanceProfile}`,
             '--block-device-mappings', `DeviceName=/dev/xvda,Ebs={VolumeSize=${config.ec2.volumeSizeGb},VolumeType=gp3,Encrypted=true,DeleteOnTermination=true}`,
-            '--metadata-options', 'HttpTokens=required,HttpEndpoint=enabled',
+            // Hop limit 1: only the host can reach the metadata service (and the
+            // role's credentials); Docker containers are one hop further and can't.
+            '--metadata-options', 'HttpTokens=required,HttpEndpoint=enabled,HttpPutResponseHopLimit=1',
             '--user-data', fileArg(userData),
             '--tag-specifications', tagSpecification('instance', config.ec2.name), tagSpecification('volume', config.ec2.name),
             '--count', '1',
@@ -185,6 +190,15 @@ main(async () => {
                 await sleep(10_000);
             }
         }
+    } else if (instance.MetadataOptions?.HttpPutResponseHopLimit !== 1 || instance.MetadataOptions?.HttpTokens !== 'required') {
+        // Instances created by older versions of this script had hop limit 2.
+        aws([
+            'ec2', 'modify-instance-metadata-options',
+            '--instance-id', instance.InstanceId,
+            '--http-tokens', 'required',
+            '--http-endpoint', 'enabled',
+            '--http-put-response-hop-limit', '1',
+        ]);
     }
     aws(['ec2', 'wait', 'instance-running', '--instance-ids', instance.InstanceId]);
     await waitForSsmOnline(instance.InstanceId);

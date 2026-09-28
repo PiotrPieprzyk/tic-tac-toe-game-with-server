@@ -16,6 +16,9 @@
 <button id="editUserName">Edit User Name</button>
 
 <script>
+    // Id of the user created by "sendUserName", used by "editUserName".
+    let currentUserId;
+
     // Connect to the WebSocket server
     const ws = new WebSocket(`ws://${window.location.host}/ws`);
 
@@ -68,17 +71,18 @@
         })
             .then(response => response.json())
             .then(data => {
+                // The UserId cookie is httpOnly (not readable from JS), so keep the id from the response.
+                currentUserId = data.id;
                 document.getElementById('output').innerText += `\nUser name response: ${JSON.stringify(data)}`;
             });
     };
-    
-    
+
+
     // Edit a user name on the server
     document.getElementById('editUserName').onclick = () => {
         const userName = document.getElementById('userName').value;
         
-        // get cookie "UserId"
-        const userId = document.cookie.split('; ').find(row => row.startsWith('UserId')).split('=')[1];
+        const userId = currentUserId;
         
         
         fetch(`/users/${userId}`, {
