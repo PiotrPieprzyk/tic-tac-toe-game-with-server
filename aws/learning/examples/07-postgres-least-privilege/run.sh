@@ -6,6 +6,7 @@
 #
 # Needs Docker. Steps mirror docker-compose.aws.yml: migrate → db-grants → backend.
 set -euo pipefail
+export MSYS_NO_PATHCONV=1   # Git Bash on Windows: keep /lab/... and /sql/... as container paths
 cd "$(dirname "$0")"
 
 compose() { docker compose -p aws-learning-pg "$@"; }

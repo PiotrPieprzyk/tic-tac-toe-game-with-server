@@ -4,6 +4,11 @@ set -euo pipefail
 
 export AWS_REGION="${AWS_REGION:-eu-central-1}"   # same region as aws/config.mjs
 export AWS_PAGER=""                               # never open `less` for output
+export MSYS_NO_PATHCONV=1                         # Git Bash on Windows: don't turn /aws/service/... into C:/...
+
+# Windows aws.exe ends lines with \r\n; $(...) strips only the \n, leaving a
+# stray \r in every captured id/ARN. Strip it (pipefail keeps aws's exit code).
+aws() { command aws "$@" | tr -d '\r'; }
 
 # Everything the labs create carries this tag, so it's easy to find and clean
 # up (and it can never be confused with the real Project=tic-tac-toe resources).

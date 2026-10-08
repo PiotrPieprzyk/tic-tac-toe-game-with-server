@@ -11,16 +11,15 @@ source "$(dirname "$0")/../_common.sh"
 cd "$(dirname "$0")"
 
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-# Fill in the account id and pass the policy through file://, like setup.mjs does (fileArg).
-# (A relative path, so file:// also works for the Windows aws.exe run from Git Bash.)
-POLICY_FILE=.read-params-policy.generated.json
-trap 'rm -f "$POLICY_FILE"' EXIT
-sed "s/ACCOUNT_ID/$ACCOUNT_ID/" read-params-policy.json > "$POLICY_FILE"
+# Fill in the account id. The policy is passed inline, not via file:// like
+# setup.mjs does: --policy-input-list is a *list* parameter, and the CLI
+# mangles a file:// JSON document there ("Policy input list item 1 has invalid content").
+POLICY=$(sed "s/ACCOUNT_ID/$ACCOUNT_ID/" read-params-policy.json)
 PARAM_ARN="arn:aws:ssm:eu-central-1:$ACCOUNT_ID:parameter"
 
 simulate() {  # simulate <action> <resource-arn>
     run aws iam simulate-custom-policy \
-        --policy-input-list "file://$POLICY_FILE" \
+        --policy-input-list "$POLICY" \
         --action-names "$1" \
         --resource-arns "$2" \
         --query 'EvaluationResults[].{Action:EvalActionName,Resource:EvalResourceName,Decision:EvalDecision}' \
