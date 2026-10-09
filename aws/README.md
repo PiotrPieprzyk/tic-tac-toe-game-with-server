@@ -15,6 +15,7 @@ It's sized for **short sessions**: about 1 hour, about 5 people, about 10 reques
 | **Disable** (pause) | `node aws/scripts/stop.mjs` |
 | **Enable** (resume) | `node aws/scripts/start.mjs` |
 | **Revert everything** | `node aws/scripts/teardown.mjs --yes` |
+| Store the Cloudflare tunnel token | `node aws/scripts/set-tunnel-token.mjs <token-file>` ([section 7](#7-making-it-publicly-available)) |
 
 Run all scripts from the repository root. Names, sizes and the region live in [`config.mjs`](config.mjs).
 
@@ -52,10 +53,11 @@ New to AWS? The [learning roadmap](learning/README.md) explains every service us
 ## 2. Architecture
 
 ```
-Browser ──HTTP:80──▶ EC2 t4g.micro (Amazon Linux 2023, default VPC, SG: 80 open, no 22)
+Browser ──HTTPS──▶ Cloudflare ◀──outgoing tunnel── EC2 t4g.micro (Amazon Linux 2023, default VPC, SG: no inbound rules)
                      └─ docker compose -f docker-compose.aws.yml
                         ├─ migrate   (one-shot)  node-pg-migrate, as master user `postgres`
                         ├─ db-grants (one-shot)  aws/db/app-role.sql, as master user `postgres`
+                        ├─ cloudflared       outgoing tunnel to Cloudflare ─▶ frontend:80
                         ├─ frontend (nginx)  serves the SPA
                         │     /api/*  ─▶ backend:3000/*     (/api prefix stripped)
                         │     /api/ws ─▶ backend:3000/ws    (WebSocket)
@@ -98,7 +100,7 @@ git push                              # the instance deploys from GitHub
 node aws/scripts/setup.mjs            # or: --branch master
 ```
 
-This takes about 15–20 minutes: RDS creation is about 5–10 minutes, and the first Docker build on the micro instance is about 5–10 minutes. The last line prints `App URL: http://<public-ip>`. The script is safe to re-run. It reuses anything that already exists and re-applies the security group rules and instance metadata settings, so re-running it also repairs a run that failed partway through.
+This takes about 15–20 minutes: RDS creation is about 5–10 minutes, and the first Docker build on the micro instance is about 5–10 minutes. The last line prints `App URL: https://ttt.piotrpieprzyk.com`. The script is safe to re-run. It reuses anything that already exists and re-applies the security group rules and instance metadata settings, so re-running it also repairs a run that failed partway through.
 
 **Upgrading a deployment created by an earlier version of these scripts:** make sure the project is enabled (`start.mjs`), push, then run `setup.mjs` once. It creates the new `/tic-tac-toe/db-app-password` parameter and sets the metadata hop limit to 1 on the existing instance. After that, `deploy.mjs` works as usual. Until then, `deploy.mjs` fails with `ParameterNotFound`.
 
@@ -116,9 +118,9 @@ VPC_ID=$(aws ec2 describe-vpcs --filters Name=is-default,Values=true --query 'Vp
 SUBNETS=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=$VPC_ID Name=default-for-az,Values=true --query 'Subnets[].SubnetId' --output text)
 
 # Security groups
-APP_SG=$(aws ec2 create-security-group --group-name tic-tac-toe-app-sg --description "tic-tac-toe app: public HTTP" \
+APP_SG=$(aws ec2 create-security-group --group-name tic-tac-toe-app-sg --description "tic-tac-toe app: no inbound (Cloudflare Tunnel)" \
   --vpc-id $VPC_ID --tag-specifications "ResourceType=security-group,Tags=[{$TAG}]" --query GroupId --output text)
-aws ec2 authorize-security-group-ingress --group-id $APP_SG --protocol tcp --port 80 --cidr 0.0.0.0/0
+# No inbound rules for the app SG: cloudflared connects outwards
 DB_SG=$(aws ec2 create-security-group --group-name tic-tac-toe-db-sg --description "tic-tac-toe db: postgres from app only" \
   --vpc-id $VPC_ID --tag-specifications "ResourceType=security-group,Tags=[{$TAG}]" --query GroupId --output text)
 aws ec2 authorize-security-group-ingress --group-id $DB_SG --protocol tcp --port 5432 --source-group $APP_SG
@@ -143,6 +145,7 @@ DB_PASSWORD=$(node -e "console.log(require('crypto').randomBytes(24).toString('h
 aws ssm put-parameter --name /tic-tac-toe/db-password --type SecureString --value "$DB_PASSWORD" --tags $TAG
 aws ssm put-parameter --name /tic-tac-toe/db-app-password --type SecureString \
   --value "$(node -e "console.log(require('crypto').randomBytes(24).toString('hex'))")" --tags $TAG
+# Cloudflare Tunnel token: uploaded with aws/scripts/set-tunnel-token.mjs (see section 7)
 
 # RDS
 aws rds create-db-subnet-group --db-subnet-group-name tic-tac-toe-db-subnets \
@@ -283,7 +286,7 @@ This takes about 15 minutes, so start it before the session.
 
 1. Restores `tic-tac-toe-db` from the newest pause snapshot. It keeps the same identifier, so it gets the same endpoint hostname.
 2. Starts EC2, waits for SSM, and restarts the containers.
-3. Prints the URL. **The public IP changes on every start.** You can also get it with `node aws/scripts/status.mjs`.
+3. Prints the URL. It is fixed (`https://ttt.piotrpieprzyk.com`): the public IP changes on every start, but the tunnel reconnects by itself.
 
 ```sh
 aws rds restore-db-instance-from-db-snapshot --db-instance-identifier tic-tac-toe-db \
@@ -301,22 +304,41 @@ The snapshot stays after a restore and is replaced on the next `stop.mjs`.
 
 ## 7. Making it publicly available
 
-It's public as soon as setup or start finishes:
+The app is served at **https://ttt.piotrpieprzyk.com** (`config.domain`) through a Cloudflare Tunnel:
 
-- The EC2 instance has a public IPv4 address, and `tic-tac-toe-app-sg` allows TCP 80 from anywhere.
-- nginx in the `frontend` container listens on host port 80 and proxies `/api` to the backend. The backend and the database aren't reachable from the internet.
-- Share the address `http://<public-ip>` from `status.mjs`.
+- A `cloudflared` container runs next to nginx in `docker-compose.aws.yml` and makes an *outgoing* connection to Cloudflare. Cloudflare terminates HTTPS with its own certificate and forwards requests through the tunnel to `frontend:80`. WebSockets (`/api/ws`) work through the tunnel.
+- `tic-tac-toe-app-sg` has **no inbound rules**, and the frontend container publishes no host port. The EC2 public IP serves nothing, and it can change on every start without affecting the URL.
+- The backend sets the `UserId` cookie with the `Secure` flag (`COOKIE_SECURE=true` in the compose file). Locally over plain HTTP the flag stays off.
+- The tunnel token is stored in Parameter Store as `/tic-tac-toe/cloudflare-tunnel-token` (SecureString). `deploy.mjs` writes it to `.env.aws` on the instance.
 
-> **Traffic is plain HTTP for now.** Anyone on the same network as a player (for example café Wi-Fi) can read requests, including the `UserId` cookie, which is the player's only credential. That's acceptable for short sessions with friends. HTTPS is planned; see [section 10](#10-roadmap).
+### One-time Cloudflare setup
+
+1. **DNS:** add `piotrpieprzyk.com` to a free Cloudflare account and set the two Cloudflare nameservers at the registrar. Recreate any records the old DNS served (for example the Netlify CNAMEs for the root and `www`) as **DNS only (grey cloud)**, so Netlify can keep issuing its certificate.
+2. **Tunnel:** in Cloudflare go to *Zero Trust → Networks → Tunnels → Create tunnel* (Cloudflared) and name it `tic-tac-toe`. Add a public hostname `ttt.piotrpieprzyk.com` with service `http://frontend:80`. This creates the proxied `ttt` CNAME for you.
+3. **Token:** get the tunnel token and store it **before** running `setup.mjs`, `deploy.mjs` or `start.mjs`:
+   1. Open the tunnel in the Cloudflare dashboard: <https://one.dash.cloudflare.com/> → *Networks → Tunnels* → `tic-tac-toe` → *Edit* (the *Overview* / install page). The install command shows `cloudflared service install <token>`. Copy only the `<token>` part (a long `eyJ...` string).
+   2. Paste it into a file that contains nothing else, for example `ttt-tunnel-token.txt`, **outside the repo** or in a git-ignored place.
+   3. Upload it:
+      ```sh
+      node aws/scripts/set-tunnel-token.mjs ttt-tunnel-token.txt
+      ```
+   The script stores the file's content as the SecureString `/tic-tac-toe/cloudflare-tunnel-token` (the value goes through a temp file, never a command line), and **deletes your token file after a successful upload**. If the upload fails, the file is kept so you can retry. Running it again replaces the stored token.
+4. Run `node aws/scripts/deploy.mjs` (or `setup.mjs` on a new setup). Re-running `setup.mjs` also removes the old port 80 rule from the security group.
+
+
+### Removing the tunnel (web console)
+
+`teardown.mjs` only reverts AWS. The Cloudflare side is removed by hand in the dashboard:
+
+1. Go to <https://one.dash.cloudflare.com/> → *Networks → Tunnels*, open the menu (⋮) of `tic-tac-toe` and choose *Delete*. A tunnel with an active connection can't be deleted, so run `node aws/scripts/stop.mjs` first (or `teardown.mjs --yes`), wait a minute, then delete it.
+2. Go to <https://dash.cloudflare.com/> → `piotrpieprzyk.com` → *DNS → Records* and delete the `ttt` CNAME (it points to `<tunnel-id>.cfargotunnel.com`) if it is still there.
+3. Delete the stored token: `aws ssm delete-parameter --name /tic-tac-toe/cloudflare-tunnel-token`.
+
+The site is offline from then on. To bring it back, repeat the one-time setup above.
 
 Other possible upgrades (not set up):
 
-- **A fixed address across stop/start without a domain:** an Elastic IP with `aws ec2 allocate-address` and `associate-address`. It costs about $3.6/month even while paused. The planned Cloudflare setup makes this unnecessary.
-- **Restricting access:** replace `0.0.0.0/0` with your friends' IPs:
-  ```sh
-  aws ec2 revoke-security-group-ingress --group-id $APP_SG --protocol tcp --port 80 --cidr 0.0.0.0/0
-  aws ec2 authorize-security-group-ingress --group-id $APP_SG --protocol tcp --port 80 --cidr 203.0.113.7/32
-  ```
+- **Restricting access:** put a Cloudflare Access policy in front of the hostname (*Zero Trust → Access*), so only your friends' emails can open the site.
 
 ---
 
@@ -382,17 +404,7 @@ The default VPC and its subnets were only used, never created, so nothing else n
 
 Planned, not implemented yet.
 
-### HTTPS on a fixed domain with Cloudflare
-
-Goal: `https://<your-domain>` instead of `http://<ip-that-changes-on-every-start>`.
-
-- **Domain:** already bought, registered at Netlify. The registration stays at Netlify. Only the **DNS** moves: in Netlify, point the domain's nameservers to the two Cloudflare nameservers you get when you add the domain to a free Cloudflare account. Cloudflare's free plan needs the whole domain's DNS, not just a subdomain. Before switching, recreate in Cloudflare any records Netlify DNS currently serves, for example a Netlify site on the root domain, or it goes offline.
-- **Cloudflare Tunnel:** a `cloudflared` container runs next to nginx in `docker-compose.aws.yml` and makes an *outgoing* connection to Cloudflare. Cloudflare terminates HTTPS with its own certificate and forwards requests through the tunnel to `frontend:80`. WebSockets (`/api/ws`) work through the tunnel.
-- **What it gives us:**
-  - A fixed URL even though the EC2 IP changes on every start, with no Elastic IP needed.
-  - HTTPS, so the `UserId` cookie can also get the `Secure` flag.
-  - **Port 80 can be closed** in `tic-tac-toe-app-sg`, so the instance accepts no inbound connections at all.
-- **Work involved:** store the tunnel token in Parameter Store (SecureString, e.g. `/tic-tac-toe/cloudflare-tunnel-token`), write it to `.env.aws` in `deploy.mjs`, add the `cloudflared` service, revoke the port 80 rule in `setup.mjs`, add `secure: true` to the cookie, and update `publicUrl()` and this README.
+The HTTPS setup with Cloudflare is done; see [section 7](#7-making-it-publicly-available).
 
 ### Build Docker images in GitHub Actions
 

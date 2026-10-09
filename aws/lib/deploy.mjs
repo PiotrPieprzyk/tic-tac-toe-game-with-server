@@ -18,7 +18,7 @@ export function defaultBranch() {
 }
 
 /**
- * Deploys the app on the instance:
+ * Deploys the app on the instance (HTTPS comes from the cloudflared container):
  *   1. (pull) checks out origin/<branch> in /opt/tic-tac-toe,
  *   2. writes .env.aws from Parameter Store (read by the instance role, so the
  *      passwords never appear in the SSM command history),
@@ -49,8 +49,10 @@ export async function deployApp(instanceId, {branch, pull = true}) {
         `DB_HOST=$(${getParam(config.params.dbHost)})`,
         `DB_PASSWORD=$(${getParam(config.params.dbPassword, '--with-decryption')})`,
         `DB_APP_PASSWORD=$(${getParam(config.params.dbAppPassword, '--with-decryption')})`,
-        `(umask 077 && printf 'DB_HOST=%s\\nDB_PASSWORD=%s\\nDB_APP_USER=%s\\nDB_APP_PASSWORD=%s\\n' ` +
-            `"$DB_HOST" "$DB_PASSWORD" "${config.rds.appUsername}" "$DB_APP_PASSWORD" > .env.aws)`,
+        `CLOUDFLARE_TUNNEL_TOKEN=$(${getParam(config.params.cloudflareTunnelToken, '--with-decryption')} ` +
+            `|| { echo "Parameter ${config.params.cloudflareTunnelToken} missing - see aws/README.md (HTTPS on a fixed domain)" >&2; exit 1; })`,
+        `(umask 077 && printf 'DB_HOST=%s\\nDB_PASSWORD=%s\\nDB_APP_USER=%s\\nDB_APP_PASSWORD=%s\\nCLOUDFLARE_TUNNEL_TOKEN=%s\\n' ` +
+            `"$DB_HOST" "$DB_PASSWORD" "${config.rds.appUsername}" "$DB_APP_PASSWORD" "$CLOUDFLARE_TUNNEL_TOKEN" > .env.aws)`,
         // Also runs the one-shot migrate + db-grants containers before the backend starts.
         `${compose} up -d --build --remove-orphans 2>&1 | tail -n 30`,
         // Old images and build cache otherwise pile up on the 10 GB disk with every rebuild.

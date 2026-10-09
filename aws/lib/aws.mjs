@@ -124,8 +124,9 @@ export function getSecurityGroupId(name) {
     return result.SecurityGroups[0]?.GroupId ?? null;
 }
 
+// Fixed HTTPS URL through the Cloudflare Tunnel; the instance's own IP serves nothing (no inbound ports).
 export const publicUrl = (instance) =>
-    instance?.PublicIpAddress ? `http://${instance.PublicIpAddress}` : '(no public IP — instance not running)';
+    instance?.PublicIpAddress ? `https://${config.domain}` : '(instance not running)';
 
 // ---------------------------------------------------------------- SSM
 

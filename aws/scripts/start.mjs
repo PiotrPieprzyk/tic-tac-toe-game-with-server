@@ -61,5 +61,5 @@ main(async () => {
     await deployApp(instance.InstanceId, {pull: false});
 
     log('Project enabled');
-    console.log(`App URL: ${publicUrl(getInstance())}   (the IP changes after every start)`);
+    console.log(`App URL: ${publicUrl(getInstance())}   (fixed URL; the tunnel reconnects after every start)`);
 });
