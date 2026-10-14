@@ -1,6 +1,6 @@
 import {execFileSync, spawnSync} from 'node:child_process';
 import {mkdtempSync, rmSync, writeFileSync} from 'node:fs';
-import {tmpdir} from 'node:os';
+import {constants, tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {setTimeout as sleep} from 'node:timers/promises';
 import {config} from '../config.mjs';
@@ -63,6 +63,11 @@ export function awsInteractive(args) {
 let tempDir;
 let tempCounter = 0;
 process.on('exit', () => tempDir && rmSync(tempDir, {recursive: true, force: true}));
+// Signals terminate Node without firing 'exit'; turn them into a normal exit
+// (conventional 128 + signal number code) so the cleanup above still runs.
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+    process.on(signal, () => process.exit(128 + constants.signals[signal]));
+}
 
 export function fileArg(content) {
     tempDir ??= mkdtempSync(join(tmpdir(), 'tic-tac-toe-aws-'));
@@ -119,8 +124,9 @@ export function getSecurityGroupId(name) {
     return result.SecurityGroups[0]?.GroupId ?? null;
 }
 
+// Fixed HTTPS URL through the Cloudflare Tunnel; the instance's own IP serves nothing (no inbound ports).
 export const publicUrl = (instance) =>
-    instance?.PublicIpAddress ? `http://${instance.PublicIpAddress}` : '(no public IP — instance not running)';
+    instance?.PublicIpAddress ? `https://${config.domain}` : '(instance not running)';
 
 // ---------------------------------------------------------------- SSM
 

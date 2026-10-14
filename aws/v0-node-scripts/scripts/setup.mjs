@@ -53,8 +53,12 @@ main(async () => {
         /InvalidPermission\.Duplicate/,
     );
 
-    const appSgId = getSecurityGroupId(config.sg.app) ?? createSg(config.sg.app, 'tic-tac-toe app: public HTTP');
-    allowIngress(appSgId, 80, ['--cidr', '0.0.0.0/0']);
+    const appSgId = getSecurityGroupId(config.sg.app) ?? createSg(config.sg.app, 'tic-tac-toe app: no inbound (Cloudflare Tunnel)');
+    // No inbound rules: cloudflared connects outwards. Removes the old public port 80 rule on existing setups.
+    tryAws(
+        ['ec2', 'revoke-security-group-ingress', '--group-id', appSgId, '--protocol', 'tcp', '--port', '80', '--cidr', '0.0.0.0/0'],
+        /InvalidPermission\.NotFound/,
+    );
     const dbSgId = getSecurityGroupId(config.sg.db) ?? createSg(config.sg.db, 'tic-tac-toe db: postgres from app only');
     allowIngress(dbSgId, 5432, ['--source-group', appSgId]);
     console.log(`app SG ${appSgId}, db SG ${dbSgId}`);
@@ -157,7 +161,7 @@ main(async () => {
     let instance = existingInstance;
     if (!instance) {
         const amiId = aws(['ssm', 'get-parameter', '--name', config.ec2.amiParameter]).Parameter.Value;
-        const userData = readFileSync(new URL('../ec2/user-data.sh', import.meta.url), 'utf8')
+        const userData = readFileSync(new URL('../../ec2/user-data.sh', import.meta.url), 'utf8')
             .replace(/\r\n/g, '\n')
             .replaceAll('__REPO_URL__', config.repoUrl)
             .replaceAll('__APP_DIR__', config.appDir);

@@ -12,7 +12,10 @@ WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = :'app_user')
 \gexec
 
 -- Also re-syncs the password if the SSM parameter was changed.
-ALTER ROLE :"app_user" WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD :'app_password';
+-- No NOSUPERUSER here: the RDS master user isn't a real superuser, and Postgres
+-- rejects any clause touching the SUPERUSER attribute from a non-superuser.
+-- CREATE ROLE above already defaults to NOSUPERUSER NOCREATEDB NOCREATEROLE.
+ALTER ROLE :"app_user" WITH LOGIN PASSWORD :'app_password';
 
 -- Read/write data only: no CREATE/ALTER/DROP. Schema changes stay with migrations.
 GRANT CONNECT ON DATABASE :"DBNAME" TO :"app_user";

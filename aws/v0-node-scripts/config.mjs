@@ -50,5 +50,10 @@ export const config = {
         dbHost: '/tic-tac-toe/db-host',
         dbPassword: '/tic-tac-toe/db-password',
         dbAppPassword: '/tic-tac-toe/db-app-password',
+        // SecureString, uploaded by aws/scripts/set-tunnel-token.mjs after creating the tunnel in the Cloudflare dashboard.
+        cloudflareTunnelToken: '/tic-tac-toe/cloudflare-tunnel-token',
     },
+
+    // Served through a Cloudflare Tunnel; the hostname is set on the tunnel in Cloudflare.
+    domain: 'ttt.piotrpieprzyk.com',
 };

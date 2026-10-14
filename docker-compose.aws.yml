@@ -4,7 +4,8 @@
 #
 # No postgres service: the backend talks to RDS. `.env.aws` is written on the
 # instance by aws/lib/deploy.mjs from SSM Parameter Store and must define
-# DB_HOST, DB_PASSWORD (RDS master), DB_APP_USER and DB_APP_PASSWORD.
+# DB_HOST, DB_PASSWORD (RDS master), DB_APP_USER, DB_APP_PASSWORD and
+# CLOUDFLARE_TUNNEL_TOKEN.
 #
 # Startup order: migrate → db-grants → backend → frontend. Only the two
 # one-shot containers get the master password; the long-running backend
@@ -71,6 +72,8 @@ services:
     container_name: tic-tac-toe-backend-aws
     restart: unless-stopped
     environment:
+      # The site is served over HTTPS by Cloudflare: send the UserId cookie with the Secure flag.
+      COOKIE_SECURE: "true"
       DATABASE_URL: postgres://${DB_APP_USER}:${DB_APP_PASSWORD}@${DB_HOST}:5432/tic_tac_toe?sslmode=verify-full&sslrootcert=/certs/rds-global-bundle.pem
     volumes:
       - /opt/rds-ca:/certs:ro
@@ -92,10 +95,24 @@ services:
         BUILD_COMMAND: pnpm exec vite build
     container_name: tic-tac-toe-frontend-aws
     restart: unless-stopped
-    ports:
-      - "80:80"
+    # No published port: the instance accepts no inbound connections. Traffic
+    # arrives through the cloudflared tunnel below (frontend:80 on this network).
     volumes:
       - ./frontend/nginx.aws.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - backend
+    logging: *logging
+
+  # Cloudflare Tunnel: makes an outgoing connection to Cloudflare, which serves
+  # https://ttt.piotrpieprzyk.com (its certificate) and forwards to frontend:80
+  # (public hostname configured in the Cloudflare dashboard). WebSockets work.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: tic-tac-toe-cloudflared-aws
+    command: tunnel --no-autoupdate run
+    restart: unless-stopped
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?CLOUDFLARE_TUNNEL_TOKEN is required}
+    depends_on:
+      - frontend
     logging: *logging

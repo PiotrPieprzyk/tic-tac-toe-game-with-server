@@ -1,0 +1,17 @@
+# Local stand-in for the RDS database, to practise aws/db/app-role.sql without AWS.
+# Used by run.sh. Costs nothing and doesn't touch your AWS account.
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: aws-learning-postgres
+    environment:
+      # Same names as on RDS: master user `postgres`, database `tic_tac_toe`.
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: master-password-only-for-this-lab
+      POSTGRES_DB: tic_tac_toe
+      # The app role, like DB_APP_USER / DB_APP_PASSWORD in .env.aws.
+      DB_APP_USER: tic_tac_toe_app
+      DB_APP_PASSWORD: app-password-only-for-this-lab
+    volumes:
+      - ../../../db:/sql:ro   # the real aws/db/app-role.sql
+      - ./:/lab:ro            # the lab's own SQL files

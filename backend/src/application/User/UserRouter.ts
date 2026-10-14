@@ -62,7 +62,12 @@ export class UserRouter {
 
                 // set cookie UserId. httpOnly: page scripts (e.g. injected XSS) can't read it;
                 // sameSite=lax: not sent on cross-site POST/PUT/DELETE requests.
-                res.cookie('UserId', user.id.value, {httpOnly: true, sameSite: 'lax'});
+                // secure (COOKIE_SECURE=true, set behind HTTPS on AWS): only sent over HTTPS.
+                res.cookie('UserId', user.id.value, {
+                    httpOnly: true,
+                    sameSite: 'lax',
+                    secure: process.env.COOKIE_SECURE === 'true',
+                });
 
                 res.status(200).json(UserMap.toDTO(user));
             } catch (e) {
