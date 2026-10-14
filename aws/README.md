@@ -20,9 +20,9 @@ sessions the project stays **paused**.
 | **Revert everything**             | `node aws/scripts/teardown.mjs --yes`                                                               |
 | Store the Cloudflare tunnel token | `node aws/scripts/set-tunnel-token.mjs <token-file>` ([section 7](#7-making-it-publicly-available)) |
 
-Run all scripts from the repository root. Names, sizes and the region live in [`config.mjs`](v0-node-scripts/config.mjs).
+Run all scripts from the repository root. Names, sizes and the region live in [`config.mjs`](v1-node-scripts/config.mjs).
 
-New to AWS? The [learning roadmap](v0-node-scripts/learning/README.md) explains every service used here, in order, with official docs
+New to AWS? The [learning roadmap](v1-node-scripts/learning/README.md) explains every service used here, in order, with official docs
 and hands-on labs.
 
 ---
