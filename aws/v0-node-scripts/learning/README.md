@@ -1,6 +1,6 @@
 # AWS learning roadmap for this project
 
-This roadmap takes you from "AWS is new to me" to understanding every line in the [`aws/`](..) folder.
+This roadmap takes you from "AWS is new to me" to understanding every line in the [`aws/`](../..) folder.
 It's ordered so each stage only uses ideas from the stages before it. Each stage has:
 
 - **Why**: where the topic shows up in this project.
@@ -81,7 +81,7 @@ Protect both before you create anything.
   one subnet per AZ. [Regions and zones](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html)
 - The root user, and why you turn on MFA and then stop using it. [Root user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html)
 - Pay-as-you-go pricing, and the [AWS Pricing Calculator](https://calculator.aws/). Compare its numbers with the
-  cost table in [`aws/README.md`](../README.md#sizing-and-cost-eu-central-1-approximate).
+  cost table in [`aws/README.md`](../../README.md#sizing-and-cost-eu-central-1-approximate).
 - Optional, for the big picture: *AWS Cloud Practitioner Essentials* on [Skill Builder](https://skillbuilder.aws/), and
   the [Well-Architected Framework](https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html) intro.
 
@@ -169,7 +169,7 @@ nobody ever stores an access key on the server. Your own CLI access is IAM too.
   [Temporary credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html).
 
 **Read in the repo:** the "IAM" block of [`aws/scripts/setup.mjs`](../scripts/setup.mjs), and the "IAM role and instance
-profile" commands in the collapsible section 3 of [`aws/README.md`](../README.md#3-first-time-setup).
+profile" commands in the collapsible section 3 of [`aws/README.md`](../../README.md#3-first-time-setup).
 
 **Do:** read [`examples/02-iam/trust-policy.json`](examples/02-iam/trust-policy.json) and
 [`read-params-policy.json`](examples/02-iam/read-params-policy.json), write down what you expect, then run
@@ -206,7 +206,7 @@ the app accepts HTTP from anywhere, and the database accepts Postgres *only from
   [Elastic IP addresses](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html).
 
 **Read in the repo:** the "network" block of `setup.mjs`, and the architecture diagram and "Resources created"
-table in [`aws/README.md` §2](../README.md#2-architecture). Look at the retry loop for `DependencyViolation` in
+table in [`aws/README.md` §2](../../README.md#2-architecture). Look at the retry loop for `DependencyViolation` in
 [`teardown.mjs`](../scripts/teardown.mjs).
 
 **Do:** `bash aws/learning/examples/04-security-groups.sh`, with the Console's Security Groups page open.
@@ -281,7 +281,7 @@ by a **user-data** script, and locked down with **IMDSv2 and hop limit 1**.
   [tagging best practices](https://docs.aws.amazon.com/whitepapers/latest/tagging-best-practices/tagging-best-practices.html).
 
 **Read in the repo:** the "EC2" block of `setup.mjs` (every `run-instances` flag), then
-[`aws/ec2/user-data.sh`](../ec2/user-data.sh) (Docker, pinned compose/buildx with sha256 checks, swap, the RDS CA bundle, `git clone`).
+[`aws/ec2/user-data.sh`](../../ec2/user-data.sh) (Docker, pinned compose/buildx with sha256 checks, swap, the RDS CA bundle, `git clone`).
 
 **Do:** `bash aws/learning/examples/05-ec2-lab/launch.sh`, then work through
 [`05-ec2-lab/on-the-instance.md`](examples/05-ec2-lab/on-the-instance.md). The **hop limit experiment** in step 4
@@ -367,8 +367,8 @@ deleting the DB with a final **snapshot** and restoring it later.
 
 **Read in the repo:** the "RDS" block of `setup.mjs` (every `create-db-instance` flag), then
 [`stop.mjs`](../scripts/stop.mjs), [`start.mjs`](../scripts/start.mjs),
-[`aws/db/app-role.sql`](../db/app-role.sql), and the `migrate` / `db-grants` / `backend` services in
-[`docker-compose.aws.yml`](../../docker-compose.aws.yml).
+[`aws/db/app-role.sql`](../../db/app-role.sql), and the `migrate` / `db-grants` / `backend` services in
+[`docker-compose.aws.yml`](../../../docker-compose.aws.yml).
 
 **Do:** `bash aws/learning/examples/07-postgres-least-privilege/run.sh`. It runs the project's real
 `app-role.sql` against a local Postgres 16, then shows what the app role can and can't do. It needs only Docker.
@@ -399,9 +399,9 @@ The real RDS lifecycle (create → snapshot → restore → delete) is covered b
 - Cost: [EC2 on-demand pricing](https://aws.amazon.com/ec2/pricing/on-demand/),
   [RDS for PostgreSQL pricing](https://aws.amazon.com/rds/postgresql/pricing/).
 
-**Read in the repo:** [`aws/README.md`](../README.md) from top to bottom. You should now understand every line.
-Then read [`docker-compose.aws.yml`](../../docker-compose.aws.yml), [`frontend/nginx.aws.conf`](../../frontend/nginx.aws.conf)
-and [`backend/Dockerfile.prod`](../../backend/Dockerfile.prod).
+**Read in the repo:** [`aws/README.md`](../../README.md) from top to bottom. You should now understand every line.
+Then read [`docker-compose.aws.yml`](../../../docker-compose.aws.yml), [`frontend/nginx.aws.conf`](../../../frontend/nginx.aws.conf)
+and [`backend/Dockerfile.prod`](../../../backend/Dockerfile.prod).
 
 **Do (costs a few cents; budget about 1.5 hours):**
 
@@ -424,7 +424,7 @@ security group rule, IAM permission or config line that allows it.
 
 ## Stage 9: Where to go next
 
-These follow the project's own planned work in [`aws/README.md` §10](../README.md#10-roadmap):
+These follow the project's own planned work in [`aws/README.md` §10](../../README.md#10-roadmap):
 
 - **HTTPS and a fixed domain with Cloudflare Tunnel.**
   [Cloudflare Tunnel docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).
@@ -455,6 +455,6 @@ These follow the project's own planned work in [`aws/README.md` §10](../README.
 | [`aws/scripts/deploy.mjs`](../scripts/deploy.mjs) | 6, 8 |
 | [`aws/scripts/stop.mjs`](../scripts/stop.mjs), [`start.mjs`](../scripts/start.mjs) | 5, 7 |
 | [`aws/scripts/teardown.mjs`](../scripts/teardown.mjs) | 3, 8 |
-| [`aws/ec2/user-data.sh`](../ec2/user-data.sh) | 5 |
-| [`aws/db/app-role.sql`](../db/app-role.sql) | 7 |
-| [`docker-compose.aws.yml`](../../docker-compose.aws.yml), [`frontend/nginx.aws.conf`](../../frontend/nginx.aws.conf) | 3, 7, 8 |
+| [`aws/ec2/user-data.sh`](../../ec2/user-data.sh) | 5 |
+| [`aws/db/app-role.sql`](../../db/app-role.sql) | 7 |
+| [`docker-compose.aws.yml`](../../../docker-compose.aws.yml), [`frontend/nginx.aws.conf`](../../../frontend/nginx.aws.conf) | 3, 7, 8 |

@@ -161,7 +161,7 @@ main(async () => {
     let instance = existingInstance;
     if (!instance) {
         const amiId = aws(['ssm', 'get-parameter', '--name', config.ec2.amiParameter]).Parameter.Value;
-        const userData = readFileSync(new URL('../ec2/user-data.sh', import.meta.url), 'utf8')
+        const userData = readFileSync(new URL('../../ec2/user-data.sh', import.meta.url), 'utf8')
             .replace(/\r\n/g, '\n')
             .replaceAll('__REPO_URL__', config.repoUrl)
             .replaceAll('__APP_DIR__', config.appDir);
