@@ -434,8 +434,8 @@ These follow the project's own planned work in [`aws/README.md` §10](../../READ
   [GitHub: OIDC in AWS](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services).
   This builds directly on stage 2 (trust policies).
 - **Infrastructure as Code.** The scripts are imperative ("create X if missing"). Tools such as CloudFormation, the AWS
-  CDK or Terraform describe the *desired state* instead. Rewriting `setup.mjs` in one of them is an excellent exercise
-  once you finish this roadmap.
+  CDK or Terraform describe the *desired state* instead. That rewrite exists:
+  [`aws/v2-terraform/`](../../v2-terraform), with its own [Terraform learning guide](../../v2-terraform/learning/README.md).
 - **Monitoring**: CloudWatch metrics and alarms for CPU credits on `t4g`, and shipping container logs to CloudWatch Logs.
 - **Certification** (optional): AWS Certified Cloud Practitioner, then Solutions Architect Associate. The topics in this
   roadmap are the core of both.

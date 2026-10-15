@@ -1,14 +1,8 @@
-
-
 ## 10. Roadmap
 
-Planned, not implemented yet.
+### 
 
-The HTTPS setup with Cloudflare is done; see [section 7](#7-making-it-publicly-available).
-
-Suggested order: 1 → 2 → 3 → 4. Each step builds on the previous one.
-
-### 1. Build images locally, push to ECR, pull from EC2
+###  Build images locally, push to ECR, pull from EC2
 
 Today the `t4g.micro` builds both images on every deploy. That takes minutes, needs 2 GB of swap, and a build can run
 out of memory. (Building in GitHub Actions was considered and dropped: images are built on the developer machine
@@ -28,7 +22,7 @@ instead.)
   credentials.
 - The instance then no longer needs buildx, the swap file, or the build cache cleanup.
 
-### 2. HTTPS with ALB + ACM
+###  HTTPS with ALB + ACM
 
 Replaces the Cloudflare Tunnel with an Application Load Balancer.
 
@@ -44,7 +38,7 @@ Replaces the Cloudflare Tunnel with an Application Load Balancer.
 - Cost note: an ALB costs roughly $16-20/month even when idle, which matters for the ~1 h demo setup. Create it only for
   the demo and delete it afterwards, and extend `stop.mjs`/`start.mjs` and the revert section accordingly.
 
-### 3. Auto Scaling
+### Auto Scaling
 
 Builds on steps 1 and 2: instances must pull a ready image and sit behind the ALB.
 
@@ -60,7 +54,7 @@ Builds on steps 1 and 2: instances must pull a ready image and sit behind the AL
 - RDS `db.t4g.micro` has a small connection limit; keep the backend's pool size × max instances below it.
 - Updates: use an **instance refresh** with the new launch template version after each push to ECR.
 
-### 4. Monitoring: one dashboard
+### Monitoring: one dashboard
 
 One **CloudWatch dashboard** (`tic-tac-toe`) shows everything below. CloudWatch is recommended because it needs no extra
 server and the instances already have an IAM role.

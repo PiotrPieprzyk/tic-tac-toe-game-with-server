@@ -7,6 +7,15 @@ so the output shows exactly what happens.
 It's sized for **short sessions**: about 1 hour, about 5 people, about 10 requests/min and under 200 MB of data. Between
 sessions the project stays **paused**.
 
+There are **two implementations** of the same infrastructure. Use one or the other, not both:
+
+- **v1, [`v1-node-scripts/`](v1-node-scripts)**: Node.js scripts calling the AWS CLI (imperative). This guide describes
+  v1.
+- **v2, [`v2-terraform/`](v2-terraform)**: the same stack as Terraform code (declarative Infrastructure as Code), and
+  the Cloudflare Tunnel and DNS record are managed in code too. See its [README](v2-terraform/README.md) and the
+  [Terraform learning guide](v2-terraform/learning/README.md). v2 still uses v1's `deploy`, `connect`, `run`, `logs`
+  and `status` scripts to operate the app.
+
 | Task                              | Command                                                                                             |
 |-----------------------------------|-----------------------------------------------------------------------------------------------------|
 | First-time setup and deploy       | `node aws/scripts/setup.mjs`                                                                        |
@@ -20,9 +29,11 @@ sessions the project stays **paused**.
 | **Revert everything**             | `node aws/scripts/teardown.mjs --yes`                                                               |
 | Store the Cloudflare tunnel token | `node aws/scripts/set-tunnel-token.mjs <token-file>` ([section 7](#7-making-it-publicly-available)) |
 
-Run all scripts from the repository root. Names, sizes and the region live in [`config.mjs`](v1-node-scripts/config.mjs).
+Run all scripts from the repository root. Names, sizes and the region live in [
+`config.mjs`](v1-node-scripts/config.mjs).
 
-New to AWS? The [learning roadmap](v1-node-scripts/learning/README.md) explains every service used here, in order, with official docs
+New to AWS? The [learning roadmap](v1-node-scripts/learning/README.md) explains every service used here, in order, with
+official docs
 and hands-on labs.
 
 ---
@@ -31,7 +42,7 @@ and hands-on labs.
 
 1. **AWS CLI v2** (`aws --version`) with credentials for the account you want to use:
    ```sh
-   aws login              # or: aws configure  (access key + secret, region eu-central-1)
+   aws login              # or: aws configure  (access key + secret, region eu-central-1)[README.md](README.md)  
    aws sts get-caller-identity
    ```
    The identity needs permissions for EC2, RDS, IAM, SSM and STS. An admin user is simplest for a personal account.
@@ -157,9 +168,7 @@ The app is served at **https://ttt.piotrpieprzyk.com** through a Cloudflare Tunn
 
 The site is offline from then on. To bring it back, repeat the one-time setup above.
 
-
 ## Connecting to the instance, running commands, reading logs
-
 
 ### Interactive shell (Session Manager)
 

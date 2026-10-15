@@ -7,6 +7,10 @@
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/.vitest" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/coverage" />
+      <excludeFolder url="file://$MODULE_DIR$/aws/v2-terraform/bootstrap/.terraform" />
+      <excludeFolder url="file://$MODULE_DIR$/aws/v2-terraform/learning/examples/01-first-steps/.terraform" />
+      <excludeFolder url="file://$MODULE_DIR$/aws/v2-terraform/learning/examples/02-lifecycle/.terraform" />
+      <excludeFolder url="file://$MODULE_DIR$/aws/v2-terraform/infra/.terraform" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
