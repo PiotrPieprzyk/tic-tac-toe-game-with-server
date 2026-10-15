@@ -40,7 +40,7 @@ services:
       - /opt/rds-ca:/certs:ro
     logging: *logging
 
-  # One-shot: creates/updates the app role and its grants (aws/db/app-role.sql),
+  # One-shot: creates/updates the app role and its grants (aws/ops/db/app-role.sql),
   # after migrations so the grants cover every table.
   db-grants:
     image: postgres:16-alpine
@@ -58,7 +58,7 @@ services:
       DB_APP_PASSWORD: ${DB_APP_PASSWORD:?DB_APP_PASSWORD is required}
     volumes:
       - /opt/rds-ca:/certs:ro
-      - ./aws/db:/sql:ro
+      - ./aws/ops/db:/sql:ro
     depends_on:
       migrate:
         condition: service_completed_successfully

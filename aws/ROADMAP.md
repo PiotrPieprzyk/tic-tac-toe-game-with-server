@@ -10,7 +10,7 @@ instead.)
 
 - Create two **ECR** repositories, `tic-tac-toe-backend` and `tic-tac-toe-frontend`, with a lifecycle policy that keeps
   only the last ~5 images.
-- A new script `aws/scripts/push-images.mjs` runs on the developer machine: `docker buildx build --platform linux/arm64`
+- A new script `aws/ops/push-images.mjs` runs on the developer machine: `docker buildx build --platform linux/arm64`
   for both images (the instance is Graviton), tags them `<git-sha>` and pushes them after
   `aws ecr get-login-password | docker login`. Building arm64 on an x86 Windows machine needs Docker Desktop's QEMU
   emulation (slower, but works).
