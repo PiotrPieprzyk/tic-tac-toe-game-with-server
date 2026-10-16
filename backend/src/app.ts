@@ -45,7 +45,11 @@ export const getApp = (repositories: RouterRepositories = defaultRepositories())
     app.use(cors({
         origin: [
             'http://127.0.0.1:4000',
+            'http://localhost:4000',
+            // Private LAN ranges, for playing with friends on the same network
             /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:4000$/,
+            /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:4000$/,
+            /^http:\/\/172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}:4000$/,
         ],
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true
