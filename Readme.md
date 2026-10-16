@@ -91,41 +91,43 @@ cd frontend && pnpm test              # frontend: unit (jsdom), story specs and 
 
 ### Playing with friends on the same network
 
-Your friends' browsers must reach both the frontend (port `4000`) and the backend (port `3000`) on your machine. The
-frontend calls the backend at `VITE_API_DOMAIN`, so that address has to be your LAN IP, not `127.0.0.1`.
+Your friends' browsers must reach both the frontend (port `4000`) and the backend (port `3000`) on your machine, and
+the frontend must call the backend at your LAN IP instead of `127.0.0.1`. With the stack running, run this in
+PowerShell **as Administrator** from the repo root (if you're on cable, replace `"Wi-Fi"` with your adapter name from
+`Get-NetAdapter`):
 
-1. **Find your LAN IP:** run `ipconfig` and take the *IPv4 Address* of your Wi-Fi adapter, e.g. `192.168.50.83`.
+```powershell
+# Read your Wi-Fi adapter's LAN IP (the address everyone will use)
+$ip = (Get-NetIPAddress -InterfaceAlias "Wi-Fi" -AddressFamily IPv4).IPAddress
+# Mark the Wi-Fi network as Private, so the Private-only firewall rule below applies to it
+Set-NetConnectionProfile -InterfaceAlias "Wi-Fi" -NetworkCategory Private
+# Allow inbound connections to the backend (3000) and the frontend (4000) on Private networks
+New-NetFirewallRule -DisplayName "Tic-Tac-Toe Dev (3000,4000)" -Direction Inbound -Protocol TCP -LocalPort 3000,4000 -Action Allow -Profile Private
+# Point the frontend at the backend on your LAN IP (overrides VITE_API_DOMAIN from .env in this shell only)
+$env:VITE_API_DOMAIN = "http://${ip}:3000"
+# Recreate the frontend container so it picks up the new backend address
+docker compose up -d --force-recreate frontend
+# Print the address to share with your friends
+"Open http://${ip}:4000"
+```
 
-2. **Point the frontend at it.** In the root `.env` (Docker Compose passes it into the frontend container):
+All players open the printed address, **including you**: the session cookie is tied to the host name, so mixing
+`127.0.0.1` and the LAN IP breaks it. The backend's CORS list (`backend/src/app.ts`) already accepts port `4000` on
+private ranges (`192.168.*`, `10.*`, `172.16–31.*`). Your IP comes from the router and may change after reconnecting;
+if it does, run the script again (skip the firewall line, the rule already exists).
 
-   ```dotenv
-   VITE_API_DOMAIN=http://192.168.50.83:3000
-   ```
+**Rollback** (PowerShell as Administrator, from the repo root):
 
-   Then restart: `docker compose up -d --force-recreate frontend`. Websockets use the same host (`ws://…:3000/ws`).
-   The backend's CORS list (`backend/src/app.ts`) accepts any origin on port `4000` in the private ranges
-   `192.168.*`, `10.*` and `172.16–31.*`, plus `localhost` and `127.0.0.1`.
-
-   > The backend logs a "Network" URL on startup. Inside Docker that is the container's own IP, not your LAN IP, so
-   > ignore it.
-
-3. **Allow the ports through Windows Firewall** (elevated PowerShell):
-
-   ```powershell
-   New-NetFirewallRule -DisplayName "Tic-Tac-Toe Dev (3000,4000)" -Direction Inbound -Protocol TCP -LocalPort 3000,4000 -Action Allow -Profile Private
-   ```
-
-   Or use the GUI: *Windows Defender Firewall with Advanced Security* → *Inbound Rules* → *New Rule…* → *Port* →
-   TCP `3000,4000` → *Allow the connection* → only *Private* → name it `Tic-Tac-Toe Dev`.
-
-4. **Check the network profile.** Your Wi-Fi must be set to **Private** (Settings → Network & Internet → Wi-Fi → your
-   network → Network profile type). A rule scoped to `-Profile Private` has no effect on a network Windows treats as
-   Public. If Docker Desktop asked for firewall access on first start, make sure *Private* was allowed.
-
-5. Everyone on the network opens `http://192.168.50.83:4000`. All players must use the LAN IP, including you: the
-   session cookie is tied to the host name, so mixing `127.0.0.1` and the LAN IP breaks it.
-
-To remove the rule afterwards: `Remove-NetFirewallRule -DisplayName "Tic-Tac-Toe Dev (3000,4000)"`.
+```powershell
+# Delete the firewall rule
+Remove-NetFirewallRule -DisplayName "Tic-Tac-Toe Dev (3000,4000)"
+# Set the Wi-Fi network back to Public (skip this if it was Private before)
+Set-NetConnectionProfile -InterfaceAlias "Wi-Fi" -NetworkCategory Public
+# Drop the LAN IP override, so the frontend uses the .env / default backend address again
+Remove-Item Env:VITE_API_DOMAIN -ErrorAction SilentlyContinue
+# Recreate the frontend container with the localhost backend address
+docker compose up -d --force-recreate frontend
+```
 
 ### On AWS
 
